@@ -21,7 +21,7 @@ import {
   type InsertGoal,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -79,6 +79,9 @@ export interface IStorage {
   // Platform tenant management
   getAllUsersWithTenants(): Promise<(User & { tenantName?: string | null })[]>;
   getAllTenants(): Promise<Tenant[]>;
+  
+  // Recent activity
+  getRecentActivity(tenantId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -350,6 +353,53 @@ export class DatabaseStorage implements IStorage {
       .orderBy(tenants.name, users.role, users.firstName);
     
     return result;
+  }
+  
+  // Recent activity for dashboard
+  async getRecentActivity(tenantId: string): Promise<any[]> {
+    // Get recent employees (showing as "joined the team")
+    const recentEmployees = await db
+      .select({
+        id: employees.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: employees.createdAt,
+        type: sql<string>`'employee_joined'`
+      })
+      .from(employees)
+      .innerJoin(users, eq(employees.userId, users.id))
+      .where(eq(employees.tenantId, tenantId))
+      .orderBy(desc(employees.createdAt))
+      .limit(2);
+      
+    // Get recent feedback  
+    const recentFeedback = await db
+      .select({
+        id: feedbacks.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: feedbacks.createdAt,
+        type: sql<string>`'feedback_received'`,
+        rating: feedbacks.rating
+      })
+      .from(feedbacks)
+      .innerJoin(employees, eq(feedbacks.employeeId, employees.id))
+      .innerJoin(users, eq(employees.userId, users.id))
+      .where(eq(employees.tenantId, tenantId))
+      .orderBy(desc(feedbacks.createdAt))
+      .limit(1);
+      
+    // Combine and sort by date
+    const allActivity = [...recentEmployees, ...recentFeedback]
+      .filter(item => item.createdAt)
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+      .slice(0, 3);
+      
+    return allActivity;
   }
 }
 

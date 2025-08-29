@@ -46,6 +46,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get recent activity for dashboard
+  app.get("/api/dashboard/activity/:tenantId", isAuthenticated, async (req, res) => {
+    try {
+      const { tenantId } = req.params;
+      const activity = await storage.getRecentActivity(tenantId);
+      res.json(activity);
+    } catch (error) {
+      console.error("Error fetching dashboard activity:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard activity" });
+    }
+  });
+
   // Platform-wide metrics for Platform Super Admins
   app.get("/api/platform/metrics", isAuthenticated, async (req, res) => {
     try {

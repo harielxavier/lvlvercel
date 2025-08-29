@@ -35,6 +35,12 @@ export default function Dashboard({ user }: DashboardProps) {
     enabled: isPlatformAdmin || !!user.tenant?.id,
   });
 
+  // Get recent activity for non-platform admin users
+  const { data: recentActivity = [], isLoading: activityLoading } = useQuery({
+    queryKey: ['/api/dashboard/activity', user.tenant?.id],
+    enabled: !isPlatformAdmin && !!user.tenant?.id,
+  });
+
   // Handle auth errors
   if (error && isUnauthorizedError(error)) {
     toast({
@@ -515,57 +521,71 @@ export default function Dashboard({ user }: DashboardProps) {
                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                   </div>
                 </div>
-              ) : (
-                // Regular User Activity
+              ) : activityLoading ? (
+                // Loading state
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors" data-testid="activity-item-1">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage 
-                        src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&h=400" 
-                        alt="Emily Chen" 
-                        className="object-cover"
-                      />
-                      <AvatarFallback>EC</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Emily Chen completed her quarterly review</p>
-                      <p className="text-xs text-muted-foreground">2 hours ago</p>
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="animate-pulse flex items-center space-x-4 p-3">
+                      <div className="rounded-full bg-gray-200 h-10 w-10"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
                     </div>
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  </div>
-
-                <div className="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors" data-testid="activity-item-2">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage 
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400" 
-                      alt="Mike Rodriguez" 
-                      className="object-cover"
-                    />
-                    <AvatarFallback>MR</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">Mike Rodriguez received 5-star feedback from client</p>
-                    <p className="text-xs text-muted-foreground">4 hours ago</p>
-                  </div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  ))}
                 </div>
-
-                <div className="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors" data-testid="activity-item-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage 
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400" 
-                      alt="James Wilson" 
-                      className="object-cover"
-                    />
-                    <AvatarFallback>JW</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">James Wilson started new performance goals</p>
-                    <p className="text-xs text-muted-foreground">6 hours ago</p>
-                  </div>
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              ) : recentActivity.length > 0 ? (
+                // Real Employee Activity
+                <div className="space-y-4">
+                  {recentActivity.map((activity: any, index: number) => {
+                    const timeAgo = new Date(activity.createdAt).toLocaleDateString();
+                    const fullName = `${activity.firstName} ${activity.lastName}`;
+                    const initials = `${activity.firstName?.charAt(0) || ''}${activity.lastName?.charAt(0) || ''}`.toUpperCase();
+                    
+                    const getActivityText = () => {
+                      if (activity.type === 'employee_joined') {
+                        return `${fullName} joined the team`;
+                      } else if (activity.type === 'feedback_received') {
+                        const stars = activity.rating ? `${activity.rating}-star` : 'positive';
+                        return `${fullName} received ${stars} feedback`;
+                      }
+                      return `${fullName} had recent activity`;
+                    };
+                    
+                    const getStatusColor = () => {
+                      if (activity.type === 'employee_joined') return 'bg-green-500';
+                      if (activity.type === 'feedback_received') return 'bg-blue-500';
+                      return 'bg-purple-500';
+                    };
+                    
+                    return (
+                      <div key={activity.id || index} className="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors" data-testid={`activity-item-${index + 1}`}>
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage 
+                            src={activity.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${activity.id}`}
+                            alt={fullName}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>{initials}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{getActivityText()}</p>
+                          <p className="text-xs text-muted-foreground">{timeAgo}</p>
+                        </div>
+                        <div className={`w-2 h-2 rounded-full ${getStatusColor()}`}></div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              ) : (
+                // No activity state
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Recent Activity</h3>
+                  <p className="text-muted-foreground">
+                    Employee activities will appear here once they start using the platform.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
