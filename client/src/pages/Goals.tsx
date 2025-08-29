@@ -30,13 +30,13 @@ export default function Goals() {
   
   // Get real goals data from API
   const { data: goals = [], isLoading: goalsLoading } = useQuery({
-    queryKey: ['/api/employee', user.id, 'goals'],
-    enabled: !!user?.id && isAuthenticated,
+    queryKey: ['/api/employee', user?.employee?.id, 'goals'],
+    enabled: !!user?.employee?.id && isAuthenticated,
   });
   
   const addGoalMutation = useMutation({
     mutationFn: async (goalData: any) => {
-      const response = await fetch(`/api/employee/${user.id}/goals`, {
+      const response = await fetch(`/api/employee/${user?.employee?.id}/goals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(goalData)
@@ -45,7 +45,7 @@ export default function Goals() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employee', user.id, 'goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/employee', user?.employee?.id, 'goals'] });
       toast({
         title: 'Goal Created',
         description: 'Your new goal has been successfully created.',
