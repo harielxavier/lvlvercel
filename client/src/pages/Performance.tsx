@@ -59,15 +59,13 @@ export default function Performance() {
     return 'bg-orange-100 text-orange-800';
   };
 
-  if (isLoading || !isAuthenticated || !user) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="glass-card p-8 rounded-2xl">
-          <div className="animate-pulse flex space-x-4">
-            <div className="rounded-full bg-slate-200 h-10 w-10"></div>
-            <div className="flex-1 space-y-6 py-1">
-              <div className="h-2 bg-slate-200 rounded"></div>
-            </div>
+          <div className="text-center">
+            <h2 className="text-lg font-medium mb-2">Authentication Required</h2>
+            <p className="text-muted-foreground">Please log in to view your performance.</p>
           </div>
         </div>
       </div>
@@ -171,16 +169,7 @@ export default function Performance() {
                 <CardTitle>Current Goals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {performanceIsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="animate-pulse">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-2 bg-gray-200 rounded"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : goalsArray.length > 0 ? (
+                {goalsArray.length > 0 ? (
                   goalsArray.slice(0, 5).map((goal: any) => (
                     <div key={goal.id} className="space-y-2">
                       <div className="flex justify-between items-center">
@@ -215,16 +204,7 @@ export default function Performance() {
                 <CardTitle>Recent Feedback</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {performanceIsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="animate-pulse">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : feedbackArray.length > 0 ? (
+                {feedbackArray.length > 0 ? (
                   feedbackArray.slice(0, 3).map((fb: any) => (
                     <div key={fb.id} className="p-3 bg-muted/20 rounded-lg">
                       <div className="flex items-center justify-between mb-2">

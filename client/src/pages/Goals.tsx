@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -221,11 +220,7 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Goals</p>
-                    {goalsLoading ? (
-                      <Skeleton className="h-9 w-8 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground">{goalsArray.length}</p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground">{goalsArray.length}</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <Target className="w-6 h-6 text-blue-600" />

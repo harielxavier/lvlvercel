@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Plus, Calendar, MessageSquare, Target, TrendingUp } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -29,15 +28,13 @@ export default function Team() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  if (isLoading || !isAuthenticated || !user) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="glass-card p-8 rounded-2xl">
-          <div className="animate-pulse flex space-x-4">
-            <div className="rounded-full bg-slate-200 h-10 w-10"></div>
-            <div className="flex-1 space-y-6 py-1">
-              <div className="h-2 bg-slate-200 rounded"></div>
-            </div>
+          <div className="text-center">
+            <h2 className="text-lg font-medium mb-2">Authentication Required</h2>
+            <p className="text-muted-foreground">Please log in to view your team.</p>
           </div>
         </div>
       </div>
@@ -103,11 +100,7 @@ export default function Team() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Team Members</p>
-                    {employeesLoading ? (
-                      <Skeleton className="h-9 w-8 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground">{teamMembers.length}</p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground">{teamMembers.length}</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <Users className="w-6 h-6 text-blue-600" />
@@ -121,11 +114,7 @@ export default function Team() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Avg Performance</p>
-                    {employeesLoading ? (
-                      <Skeleton className="h-9 w-12 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground">{avgPerformance}%</p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground">{avgPerformance}%</p>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-green-600" />
@@ -169,23 +158,7 @@ export default function Team() {
                 <CardTitle>Team Members</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {employeesLoading ? (
-                  [...Array(3)].map((_, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Skeleton className="h-10 w-10 rounded-full" />
-                        <div>
-                          <Skeleton className="h-4 w-24 mb-1" />
-                          <Skeleton className="h-3 w-20" />
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Skeleton className="h-4 w-12" />
-                        <Skeleton className="h-6 w-16" />
-                      </div>
-                    </div>
-                  ))
-                ) : teamMembers.map((member: any, index: number) => (
+                {teamMembers.map((member: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <Avatar>
@@ -225,17 +198,7 @@ export default function Team() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  {employeesLoading ? (
-                    [...Array(3)].map((_, index) => (
-                      <div key={index} className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
-                        <Skeleton className="w-2 h-2 rounded-full mt-2" />
-                        <div>
-                          <Skeleton className="h-4 w-40 mb-1" />
-                          <Skeleton className="h-3 w-16" />
-                        </div>
-                      </div>
-                    ))
-                  ) : teamMembers.length > 0 ? (
+                  {teamMembers.length > 0 ? (
                     <>
                       <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
                         <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>

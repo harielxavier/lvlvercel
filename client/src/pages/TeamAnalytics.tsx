@@ -4,7 +4,6 @@ import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart3, TrendingUp, Users, Target, Download, Filter } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -107,14 +106,10 @@ export default function TeamAnalytics() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Team Performance</p>
-                    {employeesLoading ? (
-                      <Skeleton className="h-9 w-16 mt-1" />
-                    ) : (
-                      <>
-                        <p className="text-3xl font-bold text-foreground">{avgTeamPerformance}%</p>
-                        <p className="text-sm text-green-600">Based on real data</p>
-                      </>
-                    )}
+                    <>
+                      <p className="text-3xl font-bold text-foreground">{avgTeamPerformance}%</p>
+                      <p className="text-sm text-green-600">Based on real data</p>
+                    </>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-green-600" />

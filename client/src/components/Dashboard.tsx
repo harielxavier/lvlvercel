@@ -97,13 +97,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Customer Tenants</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-16 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-total-tenants">
-                        {(metrics as any)?.totalTenants || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-total-tenants">
+                      {(metrics as any)?.totalTenants || 0}
+                    </p>
                     <p className="text-sm text-primary font-medium mt-1 flex items-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       Ready for onboarding
@@ -121,13 +117,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Platform Users</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-20 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-platform-users">
-                        {(metrics as any)?.totalUsers || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-platform-users">
+                      {(metrics as any)?.totalUsers || 0}
+                    </p>
                     <p className="text-sm text-green-600 font-medium mt-1 flex items-center">
                       <Users className="w-3 h-3 mr-1" />
                       Active platform users
@@ -145,13 +137,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-12 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-platform-revenue">
-                        ${(metrics as any)?.monthlyRecurringRevenue || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-platform-revenue">
+                      ${(metrics as any)?.monthlyRecurringRevenue || 0}
+                    </p>
                     <p className="text-sm text-blue-600 font-medium mt-1 flex items-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       Ready to generate revenue
@@ -171,13 +159,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Platform Feedback</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-8 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-platform-feedback">
-                        {(metrics as any)?.totalFeedback || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-platform-feedback">
+                      {(metrics as any)?.totalFeedback || 0}
+                    </p>
                     <p className="text-sm text-orange-600 font-medium mt-1 flex items-center">
                       <MessageSquare className="w-3 h-3 mr-1" />
                       Cross-tenant feedback
@@ -198,13 +182,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-16 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-total-employees">
-                        {(metrics as any)?.totalEmployees || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-total-employees">
+                      {(metrics as any)?.totalEmployees || 0}
+                    </p>
                     <p className="text-sm text-primary font-medium mt-1 flex items-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       +12 this month
@@ -222,13 +202,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Feedback Collected</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-20 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-total-feedback">
-                        {(metrics as any)?.totalFeedback || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-total-feedback">
+                      {(metrics as any)?.totalFeedback || 0}
+                    </p>
                     <p className="text-sm text-green-600 font-medium mt-1 flex items-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       +324 this week
@@ -246,13 +222,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Avg Performance</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-12 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-avg-performance">
-                        {(metrics as any)?.avgPerformance || 0}%
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-avg-performance">
+                      {(metrics as any)?.avgPerformance || 0}%
+                    </p>
                     <p className="text-sm text-blue-600 font-medium mt-1 flex items-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
                       +5% vs last month
@@ -276,13 +248,9 @@ function Dashboard({ user }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Active Reviews</p>
-                    {metricsLoading ? (
-                      <Skeleton className="h-8 w-8 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground" data-testid="metric-active-reviews">
-                        {(metrics as any)?.activeReviews || 0}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground" data-testid="metric-active-reviews">
+                      {(metrics as any)?.activeReviews || 0}
+                    </p>
                     <p className="text-sm text-orange-600 font-medium mt-1 flex items-center">
                       <AlertCircle className="w-3 h-3 mr-1" />
                       7 due this week
@@ -532,19 +500,6 @@ function Dashboard({ user }: DashboardProps) {
                     </div>
                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                   </div>
-                </div>
-              ) : activityLoading ? (
-                // Loading state
-                <div className="space-y-4">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="animate-pulse flex items-center space-x-4 p-3">
-                      <div className="rounded-full bg-gray-200 h-10 w-10"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               ) : recentActivity.length > 0 ? (
                 // Real Employee Activity
