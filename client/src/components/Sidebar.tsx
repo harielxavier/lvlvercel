@@ -4,6 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   LayoutDashboard,
   Users,
   BarChart3,
@@ -17,7 +24,9 @@ import {
   Calendar,
   FileText,
   Zap,
-  ChevronDown
+  ChevronDown,
+  LogOut,
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -305,34 +314,55 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {/* User Profile */}
         <div className="p-4 border-t border-sidebar-border">
-          <div 
-            className="flex items-center space-x-3 p-3 rounded-xl hover:bg-sidebar-accent cursor-pointer transition-colors"
-            data-testid="user-profile-section"
-          >
-            <Avatar className="w-10 h-10 border-2 border-sidebar-border">
-              <AvatarImage 
-                src={user.profileImageUrl} 
-                alt={`${user.firstName} ${user.lastName}`}
-                className="object-cover"
-              />
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {user.firstName?.[0]}{user.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            {!isCollapsed && (
-              <>
-                <div className="flex-1">
-                  <p className="font-medium text-sm" data-testid="text-user-name">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="text-xs text-muted-foreground capitalize" data-testid="text-user-role-profile">
-                    {user.role?.replace('_', ' ')}
-                  </p>
-                </div>
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              </>
-            )}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div 
+                className="flex items-center space-x-3 p-3 rounded-xl hover:bg-sidebar-accent cursor-pointer transition-colors"
+                data-testid="user-profile-section"
+              >
+                <Avatar className="w-10 h-10 border-2 border-sidebar-border">
+                  <AvatarImage 
+                    src={user.profileImageUrl} 
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {user.firstName?.[0]}{user.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                {!isCollapsed && (
+                  <>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm" data-testid="text-user-name">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize" data-testid="text-user-role-profile">
+                        {user.role?.replace('_', ' ')}
+                      </p>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  </>
+                )}
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56" data-testid="user-dropdown-menu">
+              <Link href="/profile">
+                <DropdownMenuItem className="cursor-pointer" data-testid="dropdown-profile">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile Settings</span>
+                </DropdownMenuItem>
+              </Link>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="cursor-pointer text-red-600 focus:text-red-600" 
+                onClick={() => window.location.href = '/api/logout'}
+                data-testid="dropdown-logout"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </aside>
