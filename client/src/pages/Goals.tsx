@@ -5,12 +5,75 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function Goals() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isNewGoalDialogOpen, setIsNewGoalDialogOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    description: '',
+    category: '',
+    deadline: ''
+  });
+  
+  // Get real goals data from API
+  const { data: goals = [], isLoading: goalsLoading } = useQuery({
+    queryKey: ['/api/employee', user.id, 'goals'],
+    enabled: !!user?.id && isAuthenticated,
+  });
+  
+  const addGoalMutation = useMutation({
+    mutationFn: async (goalData: any) => {
+      const response = await fetch(`/api/employee/${user.id}/goals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(goalData)
+      });
+      if (!response.ok) throw new Error('Failed to create goal');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/employee', user.id, 'goals'] });
+      toast({
+        title: 'Goal Created',
+        description: 'Your new goal has been successfully created.',
+      });
+      setIsNewGoalDialogOpen(false);
+      setNewGoal({ title: '', description: '', category: '', deadline: '' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create goal',
+        variant: 'destructive'
+      });
+    }
+  });
+  
+  const handleAddGoal = () => {
+    if (!newGoal.title || !newGoal.category || !newGoal.deadline) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    addGoalMutation.mutate(newGoal);
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -41,44 +104,13 @@ export default function Goals() {
     );
   }
 
-  const goals = [
-    {
-      id: 1,
-      title: "Increase team productivity by 20%",
-      description: "Implement new processes and tools to boost team efficiency",
-      progress: 85,
-      status: "in_progress",
-      deadline: "2024-03-31",
-      category: "Team Development"
-    },
-    {
-      id: 2,
-      title: "Complete AWS certification",
-      description: "Obtain AWS Solutions Architect certification",
-      progress: 60,
-      status: "in_progress",
-      deadline: "2024-02-28",
-      category: "Professional Development"
-    },
-    {
-      id: 3,
-      title: "Launch new product feature",
-      description: "Successfully deliver and launch the analytics dashboard",
-      progress: 100,
-      status: "completed",
-      deadline: "2024-01-15",
-      category: "Product Development"
-    },
-    {
-      id: 4,
-      title: "Mentor junior developers",
-      description: "Provide guidance and support to 2 junior team members",
-      progress: 40,
-      status: "in_progress",
-      deadline: "2024-06-30",
-      category: "Leadership"
-    }
-  ];
+  // Calculate metrics from real goals data
+  const goalsArray = Array.isArray(goals) ? goals : [];
+  const completedGoals = goalsArray.filter((g: any) => g.status === 'completed');
+  const inProgressGoals = goalsArray.filter((g: any) => g.status === 'in_progress');
+  const avgProgress = goalsArray.length > 0 
+    ? Math.round(goalsArray.reduce((acc: number, goal: any) => acc + (goal.progress || 0), 0) / goalsArray.length)
+    : 0;
 
   return (
     <div className="flex h-screen bg-background">
@@ -100,10 +132,83 @@ export default function Goals() {
                   <Calendar className="w-4 h-4 mr-2" />
                   View Calendar
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Goal
-                </Button>
+                <Dialog open={isNewGoalDialogOpen} onOpenChange={setIsNewGoalDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary hover:bg-primary/90" data-testid="button-new-goal">
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Goal
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Goal</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="goalTitle">Goal Title *</Label>
+                        <Input
+                          id="goalTitle"
+                          value={newGoal.title}
+                          onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
+                          placeholder="Enter goal title"
+                          data-testid="input-goal-title"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="goalDescription">Description</Label>
+                        <Textarea
+                          id="goalDescription"
+                          value={newGoal.description}
+                          onChange={(e) => setNewGoal({...newGoal, description: e.target.value})}
+                          placeholder="Describe your goal"
+                          rows={3}
+                          data-testid="input-goal-description"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="goalCategory">Category *</Label>
+                        <Select onValueChange={(value) => setNewGoal({...newGoal, category: value})}>
+                          <SelectTrigger data-testid="select-goal-category">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="professional">Professional Development</SelectItem>
+                            <SelectItem value="team">Team Development</SelectItem>
+                            <SelectItem value="product">Product Development</SelectItem>
+                            <SelectItem value="leadership">Leadership</SelectItem>
+                            <SelectItem value="personal">Personal Growth</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="goalDeadline">Deadline *</Label>
+                        <Input
+                          id="goalDeadline"
+                          type="date"
+                          value={newGoal.deadline}
+                          onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
+                          data-testid="input-goal-deadline"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2 pt-4">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsNewGoalDialogOpen(false)}
+                          data-testid="button-cancel-goal"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleAddGoal}
+                          disabled={addGoalMutation.isPending}
+                          data-testid="button-save-goal"
+                        >
+                          {addGoalMutation.isPending ? 'Creating...' : 'Create Goal'}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
@@ -116,7 +221,11 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Goals</p>
-                    <p className="text-3xl font-bold text-foreground">{goals.length}</p>
+                    {goalsLoading ? (
+                      <Skeleton className="h-9 w-8 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{goalsArray.length}</p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <Target className="w-6 h-6 text-blue-600" />
@@ -130,9 +239,13 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                    <p className="text-3xl font-bold text-green-600">
-                      {goals.filter(g => g.status === 'completed').length}
-                    </p>
+                    {goalsLoading ? (
+                      <Skeleton className="h-9 w-8 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold text-green-600">
+                        {completedGoals.length}
+                      </p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <CheckCircle className="w-6 h-6 text-green-600" />
@@ -146,9 +259,13 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">In Progress</p>
-                    <p className="text-3xl font-bold text-orange-600">
-                      {goals.filter(g => g.status === 'in_progress').length}
-                    </p>
+                    {goalsLoading ? (
+                      <Skeleton className="h-9 w-8 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold text-orange-600">
+                        {inProgressGoals.length}
+                      </p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                     <Clock className="w-6 h-6 text-orange-600" />
@@ -162,9 +279,13 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {Math.round(goals.reduce((acc, goal) => acc + goal.progress, 0) / goals.length)}%
-                    </p>
+                    {goalsLoading ? (
+                      <Skeleton className="h-9 w-12 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">
+                        {avgProgress}%
+                      </p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-purple-600" />
@@ -180,7 +301,7 @@ export default function Goals() {
                 <CardTitle>Active Goals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {goals.filter(goal => goal.status !== 'completed').map((goal) => (
+                {goalsArray.filter((goal: any) => goal.status !== 'completed').map((goal: any) => (
                   <div key={goal.id} className="space-y-3 p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -225,7 +346,7 @@ export default function Goals() {
                 <CardTitle>Completed Goals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {goals.filter(goal => goal.status === 'completed').map((goal) => (
+                {goalsArray.filter((goal: any) => goal.status === 'completed').map((goal: any) => (
                   <div key={goal.id} className="flex items-center justify-between p-4 bg-green-50/50 rounded-lg border border-green-200/50">
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />

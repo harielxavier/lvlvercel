@@ -1,4 +1,6 @@
+import { useUserContext } from '@/context/UserContext';
 import { useQuery } from '@tanstack/react-query';
+import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +18,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import type { Tenant } from '@shared/schema';
+import { useEffect } from 'react';
 
 interface PlatformMetrics {
   totalTenants: number;
@@ -27,9 +30,39 @@ interface PlatformMetrics {
 }
 
 export default function BillingSubscriptions() {
+  const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
   
-  const { data: tenants, isLoading, error } = useQuery<Tenant[]>({
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
+  
+  if (isLoading || !isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="glass-card p-8 rounded-2xl">
+          <div className="animate-pulse flex space-x-4">
+            <div className="rounded-full bg-slate-200 h-10 w-10"></div>
+            <div className="flex-1 space-y-6 py-1">
+              <div className="h-2 bg-slate-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  const { data: tenants, isLoading: tenantsLoading, error } = useQuery<Tenant[]>({
     queryKey: ['/api/platform/tenants']
   });
 
@@ -87,7 +120,9 @@ export default function BillingSubscriptions() {
   }
 
   return (
-    <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-billing-subscriptions">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-billing-subscriptions">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40">
         <div className="px-8 py-4">
@@ -268,6 +303,7 @@ export default function BillingSubscriptions() {
           </Card>
         )}
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

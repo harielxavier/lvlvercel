@@ -7,12 +7,67 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Plus, Search, Filter, UserPlus, Target, Star, TrendingUp, Copy } from 'lucide-react';
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function EmployeeManagement() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    firstName: '',
+    lastName: '',
+    email: ''
+  });
+  
+  const addEmployeeMutation = useMutation({
+    mutationFn: async (employeeData: any) => {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(employeeData)
+      });
+      if (!response.ok) throw new Error('Failed to add employee');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/employees'] });
+      toast({
+        title: 'Employee Added',
+        description: 'New employee has been successfully added with a unique feedback URL.',
+      });
+      setIsAddDialogOpen(false);
+      setNewEmployee({ firstName: '', lastName: '', email: '' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to add employee',
+        variant: 'destructive'
+      });
+    }
+  });
+  
+  const handleAddEmployee = () => {
+    if (!newEmployee.firstName || !newEmployee.lastName || !newEmployee.email) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    addEmployeeMutation.mutate({
+      ...newEmployee,
+      tenantId: user.tenant?.id
+    });
+  };
   
   // Get employees for current tenant
   const { data: employees = [], isLoading: employeesLoading } = useQuery({
@@ -90,10 +145,68 @@ export default function EmployeeManagement() {
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add Employee
-                </Button>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary hover:bg-primary/90" data-testid="button-add-employee">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Add Employee
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Employee</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={newEmployee.firstName}
+                          onChange={(e) => setNewEmployee({...newEmployee, firstName: e.target.value})}
+                          placeholder="Enter first name"
+                          data-testid="input-employee-firstname"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={newEmployee.lastName}
+                          onChange={(e) => setNewEmployee({...newEmployee, lastName: e.target.value})}
+                          placeholder="Enter last name"
+                          data-testid="input-employee-lastname"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newEmployee.email}
+                          onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+                          placeholder="Enter email address"
+                          data-testid="input-employee-email"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2 pt-4">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsAddDialogOpen(false)}
+                          data-testid="button-cancel-employee"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleAddEmployee}
+                          disabled={addEmployeeMutation.isPending}
+                          data-testid="button-save-employee"
+                        >
+                          {addEmployeeMutation.isPending ? 'Adding...' : 'Add Employee'}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
