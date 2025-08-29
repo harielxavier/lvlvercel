@@ -45,6 +45,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Platform-wide metrics for Platform Super Admins
+  app.get("/api/platform/metrics", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const metrics = await storage.getPlatformMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching platform metrics:", error);
+      res.status(500).json({ message: "Failed to fetch platform metrics" });
+    }
+  });
+
+  // Platform tenant management for Platform Super Admins
+  app.get("/api/platform/tenants", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const tenants = await storage.getAllTenants();
+      res.json(tenants);
+    } catch (error) {
+      console.error("Error fetching platform tenants:", error);
+      res.status(500).json({ message: "Failed to fetch platform tenants" });
+    }
+  });
+
   // Employee management routes
   app.get("/api/employees/:tenantId", isAuthenticated, async (req, res) => {
     try {

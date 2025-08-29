@@ -7,6 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { UserContextProvider } from "@/context/UserContext";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/not-found";
+import CustomerTenants from "@/pages/CustomerTenants";
+import PlatformAnalytics from "@/pages/PlatformAnalytics";
+import BillingSubscriptions from "@/pages/BillingSubscriptions";
+import SystemSettings from "@/pages/SystemSettings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,6 +57,10 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Home} />
+      <Route path="/tenants" component={CustomerTenants} />
+      <Route path="/analytics" component={PlatformAnalytics} />
+      <Route path="/billing" component={BillingSubscriptions} />
+      <Route path="/system-settings" component={SystemSettings} />
       <Route component={NotFound} />
     </Switch>
   );

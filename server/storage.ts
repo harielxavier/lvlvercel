@@ -60,6 +60,19 @@ export interface IStorage {
     avgPerformance: number;
     activeReviews: number;
   }>;
+  
+  // Platform analytics for Platform Super Admins
+  getPlatformMetrics(): Promise<{
+    totalTenants: number;
+    totalUsers: number;
+    totalEmployees: number;
+    totalFeedback: number;
+    activeSubscriptions: number;
+    monthlyRecurringRevenue: number;
+  }>;
+  
+  // Platform tenant management
+  getAllTenants(): Promise<Tenant[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -223,6 +236,40 @@ export class DatabaseStorage implements IStorage {
       avgPerformance: 87, // TODO: Calculate from actual performance data
       activeReviews: reviewCount.count,
     };
+  }
+
+  async getPlatformMetrics(): Promise<{
+    totalTenants: number;
+    totalUsers: number;
+    totalEmployees: number;
+    totalFeedback: number;
+    activeSubscriptions: number;
+    monthlyRecurringRevenue: number;
+  }> {
+    // Platform-wide metrics for Platform Super Admins
+    const [tenantCount] = await db.select({ count: count() }).from(tenants);
+    const [userCount] = await db.select({ count: count() }).from(users);
+    const [employeeCount] = await db.select({ count: count() }).from(employees);
+    const [feedbackCount] = await db.select({ count: count() }).from(feedbacks);
+    
+    // Calculate active subscriptions (non-free tiers)
+    const [activeSubCount] = await db
+      .select({ count: count() })
+      .from(tenants)
+      .where(and(eq(tenants.isActive, true)));
+
+    return {
+      totalTenants: tenantCount.count,
+      totalUsers: userCount.count,
+      totalEmployees: employeeCount.count,
+      totalFeedback: feedbackCount.count,
+      activeSubscriptions: activeSubCount.count,
+      monthlyRecurringRevenue: 0 // Will be calculated based on subscription tiers
+    };
+  }
+
+  async getAllTenants(): Promise<Tenant[]> {
+    return await db.select().from(tenants).orderBy(desc(tenants.createdAt));
   }
 }
 
