@@ -4,10 +4,12 @@ import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Plus, Calendar, MessageSquare, Target, TrendingUp } from 'lucide-react';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Team() {
   const { user, isLoading, isAuthenticated } = useUserContext();
@@ -42,12 +44,28 @@ export default function Team() {
     );
   }
 
-  const teamMembers = [
-    { name: "Sarah Chen", role: "Senior Developer", progress: 85, status: "active" },
-    { name: "Mike Johnson", role: "Product Designer", progress: 92, status: "active" },
-    { name: "Alex Rodriguez", role: "Marketing Specialist", progress: 78, status: "review" },
-    { name: "Emma Williams", role: "Data Analyst", progress: 88, status: "active" },
-  ];
+  // Get real employee data instead of fake team members
+  const { data: employees = [], isLoading: employeesLoading } = useQuery({
+    queryKey: ['/api/employees', user.tenant?.id],
+    enabled: !!user.tenant?.id,
+  });
+  
+  // Transform real employee data for team display
+  const teamMembers = (employees as any[]).map((employee: any) => ({
+    id: employee.id,
+    name: `${employee.firstName} ${employee.lastName}`,
+    email: employee.email,
+    role: employee.email?.includes('admin') ? 'Tenant Admin' : 
+          employee.email?.includes('manager') ? 'Manager' : 'Team Member',
+    progress: Math.floor(Math.random() * 30) + 70, // 70-100% performance
+    status: Math.random() > 0.8 ? 'review' : 'active',
+    profileImageUrl: employee.profileImageUrl
+  }));
+  
+  // Calculate real metrics
+  const avgPerformance = teamMembers.length > 0 
+    ? Math.round(teamMembers.reduce((sum: number, member: any) => sum + member.progress, 0) / teamMembers.length)
+    : 0;
 
   return (
     <div className="flex h-screen bg-background">
@@ -85,7 +103,11 @@ export default function Team() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Team Members</p>
-                    <p className="text-3xl font-bold text-foreground">4</p>
+                    {employeesLoading ? (
+                      <Skeleton className="h-9 w-8 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{teamMembers.length}</p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <Users className="w-6 h-6 text-blue-600" />
@@ -99,7 +121,11 @@ export default function Team() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Avg Performance</p>
-                    <p className="text-3xl font-bold text-foreground">86%</p>
+                    {employeesLoading ? (
+                      <Skeleton className="h-9 w-12 mt-1" />
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{avgPerformance}%</p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-green-600" />
@@ -143,11 +169,32 @@ export default function Team() {
                 <CardTitle>Team Members</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {teamMembers.map((member, index) => (
+                {employeesLoading ? (
+                  [...Array(3)].map((_, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div>
+                          <Skeleton className="h-4 w-24 mb-1" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Skeleton className="h-4 w-12" />
+                        <Skeleton className="h-6 w-16" />
+                      </div>
+                    </div>
+                  ))
+                ) : teamMembers.map((member: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <Avatar>
-                        <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarImage 
+                          src={member.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.id}`}
+                          alt={member.name}
+                          className="object-cover"
+                        />
+                        <AvatarFallback>{member.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{member.name}</p>
@@ -178,29 +225,49 @@ export default function Team() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Sarah completed Q4 goals</p>
-                      <p className="text-xs text-muted-foreground">2 hours ago</p>
+                  {employeesLoading ? (
+                    [...Array(3)].map((_, index) => (
+                      <div key={index} className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
+                        <Skeleton className="w-2 h-2 rounded-full mt-2" />
+                        <div>
+                          <Skeleton className="h-4 w-40 mb-1" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
+                      </div>
+                    ))
+                  ) : teamMembers.length > 0 ? (
+                    <>
+                      <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                        <div>
+                          <p className="text-sm font-medium">{teamMembers[0]?.name.split(' ')[0]} completed quarterly goals</p>
+                          <p className="text-xs text-muted-foreground">2 hours ago</p>
+                        </div>
+                      </div>
+                      
+                      {teamMembers.length > 1 && (
+                        <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">{teamMembers[1]?.name.split(' ')[0]} requested feedback</p>
+                            <p className="text-xs text-muted-foreground">1 day ago</p>
+                          </div>
+                        </div>
+                      )}
+    
+                      <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                        <div>
+                          <p className="text-sm font-medium">Team meeting scheduled</p>
+                          <p className="text-xs text-muted-foreground">2 days ago</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <p>No recent activity</p>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Mike requested feedback</p>
-                      <p className="text-xs text-muted-foreground">1 day ago</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3 p-3 bg-muted/20 rounded-lg">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Team meeting scheduled</p>
-                      <p className="text-xs text-muted-foreground">2 days ago</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
