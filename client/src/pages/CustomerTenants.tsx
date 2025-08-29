@@ -657,9 +657,9 @@ export default function CustomerTenants() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Customer Tenants</p>
-                  <p className="text-3xl font-bold text-foreground">
+                  <div className="text-3xl font-bold text-foreground">
                     {isLoading ? <Skeleton className="h-8 w-12" /> : tenants?.length || 0}
-                  </p>
+                  </div>
                   <p className="text-sm text-primary font-medium mt-1 flex items-center">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     Ready for onboarding
@@ -677,9 +677,9 @@ export default function CustomerTenants() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
-                  <p className="text-3xl font-bold text-foreground">
+                  <div className="text-3xl font-bold text-foreground">
                     {isLoading ? <Skeleton className="h-8 w-12" /> : tenants?.filter((t: any) => t.isActive).length || 0}
-                  </p>
+                  </div>
                   <p className="text-sm text-green-600 font-medium mt-1">All systems operational</p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">

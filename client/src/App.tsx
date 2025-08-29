@@ -11,6 +11,21 @@ import CustomerTenants from "@/pages/CustomerTenants";
 import PlatformAnalytics from "@/pages/PlatformAnalytics";
 import BillingSubscriptions from "@/pages/BillingSubscriptions";
 import SystemSettings from "@/pages/SystemSettings";
+import OrganizationChart from "@/pages/OrganizationChart";
+import EmployeeManagement from "@/pages/EmployeeManagement";
+import Performance from "@/pages/Performance";
+import FeedbackAnalytics from "@/pages/FeedbackAnalytics";
+import Settings from "@/pages/Settings";
+import Integrations from "@/pages/Integrations";
+import Team from "@/pages/Team";
+import Reviews from "@/pages/Reviews";
+import Goals from "@/pages/Goals";
+import Feedback from "@/pages/Feedback";
+import TeamAnalytics from "@/pages/TeamAnalytics";
+import Meetings from "@/pages/Meetings";
+import FeedbackCollection from "@/pages/FeedbackCollection";
+import PeerFeedback from "@/pages/PeerFeedback";
+import Profile from "@/pages/Profile";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -57,10 +72,34 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Home} />
+      
+      {/* Platform Admin Routes */}
       <Route path="/tenants" component={CustomerTenants} />
       <Route path="/analytics" component={PlatformAnalytics} />
       <Route path="/billing" component={BillingSubscriptions} />
       <Route path="/system-settings" component={SystemSettings} />
+      
+      {/* Tenant Admin Routes */}
+      <Route path="/org-chart" component={OrganizationChart} />
+      <Route path="/employees" component={EmployeeManagement} />
+      <Route path="/performance" component={Performance} />
+      <Route path="/feedback-analytics" component={FeedbackAnalytics} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/integrations" component={Integrations} />
+      
+      {/* Manager Routes */}
+      <Route path="/team" component={Team} />
+      <Route path="/reviews" component={Reviews} />
+      <Route path="/goals" component={Goals} />
+      <Route path="/feedback" component={Feedback} />
+      <Route path="/team-analytics" component={TeamAnalytics} />
+      <Route path="/meetings" component={Meetings} />
+      
+      {/* Employee Routes */}
+      <Route path="/feedback-collection" component={FeedbackCollection} />
+      <Route path="/peer-feedback" component={PeerFeedback} />
+      <Route path="/profile" component={Profile} />
+      
       <Route component={NotFound} />
     </Switch>
   );
