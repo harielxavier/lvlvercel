@@ -127,6 +127,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all users for testing (Platform Admin only)
+  app.get("/api/platform/users", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const users = await storage.getAllUsersWithTenants();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      res.status(500).json({ message: "Failed to fetch all users" });
+    }
+  });
+
   // Employee management routes
   app.get("/api/employees/:tenantId", isAuthenticated, async (req, res) => {
     try {

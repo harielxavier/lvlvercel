@@ -73,6 +73,7 @@ export interface IStorage {
   }>;
   
   // Platform tenant management
+  getAllUsersWithTenants(): Promise<(User & { tenantName?: string | null })[]>;
   getAllTenants(): Promise<Tenant[]>;
 }
 
@@ -276,6 +277,27 @@ export class DatabaseStorage implements IStorage {
 
   async getAllTenants(): Promise<Tenant[]> {
     return await db.select().from(tenants).orderBy(desc(tenants.createdAt));
+  }
+
+  async getAllUsersWithTenants(): Promise<(User & { tenantName?: string | null })[]> {
+    const result = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        role: users.role,
+        tenantId: users.tenantId,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        tenantName: tenants.name,
+      })
+      .from(users)
+      .leftJoin(tenants, eq(users.tenantId, tenants.id))
+      .orderBy(tenants.name, users.role, users.firstName);
+    
+    return result;
   }
 }
 

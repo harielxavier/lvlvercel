@@ -11,11 +11,15 @@ import {
   Settings,
   Eye,
   TrendingUp,
-  Crown
+  Crown,
+  Mail,
+  Key,
+  UserCheck,
+  Copy
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
-import type { Tenant } from '@shared/schema';
+import type { Tenant, User } from '@shared/schema';
 
 export default function CustomerTenants() {
   const { toast } = useToast();
@@ -23,6 +27,18 @@ export default function CustomerTenants() {
   const { data: tenants, isLoading, error } = useQuery<Tenant[]>({
     queryKey: ['/api/platform/tenants']
   });
+
+  const { data: users, isLoading: usersLoading } = useQuery<(User & { tenantName?: string | null })[]>({
+    queryKey: ['/api/platform/users']
+  });
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Email copied to clipboard",
+    });
+  };
 
   // Handle auth errors
   if (error && isUnauthorizedError(error)) {
@@ -57,6 +73,26 @@ export default function CustomerTenants() {
       case 'norming': return 'Norming';
       case 'performing': return 'Performing';
       case 'appsumo': return 'AppSumo';
+      default: return 'Unknown';
+    }
+  }
+
+  function getRoleColor(role: string) {
+    switch (role) {
+      case 'platform_admin': return 'bg-purple-100 text-purple-800';
+      case 'tenant_admin': return 'bg-blue-100 text-blue-800';
+      case 'manager': return 'bg-green-100 text-green-800';
+      case 'employee': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  function getRoleDisplayName(role: string) {
+    switch (role) {
+      case 'platform_admin': return 'Platform Admin';
+      case 'tenant_admin': return 'Tenant Admin';
+      case 'manager': return 'Manager';
+      case 'employee': return 'Employee';
       default: return 'Unknown';
     }
   }
@@ -141,6 +177,158 @@ export default function CustomerTenants() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Testing Users Section */}
+        <Card className="glass-card border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <UserCheck className="w-5 h-5 mr-2 text-green-600" />
+              Testing Users Database
+              <Badge className="ml-2 bg-green-100 text-green-800">Password: Vamos!!86</Badge>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Click any email to copy it for testing. All users need to create Replit accounts first.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {usersLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="p-4 border rounded-lg">
+                    <Skeleton className="h-6 w-48 mb-3" />
+                    <div className="grid gap-3">
+                      {[...Array(5)].map((_, j) => (
+                        <div key={j} className="flex items-center space-x-3">
+                          <Skeleton className="w-8 h-8 rounded-full" />
+                          <Skeleton className="h-4 w-48" />
+                          <Skeleton className="h-5 w-16" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : users && users.length > 0 ? (
+              <div className="space-y-6">
+                {tenants?.map((tenant) => {
+                  const tenantUsers = users.filter(user => user.tenantId === tenant.id);
+                  if (tenantUsers.length === 0) return null;
+                  
+                  return (
+                    <div key={tenant.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg">{tenant.name}</h3>
+                            <div className="flex items-center space-x-2">
+                              <Badge className={getTierColor(tenant.subscriptionTier || 'forming')}>
+                                {getTierDisplayName(tenant.subscriptionTier || 'forming')}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {tenantUsers.length} users
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        {tenantUsers
+                          .sort((a, b) => {
+                            const roleOrder = { 'tenant_admin': 0, 'manager': 1, 'employee': 2 };
+                            return (roleOrder[a.role as keyof typeof roleOrder] || 3) - (roleOrder[b.role as keyof typeof roleOrder] || 3);
+                          })
+                          .map((user) => (
+                            <div key={user.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                  <Users className="w-4 h-4 text-primary" />
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                  <button
+                                    onClick={() => copyToClipboard(user.email || '')}
+                                    className="flex items-center space-x-2 hover:text-primary transition-colors"
+                                    data-testid={`button-copy-email-${user.firstName?.toLowerCase()}`}
+                                  >
+                                    <Mail className="w-4 h-4" />
+                                    <span className="font-mono text-sm">{user.email}</span>
+                                    <Copy className="w-3 h-3 opacity-50" />
+                                  </button>
+                                  <Badge className={getRoleColor(user.role || 'employee')}>
+                                    {getRoleDisplayName(user.role || 'employee')}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <Key className="w-3 h-3" />
+                                <span>Vamos!!86</span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Platform Super Admins */}
+                {users.filter(user => user.role === 'platform_admin').length > 0 && (
+                  <div className="border rounded-lg p-4 bg-purple-50/50">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <Crown className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Platform Super Admins</h3>
+                        <p className="text-sm text-muted-foreground">Platform-level users (no tenant)</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      {users
+                        .filter(user => user.role === 'platform_admin')
+                        .map((user) => (
+                          <div key={user.id} className="flex items-center justify-between p-3 bg-purple-100/50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                                <Crown className="w-4 h-4 text-purple-600" />
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                <button
+                                  onClick={() => copyToClipboard(user.email || '')}
+                                  className="flex items-center space-x-2 hover:text-purple-600 transition-colors"
+                                  data-testid={`button-copy-email-${user.firstName?.toLowerCase()}`}
+                                >
+                                  <Mail className="w-4 h-4" />
+                                  <span className="font-mono text-sm">{user.email}</span>
+                                  <Copy className="w-3 h-3 opacity-50" />
+                                </button>
+                                <Badge className="bg-purple-100 text-purple-800">
+                                  Platform Admin
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                              <Key className="w-3 h-3" />
+                              <span>Vamos!!86</span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Users Found</h3>
+                <p className="text-muted-foreground">No test users have been created yet.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Customer Tenants List */}
         <Card className="glass-card border-0">
