@@ -248,6 +248,12 @@ export const insertGoalSchema = createInsertSchema(goals).omit({
   updatedAt: true,
 });
 
+export const insertPerformanceReviewSchema = createInsertSchema(performanceReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -263,3 +269,4 @@ export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type InsertGoal = z.infer<typeof insertGoalSchema>;
+export type InsertPerformanceReview = z.infer<typeof insertPerformanceReviewSchema>;

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import QRCode from 'qrcode';
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, type User, type UpsertUser } from "@shared/schema";
+import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -406,6 +406,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching goals:", error);
       res.status(500).json({ message: "Failed to fetch goals" });
+    }
+  });
+
+  // Performance Review routes
+  
+  // Get performance reviews for a tenant (for managers/admins)
+  app.get("/api/performance-reviews/:tenantId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { tenantId } = req.params;
+      const reviews = await storage.getPerformanceReviewsByTenant(tenantId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching performance reviews:", error);
+      res.status(500).json({ message: "Failed to fetch performance reviews" });
+    }
+  });
+  
+  // Get performance reviews for a specific employee
+  app.get("/api/employee/:employeeId/performance-reviews", isAuthenticated, async (req: any, res) => {
+    try {
+      const { employeeId } = req.params;
+      const reviews = await storage.getPerformanceReviewsByEmployee(employeeId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching employee performance reviews:", error);
+      res.status(500).json({ message: "Failed to fetch employee performance reviews" });
+    }
+  });
+
+  // Get a specific performance review
+  app.get("/api/performance-review/:reviewId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { reviewId } = req.params;
+      const review = await storage.getPerformanceReview(reviewId);
+      if (!review) {
+        return res.status(404).json({ message: "Performance review not found" });
+      }
+      res.json(review);
+    } catch (error) {
+      console.error("Error fetching performance review:", error);
+      res.status(500).json({ message: "Failed to fetch performance review" });
+    }
+  });
+
+  // Create a new performance review
+  app.post("/api/performance-reviews", isAuthenticated, async (req: any, res) => {
+    try {
+      const reviewData = insertPerformanceReviewSchema.parse(req.body);
+      const review = await storage.createPerformanceReview(reviewData);
+      res.json(review);
+    } catch (error) {
+      console.error("Error creating performance review:", error);
+      res.status(500).json({ message: "Failed to create performance review" });
+    }
+  });
+
+  // Update a performance review
+  app.put("/api/performance-review/:reviewId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { reviewId } = req.params;
+      const updateData = insertPerformanceReviewSchema.partial().parse(req.body);
+      const review = await storage.updatePerformanceReview(reviewId, updateData);
+      res.json(review);
+    } catch (error) {
+      console.error("Error updating performance review:", error);
+      res.status(500).json({ message: "Failed to update performance review" });
+    }
+  });
+
+  // Delete a performance review
+  app.delete("/api/performance-review/:reviewId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { reviewId } = req.params;
+      await storage.deletePerformanceReview(reviewId);
+      res.json({ message: "Performance review deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting performance review:", error);
+      res.status(500).json({ message: "Failed to delete performance review" });
     }
   });
 

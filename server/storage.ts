@@ -19,6 +19,8 @@ import {
   type InsertEmployee,
   type InsertFeedback,
   type InsertGoal,
+  type PerformanceReview,
+  type InsertPerformanceReview,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql } from "drizzle-orm";
@@ -57,6 +59,14 @@ export interface IStorage {
   // Goal operations
   createGoal(goal: InsertGoal): Promise<Goal>;
   getGoalsByEmployee(employeeId: string): Promise<Goal[]>;
+  
+  // Performance Review operations
+  createPerformanceReview(review: InsertPerformanceReview): Promise<PerformanceReview>;
+  getPerformanceReview(id: string): Promise<PerformanceReview | undefined>;
+  getPerformanceReviewsByEmployee(employeeId: string): Promise<PerformanceReview[]>;
+  getPerformanceReviewsByTenant(tenantId: string): Promise<PerformanceReview[]>;
+  updatePerformanceReview(id: string, data: Partial<InsertPerformanceReview>): Promise<PerformanceReview>;
+  deletePerformanceReview(id: string): Promise<void>;
   
   // Dashboard analytics
   getDashboardMetrics(tenantId: string): Promise<{
@@ -261,6 +271,67 @@ export class DatabaseStorage implements IStorage {
       .from(goals)
       .where(eq(goals.employeeId, employeeId))
       .orderBy(desc(goals.createdAt));
+  }
+
+  // Performance Review operations
+  async createPerformanceReview(reviewData: InsertPerformanceReview): Promise<PerformanceReview> {
+    const [review] = await db
+      .insert(performanceReviews)
+      .values(reviewData)
+      .returning();
+    return review;
+  }
+
+  async getPerformanceReview(id: string): Promise<PerformanceReview | undefined> {
+    const [review] = await db
+      .select()
+      .from(performanceReviews)
+      .where(eq(performanceReviews.id, id));
+    return review;
+  }
+
+  async getPerformanceReviewsByEmployee(employeeId: string): Promise<PerformanceReview[]> {
+    return await db
+      .select()
+      .from(performanceReviews)
+      .where(eq(performanceReviews.employeeId, employeeId))
+      .orderBy(desc(performanceReviews.createdAt));
+  }
+
+  async getPerformanceReviewsByTenant(tenantId: string): Promise<PerformanceReview[]> {
+    return await db
+      .select({
+        id: performanceReviews.id,
+        employeeId: performanceReviews.employeeId,
+        reviewerId: performanceReviews.reviewerId,
+        reviewPeriod: performanceReviews.reviewPeriod,
+        overallScore: performanceReviews.overallScore,
+        competencyScores: performanceReviews.competencyScores,
+        comments: performanceReviews.comments,
+        goals: performanceReviews.goals,
+        status: performanceReviews.status,
+        createdAt: performanceReviews.createdAt,
+        updatedAt: performanceReviews.updatedAt,
+      })
+      .from(performanceReviews)
+      .innerJoin(employees, eq(performanceReviews.employeeId, employees.id))
+      .where(eq(employees.tenantId, tenantId))
+      .orderBy(desc(performanceReviews.createdAt));
+  }
+
+  async updatePerformanceReview(id: string, data: Partial<InsertPerformanceReview>): Promise<PerformanceReview> {
+    const [review] = await db
+      .update(performanceReviews)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(performanceReviews.id, id))
+      .returning();
+    return review;
+  }
+
+  async deletePerformanceReview(id: string): Promise<void> {
+    await db
+      .delete(performanceReviews)
+      .where(eq(performanceReviews.id, id));
   }
 
   // Dashboard analytics

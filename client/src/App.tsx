@@ -26,9 +26,25 @@ import Meetings from "@/pages/Meetings";
 import FeedbackCollection from "@/pages/FeedbackCollection";
 import PeerFeedback from "@/pages/PeerFeedback";
 import Profile from "@/pages/Profile";
+import PublicFeedbackForm from "@/pages/PublicFeedbackForm";
+import { useLocation } from "wouter";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [location] = useLocation();
+
+  // Check if this is a public route (feedback form)
+  const isPublicRoute = location.startsWith('/feedback/');
+
+  // Handle public routes without authentication
+  if (isPublicRoute) {
+    return (
+      <Switch>
+        <Route path="/feedback/:feedbackUrl" component={PublicFeedbackForm} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
 
   if (isLoading) {
     return (
