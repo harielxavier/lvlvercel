@@ -26,7 +26,9 @@ import {
   Zap,
   ChevronDown,
   LogOut,
-  User
+  User,
+  MoreHorizontal,
+  UserPlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -228,10 +230,36 @@ export default function Sidebar({ user }: SidebarProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                   </svg>
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-sm text-sidebar-foreground">LVL UP</h3>
                   <p className="text-xs text-muted-foreground">Performance</p>
                 </div>
+                
+                {/* Development User Switcher */}
+                {import.meta.env.DEV && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-8 h-8 p-0 hover:bg-sidebar-accent"
+                        data-testid="dev-user-switcher"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48" data-testid="dev-switcher-menu">
+                      <DropdownMenuItem 
+                        className="cursor-pointer" 
+                        onClick={() => window.open('/api/login', '_blank')}
+                        data-testid="dev-login-as-user"
+                      >
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        <span>Login as User</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             )}
             <Button
