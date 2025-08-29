@@ -83,7 +83,7 @@ export async function setupAuth(app: Express) {
             <p>Select a user to login as (Development Mode Only):</p>
             ${users.map(user => `
               <div class="user-card" onclick="loginAs('${user.id}')">
-                <div><strong>${user.firstName} ${user.lastName}</strong> <span class="role-badge ${user.role}">${user.role.replace('_', ' ').toUpperCase()}</span></div>
+                <div><strong>${user.firstName} ${user.lastName}</strong> <span class="role-badge ${user.role || 'employee'}">${(user.role || 'employee').replace('_', ' ').toUpperCase()}</span></div>
                 <div class="tenant-info">${user.email}</div>
                 <div class="tenant-info">Tenant: ${user.tenantId}</div>
               </div>
@@ -111,11 +111,12 @@ export async function setupAuth(app: Express) {
       const user = await storage.getUser(userId);
       if (user) {
         const userSession = createDevUserSession(user);
-        req.login(userSession, (err) => {
+        req.logIn(userSession, (err) => {
           if (err) {
+            console.error('Login error:', err);
             return res.status(500).json({ error: "Login failed" });
           }
-          res.json({ success: true });
+          res.json({ success: true, user: userSession.claims });
         });
       } else {
         res.status(404).json({ error: "User not found" });
