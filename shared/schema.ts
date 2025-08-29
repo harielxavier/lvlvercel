@@ -29,7 +29,7 @@ export const sessions = pgTable(
 export const userRoleEnum = pgEnum('user_role', ['platform_admin', 'tenant_admin', 'manager', 'employee']);
 
 // Subscription tiers enum
-export const subscriptionTierEnum = pgEnum('subscription_tier', ['mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo']);
+export const subscriptionTierEnum = pgEnum('subscription_tier', ['platform', 'mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo']);
 
 // User storage table for Replit Auth
 export const users = pgTable("users", {
