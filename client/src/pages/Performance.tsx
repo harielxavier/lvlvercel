@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart3, Target, TrendingUp, Award, Plus, Star } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
 
 export default function Performance() {
   const { user, isLoading, isAuthenticated } = useUserContext();
@@ -98,10 +99,12 @@ export default function Performance() {
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="w-4 h-4 mr-2" />
-                  {user.role === 'employee' ? 'Set Goal' : 'New Review'}
-                </Button>
+                <Link href={user.role === 'employee' ? '/goals' : '/reviews'}>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    <Plus className="w-4 h-4 mr-2" />
+                    {user.role === 'employee' ? 'Set Goal' : 'New Review'}
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -204,10 +207,12 @@ export default function Performance() {
                     <p className="text-muted-foreground mb-4">
                       Set your first performance goal to get started.
                     </p>
-                    <Button size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Set Goal
-                    </Button>
+                    <Link href="/goals">
+                      <Button size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Set Goal
+                      </Button>
+                    </Link>
                   </div>
                 )}
               </CardContent>
