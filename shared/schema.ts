@@ -62,7 +62,7 @@ export const departments = pgTable("departments", {
   tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   name: varchar("name").notNull(),
   description: text("description"),
-  parentDepartmentId: varchar("parent_department_id").references(() => departments.id),
+  parentDepartmentId: varchar("parent_department_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -87,7 +87,7 @@ export const employees = pgTable("employees", {
   employeeNumber: varchar("employee_number"),
   jobPositionId: varchar("job_position_id").references(() => jobPositions.id),
   departmentId: varchar("department_id").references(() => departments.id),
-  managerId: varchar("manager_id").references(() => employees.id),
+  managerId: varchar("manager_id"),
   feedbackUrl: varchar("feedback_url").unique(), // e.g., "john-doe-x7k9"
   qrCodeData: text("qr_code_data"),
   hireDate: timestamp("hire_date"),
@@ -178,8 +178,11 @@ export const employeesRelations = relations(employees, ({ one, many }) => ({
   manager: one(employees, {
     fields: [employees.managerId],
     references: [employees.id],
+    relationName: "manager"
   }),
-  directReports: many(employees),
+  directReports: many(employees, {
+    relationName: "manager"
+  }),
   feedbacks: many(feedbacks),
   goals: many(goals),
   performanceReviews: many(performanceReviews),
@@ -193,8 +196,11 @@ export const departmentsRelations = relations(departments, ({ one, many }) => ({
   parentDepartment: one(departments, {
     fields: [departments.parentDepartmentId],
     references: [departments.id],
+    relationName: "parentDepartment"
   }),
-  subDepartments: many(departments),
+  subDepartments: many(departments, {
+    relationName: "parentDepartment"
+  }),
   employees: many(employees),
 }));
 

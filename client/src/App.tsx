@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { UserContextProvider } from "@/context/UserContext";
 import Home from "@/pages/Home";
-import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,16 +32,27 @@ function Router() {
     );
   }
 
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    window.location.href = '/api/login';
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="glass-card p-8 rounded-2xl">
+          <p className="text-lg font-medium mb-2">Redirecting to login...</p>
+          <div className="animate-pulse flex space-x-4">
+            <div className="rounded-full bg-slate-200 h-4 w-4"></div>
+            <div className="rounded-full bg-slate-200 h-4 w-4"></div>
+            <div className="rounded-full bg-slate-200 h-4 w-4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/dashboard" component={Home} />
-        </>
-      )}
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Home} />
       <Route component={NotFound} />
     </Switch>
   );

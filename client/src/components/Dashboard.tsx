@@ -27,23 +27,22 @@ interface DashboardProps {
 export default function Dashboard({ user }: DashboardProps) {
   const { toast } = useToast();
 
-  const { data: metrics, isLoading: metricsLoading } = useQuery({
+  const { data: metrics, isLoading: metricsLoading, error } = useQuery({
     queryKey: ['/api/dashboard/metrics', user.tenant?.id],
     enabled: !!user.tenant?.id,
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
   });
+
+  // Handle auth errors
+  if (error && isUnauthorizedError(error)) {
+    toast({
+      title: "Unauthorized",
+      description: "You are logged out. Logging in again...",
+      variant: "destructive",
+    });
+    setTimeout(() => {
+      window.location.href = "/api/login";
+    }, 500);
+  }
 
   return (
     <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="main-dashboard">
@@ -89,7 +88,7 @@ export default function Dashboard({ user }: DashboardProps) {
                     <Skeleton className="h-8 w-16 mt-1" />
                   ) : (
                     <p className="text-3xl font-bold text-foreground" data-testid="metric-total-employees">
-                      {metrics?.totalEmployees || 0}
+                      {(metrics as any)?.totalEmployees || 0}
                     </p>
                   )}
                   <p className="text-sm text-green-600 font-medium mt-1 flex items-center">
@@ -113,7 +112,7 @@ export default function Dashboard({ user }: DashboardProps) {
                     <Skeleton className="h-8 w-20 mt-1" />
                   ) : (
                     <p className="text-3xl font-bold text-foreground" data-testid="metric-total-feedback">
-                      {metrics?.totalFeedback || 0}
+                      {(metrics as any)?.totalFeedback || 0}
                     </p>
                   )}
                   <p className="text-sm text-green-600 font-medium mt-1 flex items-center">
@@ -137,7 +136,7 @@ export default function Dashboard({ user }: DashboardProps) {
                     <Skeleton className="h-8 w-12 mt-1" />
                   ) : (
                     <p className="text-3xl font-bold text-foreground" data-testid="metric-avg-performance">
-                      {metrics?.avgPerformance || 0}%
+                      {(metrics as any)?.avgPerformance || 0}%
                     </p>
                   )}
                   <p className="text-sm text-blue-600 font-medium mt-1 flex items-center">
@@ -149,7 +148,7 @@ export default function Dashboard({ user }: DashboardProps) {
                   <div className="w-12 h-12 performance-ring rounded-full flex items-center justify-center">
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                       <span className="text-xs font-bold text-primary">
-                        {metrics?.avgPerformance || 0}
+                        {(metrics as any)?.avgPerformance || 0}
                       </span>
                     </div>
                   </div>
@@ -167,7 +166,7 @@ export default function Dashboard({ user }: DashboardProps) {
                     <Skeleton className="h-8 w-8 mt-1" />
                   ) : (
                     <p className="text-3xl font-bold text-foreground" data-testid="metric-active-reviews">
-                      {metrics?.activeReviews || 0}
+                      {(metrics as any)?.activeReviews || 0}
                     </p>
                   )}
                   <p className="text-sm text-orange-600 font-medium mt-1 flex items-center">

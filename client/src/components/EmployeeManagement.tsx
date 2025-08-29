@@ -72,11 +72,11 @@ export default function EmployeeManagement({ user }: EmployeeManagementProps) {
     },
   });
 
-  const filteredEmployees = employees?.filter((emp: any) =>
+  const filteredEmployees = (employees as any[])?.filter((emp: any) =>
     emp.user?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.user?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [];
 
   return (
     <div className="space-y-6" data-testid="employee-management-container">
@@ -149,7 +149,7 @@ export default function EmployeeManagement({ user }: EmployeeManagementProps) {
           <div className="flex items-center justify-between">
             <CardTitle>Team Members</CardTitle>
             <Badge variant="outline" data-testid="badge-employee-count">
-              {employees?.length || 0} employees
+              {(employees as any[])?.length || 0} employees
             </Badge>
           </div>
         </CardHeader>
