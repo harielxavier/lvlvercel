@@ -871,6 +871,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new goal for employee
+  app.post('/api/employee/:employeeId/goals', isAuthenticated, async (req: any, res) => {
+    try {
+      const { employeeId } = req.params;
+      const goalData = insertGoalSchema.parse({
+        ...req.body,
+        employeeId,
+        targetDate: req.body.deadline ? new Date(req.body.deadline) : null
+      });
+      const goal = await storage.createGoal(goalData);
+      res.json(goal);
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      res.status(500).json({ message: 'Failed to create goal' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

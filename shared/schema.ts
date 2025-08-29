@@ -148,7 +148,7 @@ export const performanceReviews = pgTable("performance_reviews", {
 // User notification preferences table
 export const notificationPreferences = pgTable("notification_preferences", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id").notNull().unique().references(() => users.id),
   emailNotifications: boolean("email_notifications").default(true),
   pushNotifications: boolean("push_notifications").default(true),
   feedbackNotifications: boolean("feedback_notifications").default(true),
