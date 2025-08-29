@@ -14,15 +14,25 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
+import type { Tenant } from '@shared/schema';
+
+interface PlatformMetrics {
+  totalTenants: number;
+  totalUsers: number;
+  totalEmployees: number;
+  totalFeedback: number;
+  activeSubscriptions: number;
+  monthlyRecurringRevenue: number;
+}
 
 export default function PlatformAnalytics() {
   const { toast } = useToast();
   
-  const { data: metrics, isLoading, error } = useQuery({
+  const { data: metrics, isLoading, error } = useQuery<PlatformMetrics>({
     queryKey: ['/api/platform/metrics']
   });
 
-  const { data: tenants } = useQuery({
+  const { data: tenants } = useQuery<Tenant[]>({
     queryKey: ['/api/platform/tenants']
   });
 
@@ -39,10 +49,11 @@ export default function PlatformAnalytics() {
     return null;
   }
 
-  const tierDistribution = tenants?.reduce((acc: any, tenant: any) => {
-    acc[tenant.subscriptionTier] = (acc[tenant.subscriptionTier] || 0) + 1;
+  const tierDistribution = tenants?.reduce((acc: Record<string, number>, tenant) => {
+    const tier = tenant.subscriptionTier || 'forming';
+    acc[tier] = (acc[tier] || 0) + 1;
     return acc;
-  }, {}) || {};
+  }, {} as Record<string, number>) || {};
 
   return (
     <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-platform-analytics">

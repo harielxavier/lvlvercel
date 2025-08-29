@@ -15,15 +15,25 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
+import type { Tenant } from '@shared/schema';
+
+interface PlatformMetrics {
+  totalTenants: number;
+  totalUsers: number;
+  totalEmployees: number;
+  totalFeedback: number;
+  activeSubscriptions: number;
+  monthlyRecurringRevenue: number;
+}
 
 export default function BillingSubscriptions() {
   const { toast } = useToast();
   
-  const { data: tenants, isLoading, error } = useQuery({
+  const { data: tenants, isLoading, error } = useQuery<Tenant[]>({
     queryKey: ['/api/platform/tenants']
   });
 
-  const { data: metrics } = useQuery({
+  const { data: metrics } = useQuery<PlatformMetrics>({
     queryKey: ['/api/platform/metrics']
   });
 
@@ -192,7 +202,7 @@ export default function BillingSubscriptions() {
                 { tier: 'performing', name: 'Performing', price: '$20/mo', target: 'Enterprise (500+)' },
                 { tier: 'appsumo', name: 'AppSumo', price: 'FREE', target: 'Lifetime Deal' }
               ].map((tierInfo) => {
-                const tenantCount = tenants?.filter((t: any) => t.subscriptionTier === tierInfo.tier).length || 0;
+                const tenantCount = tenants?.filter((t) => t.subscriptionTier === tierInfo.tier).length || 0;
                 return (
                   <div key={tierInfo.tier} className="p-4 rounded-lg border bg-card">
                     <div className="flex items-center justify-between mb-3">
@@ -224,7 +234,7 @@ export default function BillingSubscriptions() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {tenants.map((tenant: any) => (
+                {tenants.map((tenant) => (
                   <div key={tenant.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -236,15 +246,15 @@ export default function BillingSubscriptions() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <Badge className={getTierColor(tenant.subscriptionTier)}>
-                        {getTierDisplayName(tenant.subscriptionTier)}
+                      <Badge className={getTierColor(tenant.subscriptionTier || 'forming')}>
+                        {getTierDisplayName(tenant.subscriptionTier || 'forming')}
                       </Badge>
                       <div className="text-right">
                         <p className="font-medium">
-                          ${getTierPrice(tenant.subscriptionTier).monthly}/mo
+                          ${getTierPrice(tenant.subscriptionTier || 'forming').monthly}/mo
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          ${getTierPrice(tenant.subscriptionTier).yearly}/mo (yearly)
+                          ${getTierPrice(tenant.subscriptionTier || 'forming').yearly}/mo (yearly)
                         </p>
                       </div>
                       <Button variant="ghost" size="sm">

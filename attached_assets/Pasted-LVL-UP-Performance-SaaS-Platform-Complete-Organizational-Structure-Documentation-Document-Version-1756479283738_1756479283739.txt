@@ -1,0 +1,777 @@
+LVL UP Performance SaaS Platform
+📊 Complete Organizational Structure Documentation
+Document Version: 3.0
+ Created: August 27, 2025
+ Last Updated: August 27, 2025
+ Platform Status: ✅ Ready for Customer Onboarding
+
+
+
+🎯 EXECUTIVE OVERVIEW
+Current System State
+• Platform Super Admins: 3 (Mauricio, Michael, Kristen)
+ • Customer Tenants: 0 (Ready for onboarding)
+ • Pricing Tiers: 6 complete tiers
+ • Architecture: Proper SaaS multi-tenant structure
+Platform Hierarchy
+LVL UP Platform
+├── Platform Super Admins (3)
+├── Customer Tenants (0)
+│   ├── Tenant Admins
+│   ├── Managers
+│   └── Employees
+└── 6 Pricing Tiers (Ready)
+
+
+💰 PRICING TIER STRUCTURE
+Complete Tier Overview
+Tier
+Name
+Monthly
+Yearly
+Max Seats
+Target Market
+0
+MJ Scott
+FREE
+FREE
+10
+VIP/Special Access
+1
+Forming
+$5.00
+$4.00
+Unlimited
+Startups (1-25)
+2
+Storming
+$10.00
+$8.00
+Unlimited
+Growing (25-100)
+3
+Norming
+$15.00
+$12.00
+Unlimited
+Established (100-500)
+4
+Performing
+$20.00
+$16.00
+Unlimited
+Enterprise (500+)
+5
+AppSumo Lifetime
+FREE
+FREE
+Unlimited
+Lifetime Deal
+*** requirement to have discounts / referrals / systematic / manual / cancel membership offer discount if they are willing to stay
+
+
+📋 TIER FEATURE BREAKDOWN
+🎯 Tier 0: MJ Scott (FREE)
+Target: VIP/Special Access
+ Max Seats: 10
+Features: • ✅ Basic HR Management
+ • ✅ Employee Profiles
+ • ✅ Basic Reporting
+ • ✅ Email Support
+Limitations: • ❌ No performance management
+ • ❌ No analytics
+ • ❌ Basic features only
+
+🌱 Tier 1: Forming ($5/month)
+Target: Small teams starting performance management
+ Max Seats: Unlimited
+Features: • ✅ Core Performance Management
+ • ✅ 360° Feedback
+ • ✅ Goal Tracking
+ • ✅ Basic Analytics
+ • ✅ QR Code Feedback
+
+⚡ Tier 2: Storming ($10/month)
+Target: Growing companies with structured processes
+ Max Seats: Unlimited
+Features: • ✅ Everything in Forming PLUS:
+ • ✅ Advanced Performance Reviews
+ • ✅ Team Collaboration Tools
+ • ✅ Custom Performance Criteria
+ • ✅ Priority Support
+ • ✅ Advanced Reporting
+
+🎯 Tier 3: Norming ($15/month)
+Target: Established businesses with complex needs
+ Max Seats: Unlimited
+Features: • ✅ Everything in Storming PLUS:
+ • ✅ Enterprise Analytics
+ • ✅ Multi-Department Management
+ • ✅ Custom Workflows
+ • ✅ API Access
+ • ✅ Dedicated Account Manager
+
+🚀 Tier 4: Performing ($20/month)
+Target: Large enterprises with advanced requirements
+ Max Seats: Unlimited
+Features: • ✅ Everything in Norming PLUS:
+ • ✅ Full Enterprise Suite
+ • ✅ Custom Integrations
+ • ✅ Advanced Security & Compliance
+ • ✅ White-label Options
+ • ✅ Premium Support & Training
+
+💎 Tier 5: AppSumo Lifetime (FREE) (Not real tier) available only from 1st year launchå
+Target: AppSumo deal purchasers
+ Max Seats: Unlimited
+Features: • ✅ Core Performance Management
+ • ✅ 360° Feedback
+ • ✅ Goal Tracking
+ • ✅ Basic Analytics
+ • ✅ QR Code Feedback
+ • ✅ Lifetime Access
+
+👥 SYSTEM ROLE DEFINITIONS
+🔧 Platform Super Admin
+Domain: @lvlupperformance.com only
+ Access: Platform-wide control
+Responsibilities: • Manage all customer tenants
+ • Platform configuration and settings
+ • Billing and subscription management
+ • System monitoring and maintenance
+ • Customer support escalation
+
+👑 Tenant Admin
+Scope: Full tenant control
+Responsibilities: • Company settings and configuration
+ • User management (add/remove/modify)
+ • Billing and subscription management
+ • Department and team structure
+ • Performance cycle configuration
+ • Integration setup
+
+📊 Manager
+Scope: Team/department management
+Responsibilities: • Team member performance management
+ • Goal setting and tracking for direct reports
+ • Performance review administration
+ • Team analytics and reporting
+ • 360° feedback coordination
+
+👤 Employee
+Scope: Personal performance management
+Responsibilities: • Personal goal management
+ • Self-assessment completion
+ • Peer feedback participation
+ • Performance data viewing
+ • Profile management
+
+🏢 STANDARD JOB POSITIONS
+Executive Level
+• Chief Executive Officer (CEO)
+ • Chief Operating Officer (COO)
+ • Chief Technology Officer (CTO)
+ • Chief Financial Officer (CFO)
+ • Chief Human Resources Officer (CHRO)
+ • Chief Marketing Officer (CMO)
+ • Chief Sales Officer (CSO)
+ • President
+ • Vice President (VP)
+Senior Management
+• Senior Director
+ • Director
+ • Senior Manager
+ • Department Head
+ • Regional Manager
+ • Division Manager
+ • General Manager
+ • Operations Manager
+Middle Management
+• Manager
+ • Team Lead
+ • Project Manager
+ • Product Manager
+ • Account Manager
+ • Sales Manager
+ • Marketing Manager
+ • HR Manager
+ • IT Manager
+Supervisory Roles
+• Supervisor
+ • Team Leader
+ • Shift Supervisor
+ • Floor Supervisor
+ • Section Leader
+ • Group Leader
+Professional/Individual Contributors
+• Senior Specialist
+ • Specialist
+ • Analyst
+ • Coordinator
+ • Administrator
+ • Representative
+ • Associate
+ • Consultant
+Entry Level
+• Junior Analyst
+ • Assistant
+ • Intern
+ • Trainee
+ • Entry Level Employee
+ • New Graduate
+
+🔗 ROLE-TO-POSITION MAPPING
+How to Structure BambooHR Organizational Charts and Employee Roles: A DO Guide
+DO: Set Up Your Foundation
+Structure Your Employee Data Fields
+DO configure these core fields for every employee:
+Employee Name (First, Last, Preferred)
+Job Title
+Department
+Division (if applicable)
+Location
+Employment Status (Full-time, Part-time, Contractor)
+Reports To (critical for org chart generation)
+Employee ID (auto-generated, immutable)
+Configure Your Reporting Structure
+DO establish a single clear supervisor for each employee in the "Reports To" field
+DO start from the top - ensure your CEO/President has no "Reports To" entry
+DO verify every employee has exactly one supervisor (except the top position)
+DO use Department and Division fields to capture cross-functional relationships if you have matrix structures
+Clean Your Data Before Import
+DO standardize all job titles before importing
+DO verify spelling consistency across all names
+DO confirm all email addresses are correct
+DO remove duplicate entries
+DO validate all reporting relationships make logical sense
+DO: Configure Organizational Display
+Set Up Your Org Chart Display
+DO navigate to Settings > Employee Fields to control what displays
+DO enable these display options:
+Employee photos (if available)
+Job titles
+Department names
+Direct report count badges
+Full reporting line visibility
+Structure Your Visual Hierarchy
+DO use the default top-down tree structure for straightforward organizations
+DO enable expandable/collapsible sections for large teams
+DO configure the "Full Reporting Line" feature to show complete management chains
+DO set up search functionality for quick employee location
+Handle Complex Structures
+DO integrate with OrgChart NOW or Lucidchart if you need:
+Matrix reporting visualization
+Custom colors and branding
+Department-based color coding
+Advanced layout options
+Export to multiple formats
+DO: Implement Role-Based Permissions
+Structure Your Permission Levels
+DO create these standard access levels:
+Full Admin: Complete system access for HR team
+Manager Access: View-only for direct and indirect reports
+Employee Access: Self-service only
+Custom Levels: Field-by-field permissions as needed
+Configure Granular Permissions
+DO set permissions at the field level:
+"View Only" for sensitive data like compensation
+"Edit" for job-related information
+"No Access" for confidential fields
+DO filter permissions by:
+Department
+Location
+Division
+Employment status
+Secure Your API Access
+DO remember that API keys inherit creator permissions
+DO create service accounts with appropriate limited permissions
+DO use Full-Admin API access only when generating complete org charts
+DO implement webhook notifications for real-time updates
+DO: Integrate with HR Functions
+Connect Your Core Modules
+DO ensure organizational data flows to:
+Payroll (automatic role-based salary bands)
+Benefits (eligibility based on position)
+Time tracking (approval chains)
+Performance management (review routing)
+Structure Your API Integrations
+DO use these key endpoints:
+/employees/directory for complete org charts
+/employees/{id} for individual records
+/employees/changed for tracking updates
+DO implement JSON data format for all API calls
+DO include these fields in API responses:
+Name
+Title
+SupervisorID
+Department
+Division
+Location
+Set Up Third-Party Connections
+DO connect Slack for:
+Org chart lookups via slash commands
+Manager approval workflows
+Birthday and anniversary notifications
+DO integrate identity management (Okta/Azure AD) for:
+Automatic access provisioning
+Security group updates based on roles
+Single sign-on authentication
+DO link visualization tools for:
+Advanced org chart creation
+Custom branded outputs
+Matrix structure support
+DO: Automate Organizational Updates
+Structure Automatic Workflows
+DO create workflows for:
+New employee onboarding sequences
+Role change approval chains
+Termination processes
+Department transfers
+Configure Update Triggers
+DO set up automatic triggers when:
+Employee role changes → Update permissions
+New hire starts → Create accounts
+Promotion occurs → Adjust salary bands
+Transfer happens → Notify new manager
+Termination processes → Revoke access
+Implement Bulk Operations
+DO use API bulk endpoints for:
+Organizational restructures
+Department-wide updates
+Mass title changes
+Location transfers
+DO maintain audit trails for all bulk changes
+DO test bulk operations in a sandbox first
+DO: Maintain Data Integrity
+Schedule Regular Audits
+DO perform monthly checks on:
+Orphaned employees (no supervisor)
+Circular reporting relationships
+Terminated employees still in structure
+Duplicate entries
+DO run quarterly reviews of:
+Department accuracy
+Title standardization
+Permission appropriateness
+Structure Your Update Process
+DO establish a clear process for:
+Who can request org changes
+Required approvals for modifications
+Documentation requirements
+Communication protocols
+DO create change request forms including:
+Effective date
+Reason for change
+Impact on other employees
+Required system updates
+Track Historical Changes
+DO enable the Enhanced Employment Status table
+DO maintain records of:
+All position changes
+Compensation adjustments
+Status modifications
+Department transfers
+DO configure retention policies for historical data
+DO: Handle Limitations Proactively
+Structure for Scale
+DO plan for growth if approaching 350 employees:
+Evaluate enterprise HRIS options
+Implement performance optimization
+Consider data archiving strategies
+DO address matrix organizations by:
+Using custom fields for secondary reporting
+Implementing third-party visualization
+Creating departmental sub-charts
+Work Around Constraints
+DO compensate for limited customization by:
+Exporting to design tools for presentations
+Using integrated tools for advanced features
+Creating multiple views for different audiences
+DO handle browser issues by:
+Standardizing on Chrome/Firefox
+Avoiding Safari for admin functions
+Testing all features after updates
+Plan Your Integration Strategy
+DO evaluate integration needs before implementation:
+List required visualization features
+Identify automation requirements
+Determine reporting needs
+Budget for third-party tools
+DO prioritize integrations based on:
+User count affected
+Time savings potential
+Security requirements
+Cost-benefit analysis
+DO: Follow Implementation Best Practices
+Structure Your Rollout
+DO Phase 1: Core Setup (Week 1-2)
+Import clean employee data
+Configure basic permissions
+Set up primary integrations
+DO Phase 2: Department Pilot (Week 3-4)
+Test with one department
+Gather user feedback
+Refine configurations
+DO Phase 3: Company-wide Launch (Week 5-6)
+Roll out to all employees
+Provide training materials
+Monitor adoption metrics
+Create Documentation
+DO document:
+All custom field definitions
+Permission level descriptions
+Integration configurations
+Update procedures
+Troubleshooting guides
+DO maintain separate guides for:
+HR administrators
+Managers
+Employees
+IT support
+Train Your Users
+DO provide training on:
+Navigating the org chart
+Understanding permissions
+Requesting changes
+Using integrations
+DO create resources including:
+Video tutorials
+Quick reference cards
+FAQ documents
+Support ticket process
+DO: Monitor and Optimize
+Track Key Metrics
+DO monitor:
+Org chart accuracy rate
+Update frequency
+User engagement levels
+Integration performance
+Error rates
+Optimize Performance
+DO regularly:
+Archive inactive employees
+Optimize API calls
+Review integration efficiency
+Update permission structures
+Refine workflows
+Plan for the Future
+DO evaluate quarterly:
+Growing organization needs
+New integration opportunities
+Feature utilization rates
+User satisfaction scores
+DO prepare for transitions by:
+Maintaining clean data
+Documenting all customizations
+Keeping integration lists current
+Training backup administrators
+
+
+🔐 PERMISSION MATRICES
+Feature Access by Role
+Feature
+Platform Super Admin
+Tenant Admin
+Manager
+Employee
+Platform Management
+✅ Full
+❌
+❌
+❌
+Tenant Settings
+✅ All Tenants
+✅ Own Tenant
+❌
+❌
+User Management
+✅ All Users
+✅ Tenant Users
+✅ Direct Reports
+✅ Own Profile
+Performance Reviews
+✅ View All
+✅ Tenant Wide
+✅ Team Members
+✅ Own Reviews
+Goal Management
+✅ View All
+✅ Tenant Wide
+✅ Team Goals
+✅ Own Goals
+Analytics & Reporting
+✅ Platform Wide
+✅ Tenant Wide
+✅ Team Data
+✅ Personal Data
+360° Feedback
+✅ View All
+✅ Configure
+✅ Manage Team
+✅ Participate
+Billing Management
+✅ All Tenants
+✅ Own Tenant
+❌
+❌
+Integration Setup
+✅ Platform
+✅ Tenant
+❌
+❌
+
+Data Access Permissions
+Data Type
+Platform Super Admin
+Tenant Admin
+Manager
+Employee
+Personal Data
+✅ All
+✅ Tenant
+✅ Direct Reports
+✅ Own Only
+Team Performance
+✅ All
+✅ Tenant
+✅ Own Team
+❌
+Company Metrics
+✅ All
+✅ Own Company
+✅ Department
+❌
+Salary Information
+✅ All
+✅ Configure
+✅ If Enabled
+❌
+Feedback Data
+✅ All
+✅ Tenant
+✅ Team Related
+✅ Own Related
+
+Administrative Permissions
+Action
+Platform Super Admin
+Tenant Admin
+Manager
+Employee
+Add Users
+✅ Any Tenant
+✅ Own Tenant
+✅ Team Members
+❌
+Remove Users
+✅ Any Tenant
+✅ Own Tenant
+✅ Team Members
+❌
+Change Roles
+✅ Any Tenant
+✅ Own Tenant
+❌
+❌
+Configure Workflows
+✅ Any Tenant
+✅ Own Tenant
+✅ Team Workflows
+❌
+Export Data
+✅ All Data
+✅ Tenant Data
+✅ Team Data
+✅ Own Data
+API Access
+✅ Platform API
+✅ Tenant API
+✅ If Enabled
+❌
+
+
+📊 ORGANIZATIONAL CHART FRAMEWORK
+Reporting Relationships
+Direct Reports Structure
+Board of Directors (External)
+    ↓
+CEO/President
+    ↓
+VPs/Directors
+    ↓
+Managers
+    ↓
+Team Leads
+    ↓
+Employees
+
+Matrix Reporting (Optional)
+• Project Teams: Cross-functional reporting
+ • Dotted Line Reports: Secondary reporting relationships
+ • Committee Members: Temporary reporting structures
+
+🏗️ COMPANY SIZE TEMPLATES
+Startup (1-25 employees) - Forming Tier
+Recommended Role Distribution: • 1 Tenant Admin (CEO/Founder)
+ • 4-6 Managers (Department heads)
+ • 15-20 Employees (Individual contributors)
+Growing Company (25-100 employees) - Storming Tier
+Recommended Role Distribution: • 1-2 Tenant Admins (CEO + HR Director)
+ • 12-18 Managers (VPs + Department Managers)
+ • 60-80 Employees (Individual contributors)
+Established Business (100-500 employees) - Norming Tier
+Recommended Role Distribution: • 2-3 Tenant Admins (CEO, CHRO, IT Director)
+ • 25-50 Managers (All management levels)
+ • 350-450 Employees (Individual contributors)
+Enterprise (500+ employees) - Performing Tier
+Recommended Role Distribution: • 3-5 Tenant Admins (CEO, CHRO, CIO, Regional HRs)
+ • 50-150 Managers (All management levels)
+ • 400+ Employees (Individual contributors)
+
+🚀 TENANT ONBOARDING GUIDE
+Step 1: Company Setup
+Create Tenant Account • Company name and basic information
+ • Select appropriate pricing tier
+ • Configure billing information
+Assign Initial Tenant Admin • Usually CEO, CHRO, or HR Director
+ • Verify email and set up account
+ • Complete company profile
+Step 2: Organizational Structure
+Define Departments • Sales, Marketing, Engineering, Operations, etc.
+ • Set department hierarchies
+ • Assign department heads
+Create Job Positions • Use standard position templates
+ • Customize for company needs
+ • Define reporting relationships
+Step 3: User Management
+Bulk User Import • CSV template with employee data
+ • Assign roles based on position mapping
+ • Set up reporting relationships
+Role Assignment • Follow role-to-position mapping guidelines
+ • Adjust based on company structure
+ • Verify manager-employee relationships
+Step 4: Performance Configuration
+Set Performance Cycles • Annual, semi-annual, or quarterly
+ • Define review periods
+ • Configure approval workflows
+Goal Framework Setup • Company-wide goals
+ • Department goals
+ • Individual goal templates
+Step 5: Feature Activation
+Enable Tier Features • Activate features based on pricing tier
+ • Configure 360° feedback settings
+ • Set up analytics dashboards
+Integration Setup • Connect HRIS systems (if available in tier)
+ • Set up SSO (if available in tier)
+ • Configure API access (if available in tier)
+Step 6: Training and Launch
+Admin Training • Platform administration
+ • User management
+ • Reporting and analytics
+User Onboarding • Role-specific training
+ • Feature walkthroughs
+ • Best practices guidance
+
+📋 IMPLEMENTATION CHECKLIST
+✅ For Platform Team
+☐ Verify all 6 pricing tiers are configured
+ ☐ Test role-based access controls
+ ☐ Validate permission matrices
+ ☐ Prepare onboarding materials
+ ☐ Set up customer support processes
+✅ For Customer Onboarding
+☐ Company information collection
+ ☐ Organizational chart creation
+ ☐ User role assignment
+ ☐ Feature configuration
+ ☐ Training delivery
+ ☐ Go-live support
+✅ For Ongoing Management
+☐ Regular role audits
+ ☐ Permission reviews
+ ☐ Organizational updates
+ ☐ Feature utilization monitoring
+ ☐ Customer success tracking
+
+📈 KEY METRICS & INDICATORS
+Platform Readiness Status
+• Infrastructure: ✅ Complete
+ • Pricing Tiers: ✅ All 6 Configured
+ • Role System: ✅ Fully Implemented
+ • Permission Matrix: ✅ Validated
+ • Onboarding Process: ✅ Documented
+ • Support System: ✅ Ready
+Customer Acquisition Readiness
+• Documentation: ✅ Complete
+ • Training Materials: ✅ Prepared
+ • Support Processes: ✅ Established
+ • Integration Capabilities: ✅ Tested
+ • Scalability: ✅ Verified
+
+🎯 CONCLUSION
+Platform Status: The LVL UP Performance SaaS Platform is fully operational and ready for customer acquisition.
+Key Strengths: • Complete multi-tenant architecture
+ • Six distinct pricing tiers for all market segments
+ • Robust role-based access control system
+ • Comprehensive permission matrices
+ • Structured onboarding process
+ • Scalable from startups to enterprises
+Next Steps: • Begin customer acquisition
+ • Monitor first tenant deployments
+ • Gather feedback for optimization
+ • Scale support operations as needed
+Contact Platform Super Admins: • Mauricio
+ • Michael
+ • Kristen
+
+Document maintained by LVL UP Performance Platform Team
+ Version 1.0 | August 27, 2025
+
+
+
+🎯 Basic HR Management Features (MJ Scott Tier)
+✅ What's INCLUDED:
+Employee Profiles - Basic employee information and profile management
+Basic Reporting - Simple reports and data views
+Email Support - Standard customer support via email
+Team Directory - View organizational structure and employee list
+Org Chart - Basic organizational chart viewing
+Dashboard Access - Basic dashboard with limited metrics
+📊 Specific Capabilities:
+Up to 10 employees maximum (seat limit enforced)
+Basic goal setting (limited to 2 goals per user)
+Limited feedback (25 feedback submissions per month)
+Basic reports (3 reports per month)
+5GB storage limit
+Employee module access
+Basic dashboard module
+❌ What's EXCLUDED (Available in Higher Tiers):
+Core Performance Management (starts in Forming tier)
+360° Feedback (starts in Forming tier)
+Goal Tracking & OKRs (starts in Forming tier)å
+Analytics (starts in Forming tier)
+QR Code Feedback (starts in Forming tier)
+Advanced Performance Reviews (starts in Storming tier)
+Team Collaboration Tools (starts in Storming tier)
+API Access (starts in Norming tier)
+Custom Integrations (starts in Performing tier)
+🎯 Purpose:
+The MJ Scott tier is designed as a very basic entry point for small organizations (up to 10 people) who need simple HR record-keeping and basic employee management, but don't need advanced performance management features. It's essentially a "contact management system" for HR rather than a full performance management platform.
+This tier is perfect for small consulting firms, startups, or teams that just need to maintain employee records and basic organizational structure without the complexity of performance reviews, goal tracking, or analytics.
+
+
+
+
+Core (single-row) profile — most used fields
+Identity & contact: employeeNumber, firstName, lastName, preferredName, workEmail, homeEmail, mobilePhone, workPhone, workPhoneExtension, address1/2, city, state, zipcode, country, dateOfBirth, gender. BambooHR
+
+
+Employment status snapshot: status (Active/Inactive), hireDate, originalHireDate, terminationDate (read-only via core; use status table to update). BambooHR
+
+
+Org & role: jobTitle, department, division, location, reportsTo (manager link). BambooHR
+
+
+Fields to add QR Code and Unique URL link. QR Code uses that same link to take to user’s Review page
+We are to keep track of when users move such as their previous locations
+

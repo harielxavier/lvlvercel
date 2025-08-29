@@ -15,11 +15,12 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
+import type { Tenant } from '@shared/schema';
 
 export default function CustomerTenants() {
   const { toast } = useToast();
   
-  const { data: tenants, isLoading, error } = useQuery({
+  const { data: tenants, isLoading, error } = useQuery<Tenant[]>({
     queryKey: ['/api/platform/tenants']
   });
 
@@ -167,7 +168,7 @@ export default function CustomerTenants() {
               </div>
             ) : tenants && tenants.length > 0 ? (
               <div className="space-y-4">
-                {tenants.map((tenant: any) => (
+                {tenants.map((tenant) => (
                   <div key={tenant.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -177,8 +178,8 @@ export default function CustomerTenants() {
                         <h3 className="font-medium">{tenant.name}</h3>
                         <p className="text-sm text-muted-foreground">{tenant.domain}</p>
                         <div className="flex items-center mt-1 space-x-2">
-                          <Badge className={getTierColor(tenant.subscriptionTier)}>
-                            {getTierDisplayName(tenant.subscriptionTier)}
+                          <Badge className={getTierColor(tenant.subscriptionTier || 'forming')}>
+                            {getTierDisplayName(tenant.subscriptionTier || 'forming')}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             Max: {tenant.maxEmployees === -1 ? 'Unlimited' : tenant.maxEmployees} employees

@@ -81,6 +81,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new tenant (Platform Admin only)
+  app.post("/api/platform/tenants", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const tenantData = insertTenantSchema.parse(req.body);
+      const tenant = await storage.createTenant(tenantData);
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error creating tenant:", error);
+      res.status(500).json({ message: "Failed to create tenant" });
+    }
+  });
+
+  // Update tenant (Platform Admin only)
+  app.patch("/api/platform/tenants/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const { id } = req.params;
+      const updateData = z.object({
+        name: z.string().optional(),
+        domain: z.string().optional(),
+        subscriptionTier: z.enum(['mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo']).optional(),
+        maxEmployees: z.number().optional(),
+        isActive: z.boolean().optional(),
+      }).parse(req.body);
+      
+      const tenant = await storage.updateTenant(id, updateData);
+      res.json(tenant);
+    } catch (error) {
+      console.error("Error updating tenant:", error);
+      res.status(500).json({ message: "Failed to update tenant" });
+    }
+  });
+
   // Employee management routes
   app.get("/api/employees/:tenantId", isAuthenticated, async (req, res) => {
     try {
@@ -148,6 +194,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching departments:", error);
       res.status(500).json({ message: "Failed to fetch departments" });
+    }
+  });
+
+  // Universal feedback link (public, no auth required)
+  app.get("/feedback/:feedbackUrl", async (req, res) => {
+    try {
+      const { feedbackUrl } = req.params;
+      const employee = await storage.getEmployeeByFeedbackUrl(feedbackUrl);
+      if (!employee) {
+        return res.status(404).json({ message: "Feedback link not found" });
+      }
+      res.json({ employee, tenant: await storage.getTenant(employee.tenantId) });
+    } catch (error) {
+      console.error("Error fetching feedback link:", error);
+      res.status(500).json({ message: "Failed to fetch feedback link" });
+    }
+  });
+
+  // Submit feedback via universal link (public, no auth required)
+  app.post("/feedback/:feedbackUrl/submit", async (req, res) => {
+    try {
+      const { feedbackUrl } = req.params;
+      const employee = await storage.getEmployeeByFeedbackUrl(feedbackUrl);
+      if (!employee) {
+        return res.status(404).json({ message: "Feedback link not found" });
+      }
+      
+      const feedbackData = insertFeedbackSchema.parse({
+        ...req.body,
+        employeeId: employee.id
+      });
+      const feedback = await storage.createFeedback(feedbackData);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      res.status(500).json({ message: "Failed to submit feedback" });
+    }
+  });
+
+  // Get pricing tier information
+  app.get("/api/platform/pricing-tiers", async (req, res) => {
+    try {
+      const pricingTiers = [
+        {
+          id: 'mj_scott',
+          name: 'MJ Scott',
+          monthlyPrice: 0,
+          yearlyPrice: 0,
+          maxSeats: 10,
+          features: ['Basic HR Management', 'Employee Profiles', 'Basic Reporting', 'Email Support'],
+          targetMarket: 'VIP/Special Access'
+        },
+        {
+          id: 'forming',
+          name: 'Forming',
+          monthlyPrice: 5,
+          yearlyPrice: 4,
+          maxSeats: -1,
+          features: ['Core Performance Management', '360° Feedback', 'Goal Tracking', 'Basic Analytics', 'QR Code Feedback'],
+          targetMarket: 'Small teams starting performance management (1-25)'
+        },
+        {
+          id: 'storming',
+          name: 'Storming',
+          monthlyPrice: 10,
+          yearlyPrice: 8,
+          maxSeats: -1,
+          features: ['Everything in Forming', 'Advanced Performance Reviews', 'Team Collaboration Tools', 'Custom Performance Criteria', 'Priority Support', 'Advanced Reporting'],
+          targetMarket: 'Growing companies with structured processes (25-100)'
+        },
+        {
+          id: 'norming',
+          name: 'Norming',
+          monthlyPrice: 15,
+          yearlyPrice: 12,
+          maxSeats: -1,
+          features: ['Everything in Storming', 'Enterprise Analytics', 'Multi-Department Management', 'Custom Workflows', 'API Access', 'Dedicated Account Manager'],
+          targetMarket: 'Established businesses with complex needs (100-500)'
+        },
+        {
+          id: 'performing',
+          name: 'Performing',
+          monthlyPrice: 20,
+          yearlyPrice: 16,
+          maxSeats: -1,
+          features: ['Everything in Norming', 'Full Enterprise Suite', 'Custom Integrations', 'Advanced Security & Compliance', 'White-label Options', 'Premium Support & Training'],
+          targetMarket: 'Large enterprises with advanced requirements (500+)'
+        },
+        {
+          id: 'appsumo',
+          name: 'AppSumo Lifetime',
+          monthlyPrice: 0,
+          yearlyPrice: 0,
+          maxSeats: -1,
+          features: ['Core Performance Management', '360° Feedback', 'Goal Tracking', 'Basic Analytics', 'QR Code Feedback', 'Lifetime Access'],
+          targetMarket: 'AppSumo deal purchasers'
+        }
+      ];
+      res.json(pricingTiers);
+    } catch (error) {
+      console.error("Error fetching pricing tiers:", error);
+      res.status(500).json({ message: "Failed to fetch pricing tiers" });
     }
   });
 
