@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import QRCode from 'qrcode';
 import { notificationService } from './notificationService';
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, type User, type UpsertUser } from "@shared/schema";
+import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, insertGoalSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -378,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      if (!['tenant_admin', 'manager'].includes(currentUser.role)) {
+      if (!currentUser.role || !['tenant_admin', 'manager'].includes(currentUser.role)) {
         return res.status(403).json({ 
           message: "Access denied - Only tenant administrators and managers can add employees" 
         });
@@ -508,13 +508,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const employee = await storage.getEmployee(review.employeeId);
         if (employee) {
-          const employeeUser = await storage.getUserByEmployeeId(employee.id);
+          const employeeUser = employee.userId ? await storage.getUser(employee.userId) : null;
           if (employeeUser) {
             await notificationService.sendNotification(
               employeeUser.id,
-              'performance_review_created',
+              'performance_review',
               '📊 New Performance Review',
-              `A new performance review has been created for the period: ${review.period}`,
+              `A new performance review has been created for the period: ${review.reviewPeriod}`,
               { reviewId: review.id, employeeId: employee.id }
             );
           }
@@ -599,13 +599,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send notification to employee about new feedback received
       try {
-        const employeeUser = await storage.getUserByEmployeeId(employee.id);
+        const employeeUser = employee.userId ? await storage.getUser(employee.userId) : null;
         if (employeeUser) {
           await notificationService.sendNotification(
             employeeUser.id,
             'feedback_received',
             '📝 New Feedback Received',
-            `You've received new feedback: "${feedback.feedback.slice(0, 100)}${feedback.feedback.length > 100 ? '...' : ''}"`,
+            `You've received new feedback: "${(feedback.comments || '').slice(0, 100)}${(feedback.comments || '').length > 100 ? '...' : ''}"`,
             { feedbackId: feedback.id, employeeId: employee.id }
           );
         }
