@@ -195,11 +195,14 @@ export default function EmployeeManagement() {
                         <Avatar className="h-12 w-12">
                           <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.id}`} />
                           <AvatarFallback>
-                            {employee.userId?.substring(0, 2).toUpperCase()}
+                            {employee.firstName && employee.lastName 
+                              ? `${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}`.toUpperCase()
+                              : employee.userId?.substring(0, 2).toUpperCase()
+                            }
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">Employee {employee.employeeNumber || employee.id.substring(0, 8)}</p>
+                          <p className="font-medium">{employee.firstName && employee.lastName ? `${employee.firstName} ${employee.lastName}` : `Employee ${employee.employeeNumber || employee.id.substring(0, 8)}`}</p>
                           <p className="text-sm text-muted-foreground">
                             {employee.status === 'active' ? 'Active' : employee.status || 'Unknown Status'}
                           </p>

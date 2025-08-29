@@ -171,8 +171,31 @@ export class DatabaseStorage implements IStorage {
     return employee;
   }
 
-  async getEmployeesByTenant(tenantId: string): Promise<Employee[]> {
-    return await db.select().from(employees).where(eq(employees.tenantId, tenantId));
+  async getEmployeesByTenant(tenantId: string): Promise<any[]> {
+    return await db
+      .select({
+        id: employees.id,
+        userId: employees.userId,
+        tenantId: employees.tenantId,
+        employeeNumber: employees.employeeNumber,
+        jobPositionId: employees.jobPositionId,
+        departmentId: employees.departmentId,
+        managerId: employees.managerId,
+        feedbackUrl: employees.feedbackUrl,
+        qrCodeData: employees.qrCodeData,
+        hireDate: employees.hireDate,
+        status: employees.status,
+        createdAt: employees.createdAt,
+        updatedAt: employees.updatedAt,
+        // User information
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl
+      })
+      .from(employees)
+      .innerJoin(users, eq(employees.userId, users.id))
+      .where(eq(employees.tenantId, tenantId));
   }
 
   async createEmployee(employeeData: InsertEmployee): Promise<Employee> {
