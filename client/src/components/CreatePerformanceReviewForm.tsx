@@ -297,7 +297,7 @@ export default function CreatePerformanceReviewForm({
           {/* Competency Ratings */}
           <div className="space-y-4">
             <Label>Competency Ratings</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               {competencies.map((competency) => (
                 <div key={competency} className="space-y-2">
                   <div className="flex justify-between">
@@ -368,7 +368,7 @@ export default function CreatePerformanceReviewForm({
                       </Button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
                     <div>
                       <Label>Goal Title</Label>
                       <Input

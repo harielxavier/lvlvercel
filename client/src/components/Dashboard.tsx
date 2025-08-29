@@ -56,29 +56,29 @@ function Dashboard({ user }: DashboardProps) {
   }
 
   return (
-    <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="main-dashboard">
+    <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out" data-testid="main-dashboard">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40">
-        <div className="px-8 py-4">
+        <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold gradient-text" data-testid="heading-dashboard">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold gradient-text truncate" data-testid="heading-dashboard">
                 Dashboard
               </h1>
-              <p className="text-sm text-muted-foreground" data-testid="text-welcome-message">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate" data-testid="text-welcome-message">
                 Welcome back, {user.firstName}! Here's your {user.role === 'platform_admin' ? 'platform' : user.role === 'tenant_admin' ? 'company' : 'performance'} overview.
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" data-testid="button-header-action-1">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+              <Button variant="ghost" size="sm" className="hidden sm:flex" data-testid="button-header-action-1">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM9 7H4l5-5v5zM9 17v5l-5-5h5zM15 7V2l5 5h-5z"></path>
                 </svg>
               </Button>
-              <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
-                <AlertCircle className="w-5 h-5" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full flex items-center justify-center">
-                  <span className="text-xs text-destructive-foreground font-medium">3</span>
+              <Button variant="ghost" size="sm" className="relative" data-testid="button-notifications">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-destructive rounded-full flex items-center justify-center">
+                  <span className="text-[10px] sm:text-xs text-destructive-foreground font-medium">3</span>
                 </div>
               </Button>
             </div>
@@ -87,13 +87,13 @@ function Dashboard({ user }: DashboardProps) {
       </header>
 
       {/* Dashboard Content */}
-      <div className="p-8 space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Key Metrics */}
         {user.role === 'platform_admin' ? (
           // Platform Admin Dashboard
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-total-tenants">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Customer Tenants</p>
@@ -117,7 +117,7 @@ function Dashboard({ user }: DashboardProps) {
             </Card>
 
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-platform-users">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Platform Users</p>
@@ -141,7 +141,7 @@ function Dashboard({ user }: DashboardProps) {
             </Card>
 
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-platform-revenue">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
@@ -167,7 +167,7 @@ function Dashboard({ user }: DashboardProps) {
             </Card>
 
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-platform-feedback">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Platform Feedback</p>
@@ -192,9 +192,9 @@ function Dashboard({ user }: DashboardProps) {
           </div>
         ) : (
           // Regular User Dashboard
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-total-employees">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
@@ -218,7 +218,7 @@ function Dashboard({ user }: DashboardProps) {
             </Card>
 
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-feedback-collected">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Feedback Collected</p>
@@ -242,7 +242,7 @@ function Dashboard({ user }: DashboardProps) {
             </Card>
 
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-avg-performance">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Avg Performance</p>
@@ -272,7 +272,7 @@ function Dashboard({ user }: DashboardProps) {
             </Card>
 
             <Card className="glass-card border-0 animate-fade-in" data-testid="card-active-reviews">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Active Reviews</p>

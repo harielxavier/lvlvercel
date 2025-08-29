@@ -77,23 +77,24 @@ export default function Performance() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar user={user} />
-      <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-performance">
+      <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out" data-testid="page-performance">
         <header className="glass-morphism border-b sticky top-0 z-40">
-          <div className="px-8 py-4">
+          <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold gradient-text" data-testid="heading-performance">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold gradient-text truncate" data-testid="heading-performance">
                   {user.role === 'employee' ? 'My Performance' : 'Performance Management'}
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {user.role === 'employee' ? 'Track your goals and progress' : 'Manage team performance and development'}
                 </p>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                 <Link href={user.role === 'employee' ? '/goals' : '/reviews'}>
-                  <Button className="bg-primary hover:bg-primary/90">
-                    <Plus className="w-4 h-4 mr-2" />
-                    {user.role === 'employee' ? 'Set Goal' : 'New Review'}
+                  <Button className="bg-primary hover:bg-primary/90" size="sm">
+                    <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">{user.role === 'employee' ? 'Set Goal' : 'New Review'}</span>
+                    <span className="sm:hidden">{user.role === 'employee' ? 'Goal' : 'Review'}</span>
                   </Button>
                 </Link>
               </div>
@@ -101,10 +102,10 @@ export default function Performance() {
           </div>
         </header>
 
-        <div className="p-8 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
             <Card className="glass-card border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Overall Score</p>
@@ -119,7 +120,7 @@ export default function Performance() {
             </Card>
 
             <Card className="glass-card border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Goals Complete</p>
@@ -134,7 +135,7 @@ export default function Performance() {
             </Card>
 
             <Card className="glass-card border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Feedback Score</p>
@@ -149,7 +150,7 @@ export default function Performance() {
             </Card>
 
             <Card className="glass-card border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Growth</p>

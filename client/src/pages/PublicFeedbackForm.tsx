@@ -257,7 +257,7 @@ export default function PublicFeedbackForm() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6" data-testid="form-feedback">
               {/* Personal Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="giverName">Your Name</Label>
                   <Input 
@@ -326,7 +326,7 @@ export default function PublicFeedbackForm() {
               {/* Competency Ratings */}
               <div className="space-y-4">
                 <Label>Competency Ratings (Optional)</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6">
                   {competencies.map(competency => (
                     <div key={competency} className="space-y-2">
                       <div className="flex justify-between">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +28,9 @@ import {
   LogOut,
   User,
   MoreHorizontal,
-  UserPlus
+  UserPlus,
+  Menu,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -207,18 +209,63 @@ function getTierDisplayName(tier?: string): string {
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [location] = useLocation();
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location]);
+  
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileOpen(false);
+      }
+    };
+    
+    if (isMobileOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isMobileOpen]);
   
   const menuItems = getMenuItemsForRole(user.role, user.tenant?.subscriptionTier);
 
   return (
-    <aside 
-      className={cn(
-        "fixed left-0 top-0 h-full glass-morphism transform transition-all duration-300 ease-in-out z-50 border-r",
-        isCollapsed ? "w-16" : "w-80"
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-md bg-background/80 backdrop-blur-sm border border-border shadow-lg"
+        data-testid="mobile-menu-button"
+      >
+        {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
+      
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+          data-testid="mobile-overlay"
+        />
       )}
-      data-testid="sidebar-main"
-    >
+      
+      <aside 
+        className={cn(
+          "fixed left-0 top-0 h-full glass-morphism transform transition-all duration-300 ease-in-out z-50 border-r",
+          // Desktop behavior
+          "lg:translate-x-0",
+          isCollapsed ? "lg:w-16" : "lg:w-80",
+          // Mobile behavior  
+          "lg:block",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full",
+          "w-80"
+        )}
+        data-testid="sidebar-main"
+      >
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="p-6 border-b border-sidebar-border">
@@ -394,5 +441,6 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
       </div>
     </aside>
+    </>
   );
 }
