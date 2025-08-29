@@ -365,8 +365,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/employees", isAuthenticated, async (req, res) => {
     try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      const currentUser = await storage.getUser(userId);
+      
+      // Check if user exists and has permission to create employees (only tenant_admin and manager)
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!['tenant_admin', 'manager'].includes(currentUser.role)) {
+        return res.status(403).json({ 
+          message: "Access denied - Only tenant administrators and managers can add employees" 
+        });
+      }
+
       const employeeData = insertEmployeeSchema.parse(req.body);
-      const employee = await storage.createEmployee(employeeData);
+      
+      // Use the current user's tenant ID to ensure proper tenant isolation
+      const tenantId = currentUser.tenantId;
+      if (!tenantId) {
+        return res.status(400).json({ message: "User must belong to a tenant" });
+      }
+      
+      // Check subscription limits
+      const tenant = await storage.getTenant(tenantId as string);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      
+      // Get current employee count for the tenant
+      const currentEmployees = await storage.getEmployeesByTenant(tenantId as string);
+      
+      // Check if adding another employee would exceed the subscription limit
+      const maxEmployees = tenant.maxEmployees || 25; // Default to 25 if null
+      if (currentEmployees.length >= maxEmployees) {
+        return res.status(400).json({ 
+          message: `Employee limit reached. Your ${tenant.subscriptionTier} plan supports up to ${maxEmployees} employees. Please upgrade your subscription to add more team members.` 
+        });
+      }
+      
+      // Ensure the employee is created in the correct tenant
+      const employee = await storage.createEmployee({
+        ...employeeData,
+        tenantId: tenantId as string,
+      });
+      
       res.json(employee);
     } catch (error) {
       console.error("Error creating employee:", error);

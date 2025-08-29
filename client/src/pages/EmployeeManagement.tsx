@@ -102,6 +102,9 @@ export default function EmployeeManagement() {
   // Calculate real employee metrics
   const employeesArray = Array.isArray(employees) ? employees : [];
   const totalEmployees = employeesArray.length;
+  // Check if user can add employees (only tenant_admin and manager)
+  const canAddEmployees = user?.role === 'tenant_admin' || user?.role === 'manager';
+  
   const activeEmployees = employeesArray.filter((emp: any) => emp.status === 'active').length;
   const newHires = employeesArray.filter((emp: any) => {
     const hireDate = new Date(emp.hireDate);
@@ -147,10 +150,12 @@ export default function EmployeeManagement() {
                 </Button>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90" data-testid="button-add-employee">
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Add Employee
-                    </Button>
+                    {canAddEmployees && (
+                      <Button className="bg-primary hover:bg-primary/90" data-testid="button-add-employee">
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Add Employee
+                      </Button>
+                    )}
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>

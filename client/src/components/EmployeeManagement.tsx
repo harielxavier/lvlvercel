@@ -44,6 +44,9 @@ export default function EmployeeManagement({ user }: EmployeeManagementProps) {
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Check if user can add employees (only tenant_admin and manager)
+  const canAddEmployees = user?.role === 'tenant_admin' || user?.role === 'manager';
 
   const { data: employees, isLoading } = useQuery({
     queryKey: ['/api/employees', user.tenant?.id],
@@ -86,13 +89,14 @@ export default function EmployeeManagement({ user }: EmployeeManagementProps) {
           <h2 className="text-2xl font-bold" data-testid="heading-employee-management">Employee Management</h2>
           <p className="text-muted-foreground">Manage your team members and their roles</p>
         </div>
-        <Dialog open={isAddEmployeeOpen} onOpenChange={setIsAddEmployeeOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-500 to-blue-600" data-testid="button-add-employee">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Employee
-            </Button>
-          </DialogTrigger>
+        {canAddEmployees && (
+          <Dialog open={isAddEmployeeOpen} onOpenChange={setIsAddEmployeeOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-blue-500 to-blue-600" data-testid="button-add-employee">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Employee
+              </Button>
+            </DialogTrigger>
           <DialogContent data-testid="dialog-add-employee">
             <DialogHeader>
               <DialogTitle>Add New Employee</DialogTitle>
@@ -120,6 +124,7 @@ export default function EmployeeManagement({ user }: EmployeeManagementProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       {/* Search and Filters */}
