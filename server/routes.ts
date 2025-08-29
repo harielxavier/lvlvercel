@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import QRCode from 'qrcode';
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
@@ -450,6 +451,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching pricing tiers:", error);
       res.status(500).json({ message: "Failed to fetch pricing tiers" });
+    }
+  });
+
+  // QR Code generation
+  app.post('/api/generate-qr', isAuthenticated, async (req: any, res) => {
+    try {
+      const { url } = req.body;
+      if (!url) {
+        return res.status(400).json({ message: 'URL is required' });
+      }
+      
+      const qrCodeDataURL = await QRCode.toDataURL(url, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      
+      res.json({ qrCode: qrCodeDataURL });
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      res.status(500).json({ message: 'Failed to generate QR code' });
+    }
+  });
+
+  // Get current user's employee data
+  app.get('/api/user/employee', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const employee = await storage.getEmployeeByUserId(userId);
+      if (!employee) {
+        return res.status(404).json({ message: 'Employee record not found' });
+      }
+      res.json(employee);
+    } catch (error) {
+      console.error('Error fetching employee data:', error);
+      res.status(500).json({ message: 'Failed to fetch employee data' });
+    }
+  });
+
+  // Get employee feedback
+  app.get('/api/employee/:employeeId/feedback', isAuthenticated, async (req: any, res) => {
+    try {
+      const { employeeId } = req.params;
+      const feedback = await storage.getFeedbacksByEmployee(employeeId);
+      res.json(feedback);
+    } catch (error) {
+      console.error('Error fetching employee feedback:', error);
+      res.status(500).json({ message: 'Failed to fetch employee feedback' });
+    }
+  });
+
+  // Get employee goals
+  app.get('/api/employee/:employeeId/goals', isAuthenticated, async (req: any, res) => {
+    try {
+      const { employeeId } = req.params;
+      const goals = await storage.getGoalsByEmployee(employeeId);
+      res.json(goals);
+    } catch (error) {
+      console.error('Error fetching employee goals:', error);
+      res.status(500).json({ message: 'Failed to fetch employee goals' });
     }
   });
 

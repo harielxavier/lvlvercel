@@ -5,12 +5,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, Link as LinkIcon, QrCode, Copy, Share, Eye } from 'lucide-react';
-import { useEffect } from 'react';
+import { MessageSquare, Link as LinkIcon, QrCode, Copy, Share, Eye, Download, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function FeedbackCollection() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
+  const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  
+  // Get current user's employee data
+  const { data: employee, isLoading: employeeLoading } = useQuery({
+    queryKey: ['/api/user/employee'],
+    retry: false,
+    enabled: !!user,
+  });
+
+  // Get employee feedback
+  const { data: feedback = [], isLoading: feedbackLoading } = useQuery({
+    queryKey: ['/api/employee', (employee as any)?.id, 'feedback'],
+    enabled: !!(employee as any)?.id,
+    retry: false,
+  });
+
+  // QR code generation mutation
+  const generateQRMutation = useMutation({
+    mutationFn: async (url: string) => {
+      return apiRequest('/api/generate-qr', 'POST', { url });
+    },
+    onSuccess: (data: any) => {
+      setQrCodeData(data.qrCode);
+      toast({
+        title: "QR Code Generated!",
+        description: "Your feedback QR code is ready to share",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to generate QR code",
+        variant: "destructive",
+      });
+    }
+  });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -41,7 +79,9 @@ export default function FeedbackCollection() {
     );
   }
 
-  const feedbackUrl = `https://lvlup.app/feedback/${user.id}`;
+  const feedbackUrl = (employee as any)?.feedbackUrl 
+    ? `${window.location.origin}/feedback/${(employee as any).feedbackUrl}`
+    : '';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -51,36 +91,38 @@ export default function FeedbackCollection() {
     });
   };
 
+  const generateQRCode = () => {
+    if (feedbackUrl) {
+      generateQRMutation.mutate(feedbackUrl);
+    }
+  };
+
+  const downloadQRCode = () => {
+    if (qrCodeData) {
+      const link = document.createElement('a');
+      link.download = 'feedback-qr-code.png';
+      link.href = qrCodeData;
+      link.click();
+    }
+  };
+
+  // Calculate real stats from feedback data
+  const feedbackArray = Array.isArray(feedback) ? feedback : [];
+  const totalFeedback = feedbackArray.length || 0;
+  const avgRating = feedbackArray.length > 0 
+    ? (feedbackArray.reduce((sum: number, fb: any) => sum + (fb.rating || 0), 0) / feedbackArray.length).toFixed(1)
+    : '0.0';
+  const latestFeedback = feedbackArray[0];
+  const latestDate = latestFeedback ? new Date(latestFeedback.createdAt).toLocaleDateString() : 'No feedback yet';
+  
   const feedbackStats = [
-    { label: "Total Responses", value: "47", change: "+12 this week" },
-    { label: "Avg Rating", value: "4.8", change: "+0.3 from last month" },
-    { label: "Response Rate", value: "73%", change: "Above average" },
-    { label: "Latest Response", value: "2h ago", change: "Very recent" }
+    { label: "Total Responses", value: totalFeedback.toString(), change: "All time" },
+    { label: "Avg Rating", value: avgRating, change: "Out of 5 stars" },
+    { label: "Response Rate", value: "--", change: "Coming soon" },
+    { label: "Latest Response", value: latestDate, change: "Most recent" }
   ];
 
-  const recentFeedback = [
-    {
-      id: 1,
-      rating: 5,
-      comment: "Excellent collaboration and communication skills. Always willing to help team members.",
-      date: "2024-01-20",
-      source: "Anonymous Colleague"
-    },
-    {
-      id: 2,
-      rating: 4,
-      comment: "Great technical expertise and problem-solving abilities. Could improve on documentation.",
-      date: "2024-01-19",
-      source: "Project Partner"
-    },
-    {
-      id: 3,
-      rating: 5,
-      comment: "Outstanding leadership during the project. Kept everyone motivated and on track.",
-      date: "2024-01-18",
-      source: "Team Member"
-    }
-  ];
+  const recentFeedback = feedbackArray.slice(0, 5) || [];
 
   return (
     <div className="flex h-screen bg-background">
@@ -98,11 +140,19 @@ export default function FeedbackCollection() {
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <Button variant="outline">
+                <Button 
+                  variant="outline" 
+                  onClick={generateQRCode}
+                  disabled={!feedbackUrl || generateQRMutation.isPending}
+                >
                   <QrCode className="w-4 h-4 mr-2" />
-                  Generate QR
+                  {generateQRMutation.isPending ? 'Generating...' : 'Generate QR'}
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90">
+                <Button 
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => copyToClipboard(feedbackUrl)}
+                  disabled={!feedbackUrl}
+                >
                   <Share className="w-4 h-4 mr-2" />
                   Share Link
                 </Button>
@@ -167,8 +217,14 @@ export default function FeedbackCollection() {
                   <p className="text-sm text-muted-foreground">
                     Generate a QR code for easy mobile access
                   </p>
-                  <Button variant="outline" size="sm" className="mt-2 w-full">
-                    Generate QR
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2 w-full"
+                    onClick={generateQRCode}
+                    disabled={!feedbackUrl || generateQRMutation.isPending}
+                  >
+                    {generateQRMutation.isPending ? 'Generating...' : 'Generate QR'}
                   </Button>
                 </div>
 
@@ -198,6 +254,33 @@ export default function FeedbackCollection() {
                   </Button>
                 </div>
               </div>
+              
+              {/* QR Code Display */}
+              {qrCodeData && (
+                <div className="mt-4 p-4 border rounded-lg bg-muted/20">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">Your QR Code</h4>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={downloadQRCode}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                  <div className="flex justify-center">
+                    <img 
+                      src={qrCodeData} 
+                      alt="Feedback QR Code" 
+                      className="border rounded-lg shadow-sm"
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground text-center mt-2">
+                    Scan this QR code to access your feedback form
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -206,26 +289,30 @@ export default function FeedbackCollection() {
               <CardTitle>Recent Feedback</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentFeedback.map((feedback) => (
+              {recentFeedback.map((feedback: any) => (
                 <div key={feedback.id} className="p-4 bg-muted/20 rounded-lg space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="flex space-x-1">
-                        {Array.from({ length: feedback.rating }).map((_, i) => (
-                          <div key={i} className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+                        {Array.from({ length: feedback.rating || 0 }).map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {feedback.rating}/5
                       </Badge>
                     </div>
-                    <span className="text-xs text-muted-foreground">{feedback.date}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(feedback.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                   
                   <p className="text-sm">{feedback.comment}</p>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">From: {feedback.source}</span>
+                    <span className="text-xs text-muted-foreground">
+                      From: {feedback.giverName || feedback.relationship || 'Anonymous'}
+                    </span>
                     <Button variant="ghost" size="sm">
                       <Eye className="w-3 h-3 mr-1" />
                       View Details
