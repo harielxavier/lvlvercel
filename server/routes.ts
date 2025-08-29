@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import QRCode from 'qrcode';
+import { notificationService } from './notificationService';
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
@@ -502,6 +503,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reviewData = insertPerformanceReviewSchema.parse(req.body);
       const review = await storage.createPerformanceReview(reviewData);
+      
+      // Send notification to employee about new performance review
+      try {
+        const employee = await storage.getEmployee(review.employeeId);
+        if (employee) {
+          const employeeUser = await storage.getUserByEmployeeId(employee.id);
+          if (employeeUser) {
+            await notificationService.sendNotification(
+              employeeUser.id,
+              'performance_review_created',
+              '📊 New Performance Review',
+              `A new performance review has been created for the period: ${review.period}`,
+              { reviewId: review.id, employeeId: employee.id }
+            );
+          }
+        }
+      } catch (notificationError) {
+        console.error("Error sending performance review notification:", notificationError);
+      }
+      
       res.json(review);
     } catch (error) {
       console.error("Error creating performance review:", error);
@@ -575,6 +596,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         employeeId: employee.id
       });
       const feedback = await storage.createFeedback(feedbackData);
+      
+      // Send notification to employee about new feedback received
+      try {
+        const employeeUser = await storage.getUserByEmployeeId(employee.id);
+        if (employeeUser) {
+          await notificationService.sendNotification(
+            employeeUser.id,
+            'feedback_received',
+            '📝 New Feedback Received',
+            `You've received new feedback: "${feedback.feedback.slice(0, 100)}${feedback.feedback.length > 100 ? '...' : ''}"`,
+            { feedbackId: feedback.id, employeeId: employee.id }
+          );
+        }
+      } catch (notificationError) {
+        console.error("Error sending feedback notification:", notificationError);
+      }
+      
       res.json(feedback);
     } catch (error) {
       console.error("Error submitting feedback:", error);
@@ -645,6 +683,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching pricing tiers:", error);
       res.status(500).json({ message: "Failed to fetch pricing tiers" });
+    }
+  });
+
+  // Notification endpoints
+  
+  // Get user notifications
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getNotificationsByUser(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch('/api/notifications/:id/read', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.markNotificationAsRead(id);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Delete notification
+  app.delete('/api/notifications/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteNotification(id);
+      res.json({ message: "Notification deleted" });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
+  // Get user notification preferences
+  app.get('/api/notification-preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      let preferences = await storage.getUserNotificationPreferences(userId);
+      
+      // Create default preferences if none exist
+      if (!preferences) {
+        preferences = await storage.upsertNotificationPreferences({
+          userId,
+          emailNotifications: true,
+          pushNotifications: true,
+          feedbackNotifications: true,
+          goalReminders: true,
+          weeklyDigest: false,
+        });
+      }
+      
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching notification preferences:", error);
+      res.status(500).json({ message: "Failed to fetch notification preferences" });
+    }
+  });
+
+  // Update notification preferences
+  app.put('/api/notification-preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferencesData = {
+        userId,
+        ...req.body,
+      };
+      
+      const preferences = await storage.upsertNotificationPreferences(preferencesData);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
+  // Test notification endpoint (for system admins)
+  app.post('/api/notifications/test', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== 'platform_admin') {
+        return res.status(403).json({ message: "Access denied - Platform admin only" });
+      }
+      
+      await notificationService.sendNotification(
+        userId,
+        'system_update',
+        '🧪 Test Notification',
+        'This is a test notification to verify the notification system is working correctly.',
+        { test: true }
+      );
+      
+      res.json({ message: "Test notification sent successfully" });
+    } catch (error) {
+      console.error("Error sending test notification:", error);
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  // Get notification system status
+  app.get('/api/notifications/status', isAuthenticated, async (req, res) => {
+    try {
+      const health = await notificationService.healthCheck();
+      const stats = await notificationService.getNotificationStats();
+      
+      res.json({
+        ...health,
+        ...stats,
+        status: 'operational'
+      });
+    } catch (error) {
+      console.error("Error fetching notification status:", error);
+      res.status(500).json({ message: "Failed to fetch notification status" });
     }
   });
 

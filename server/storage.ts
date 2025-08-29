@@ -7,6 +7,8 @@ import {
   feedbacks,
   goals,
   performanceReviews,
+  notifications,
+  notificationPreferences,
   type User,
   type UpsertUser,
   type Tenant,
@@ -21,6 +23,10 @@ import {
   type InsertGoal,
   type PerformanceReview,
   type InsertPerformanceReview,
+  type Notification,
+  type NotificationPreferences,
+  type InsertNotification,
+  type InsertNotificationPreferences,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql } from "drizzle-orm";
@@ -92,6 +98,16 @@ export interface IStorage {
   
   // Recent activity
   getRecentActivity(tenantId: string): Promise<any[]>;
+  
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getNotificationsByUser(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<void>;
+  deleteNotification(id: string): Promise<void>;
+  
+  // Notification preferences operations
+  getUserNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined>;
+  upsertNotificationPreferences(preferences: InsertNotificationPreferences): Promise<NotificationPreferences>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -471,6 +487,64 @@ export class DatabaseStorage implements IStorage {
       .slice(0, 3);
       
     return allActivity;
+  }
+
+  // Notification operations
+  async createNotification(notificationData: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(notificationData)
+      .returning();
+    return notification;
+  }
+
+  async getNotificationsByUser(userId: string): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ status: 'read', readAt: new Date() })
+      .where(eq(notifications.id, id));
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db
+      .delete(notifications)
+      .where(eq(notifications.id, id));
+  }
+
+  // Notification preferences operations
+  async getUserNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(notificationPreferences)
+      .where(eq(notificationPreferences.userId, userId));
+    return preferences;
+  }
+
+  async upsertNotificationPreferences(preferencesData: InsertNotificationPreferences): Promise<NotificationPreferences> {
+    const [preferences] = await db
+      .insert(notificationPreferences)
+      .values(preferencesData)
+      .onConflictDoUpdate({
+        target: notificationPreferences.userId,
+        set: {
+          emailNotifications: preferencesData.emailNotifications,
+          pushNotifications: preferencesData.pushNotifications,
+          feedbackNotifications: preferencesData.feedbackNotifications,
+          goalReminders: preferencesData.goalReminders,
+          weeklyDigest: preferencesData.weeklyDigest,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return preferences;
   }
 }
 

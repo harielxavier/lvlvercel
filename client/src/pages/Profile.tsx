@@ -10,11 +10,72 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Camera, Bell, Shield, Key, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function Profile() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Notification preferences state
+  const [notificationPreferences, setNotificationPreferences] = useState({
+    emailNotifications: true,
+    pushNotifications: true,
+    feedbackNotifications: true,
+    goalReminders: true,
+    weeklyDigest: false,
+  });
+
+  // Fetch current notification preferences
+  const { data: preferencesData, isLoading: preferencesLoading } = useQuery({
+    queryKey: ['/api/notification-preferences'],
+    enabled: !!isAuthenticated && !!user,
+  });
+
+  // Update preferences mutation
+  const updatePreferencesMutation = useMutation({
+    mutationFn: (preferences: any) => apiRequest('/api/notification-preferences', 'PUT', preferences),
+    onSuccess: () => {
+      toast({
+        title: '✅ Settings Saved',
+        description: 'Your notification preferences have been updated.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/notification-preferences'] });
+    },
+    onError: (error) => {
+      toast({
+        title: '❌ Error',
+        description: 'Failed to update notification preferences.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Update local state when data is loaded
+  useEffect(() => {
+    if (preferencesData) {
+      setNotificationPreferences({
+        emailNotifications: (preferencesData as any).emailNotifications ?? true,
+        pushNotifications: (preferencesData as any).pushNotifications ?? true,
+        feedbackNotifications: (preferencesData as any).feedbackNotifications ?? true,
+        goalReminders: (preferencesData as any).goalReminders ?? true,
+        weeklyDigest: (preferencesData as any).weeklyDigest ?? false,
+      });
+    }
+  }, [preferencesData]);
+
+  const handleSaveNotificationSettings = () => {
+    updatePreferencesMutation.mutate(notificationPreferences);
+  };
+
+  const handlePreferenceChange = (key: string, value: boolean) => {
+    setNotificationPreferences(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -160,7 +221,13 @@ export default function Profile() {
                         <Label htmlFor="email-notifications">Email Notifications</Label>
                         <p className="text-sm text-muted-foreground">Receive feedback and review notifications via email</p>
                       </div>
-                      <Switch id="email-notifications" defaultChecked />
+                      <Switch 
+                        id="email-notifications" 
+                        checked={notificationPreferences.emailNotifications}
+                        onCheckedChange={(checked) => handlePreferenceChange('emailNotifications', checked)}
+                        disabled={preferencesLoading}
+                        data-testid="switch-email-notifications"
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -168,7 +235,13 @@ export default function Profile() {
                         <Label htmlFor="push-notifications">Browser Notifications</Label>
                         <p className="text-sm text-muted-foreground">Get real-time updates in your browser</p>
                       </div>
-                      <Switch id="push-notifications" defaultChecked />
+                      <Switch 
+                        id="push-notifications" 
+                        checked={notificationPreferences.pushNotifications}
+                        onCheckedChange={(checked) => handlePreferenceChange('pushNotifications', checked)}
+                        disabled={preferencesLoading}
+                        data-testid="switch-push-notifications"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -176,7 +249,13 @@ export default function Profile() {
                         <Label htmlFor="feedback-notifications">Feedback Notifications</Label>
                         <p className="text-sm text-muted-foreground">Be notified when you receive new feedback</p>
                       </div>
-                      <Switch id="feedback-notifications" defaultChecked />
+                      <Switch 
+                        id="feedback-notifications" 
+                        checked={notificationPreferences.feedbackNotifications}
+                        onCheckedChange={(checked) => handlePreferenceChange('feedbackNotifications', checked)}
+                        disabled={preferencesLoading}
+                        data-testid="switch-feedback-notifications"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -184,7 +263,13 @@ export default function Profile() {
                         <Label htmlFor="goal-reminders">Goal Reminders</Label>
                         <p className="text-sm text-muted-foreground">Receive reminders about upcoming goal deadlines</p>
                       </div>
-                      <Switch id="goal-reminders" defaultChecked />
+                      <Switch 
+                        id="goal-reminders" 
+                        checked={notificationPreferences.goalReminders}
+                        onCheckedChange={(checked) => handlePreferenceChange('goalReminders', checked)}
+                        disabled={preferencesLoading}
+                        data-testid="switch-goal-reminders"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -192,11 +277,23 @@ export default function Profile() {
                         <Label htmlFor="weekly-digest">Weekly Digest</Label>
                         <p className="text-sm text-muted-foreground">Get a weekly summary of your performance</p>
                       </div>
-                      <Switch id="weekly-digest" />
+                      <Switch 
+                        id="weekly-digest" 
+                        checked={notificationPreferences.weeklyDigest}
+                        onCheckedChange={(checked) => handlePreferenceChange('weeklyDigest', checked)}
+                        disabled={preferencesLoading}
+                        data-testid="switch-weekly-digest"
+                      />
                     </div>
                   </div>
 
-                  <Button>Save Notification Settings</Button>
+                  <Button 
+                    onClick={handleSaveNotificationSettings}
+                    disabled={updatePreferencesMutation.isPending || preferencesLoading}
+                    data-testid="button-save-notification-settings"
+                  >
+                    {updatePreferencesMutation.isPending ? 'Saving...' : 'Save Notification Settings'}
+                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>

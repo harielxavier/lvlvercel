@@ -172,30 +172,38 @@ export default function SystemSettings() {
               <div className="flex items-center justify-between p-3 rounded-lg border">
                 <div>
                   <p className="font-medium">Email Notifications</p>
-                  <p className="text-sm text-muted-foreground">System alerts & updates</p>
+                  <p className="text-sm text-muted-foreground">Feedback alerts, goal reminders, system updates</p>
                 </div>
-                <Badge className="bg-yellow-100 text-yellow-800">Pending Setup</Badge>
+                <Badge className="bg-green-100 text-green-800">Active</Badge>
               </div>
               
               <div className="flex items-center justify-between p-3 rounded-lg border">
                 <div>
                   <p className="font-medium">Platform Monitoring</p>
-                  <p className="text-sm text-muted-foreground">System health alerts</p>
+                  <p className="text-sm text-muted-foreground">System health & performance tracking</p>
                 </div>
-                <Badge className="bg-yellow-100 text-yellow-800">Pending Setup</Badge>
+                <Badge className="bg-green-100 text-green-800">Operational</Badge>
               </div>
               
               <div className="flex items-center justify-between p-3 rounded-lg border">
                 <div>
-                  <p className="font-medium">Customer Notifications</p>
-                  <p className="text-sm text-muted-foreground">Tenant updates & billing</p>
+                  <p className="font-medium">SMS Notifications</p>
+                  <p className="text-sm text-muted-foreground">Critical alerts & performance reviews</p>
                 </div>
-                <Badge className="bg-yellow-100 text-yellow-800">Pending Setup</Badge>
+                <Badge className="bg-blue-100 text-blue-800">Ready for Setup</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div>
+                  <p className="font-medium">Push Notifications</p>
+                  <p className="text-sm text-muted-foreground">Real-time browser notifications</p>
+                </div>
+                <Badge className="bg-green-100 text-green-800">Configured</Badge>
               </div>
               
               <Button variant="outline" className="w-full">
                 <Mail className="w-4 h-4 mr-2" />
-                Configure Notifications
+                Test Notification System
               </Button>
             </CardContent>
           </Card>

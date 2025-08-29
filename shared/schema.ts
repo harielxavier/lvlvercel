@@ -31,6 +31,12 @@ export const userRoleEnum = pgEnum('user_role', ['platform_admin', 'tenant_admin
 // Subscription tiers enum
 export const subscriptionTierEnum = pgEnum('subscription_tier', ['platform', 'mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo']);
 
+// Notification types enum
+export const notificationTypeEnum = pgEnum('notification_type', ['feedback_received', 'goal_reminder', 'performance_review', 'system_update', 'weekly_digest']);
+
+// Notification status enum
+export const notificationStatusEnum = pgEnum('notification_status', ['unread', 'read', 'archived']);
+
 // User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -139,8 +145,34 @@ export const performanceReviews = pgTable("performance_reviews", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User notification preferences table
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  emailNotifications: boolean("email_notifications").default(true),
+  pushNotifications: boolean("push_notifications").default(true),
+  feedbackNotifications: boolean("feedback_notifications").default(true),
+  goalReminders: boolean("goal_reminders").default(true),
+  weeklyDigest: boolean("weekly_digest").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: notificationTypeEnum("type").notNull(),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  status: notificationStatusEnum("status").default('unread'),
+  metadata: jsonb("metadata"), // Additional data like employee ID, goal ID, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+});
+
 // Relations
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   tenant: one(tenants, {
     fields: [users.tenantId],
     references: [tenants.id],
@@ -149,6 +181,11 @@ export const usersRelations = relations(users, ({ one }) => ({
     fields: [users.id],
     references: [employees.userId],
   }),
+  notificationPreferences: one(notificationPreferences, {
+    fields: [users.id],
+    references: [notificationPreferences.userId],
+  }),
+  notifications: many(notifications),
 }));
 
 export const tenantsRelations = relations(tenants, ({ many }) => ({
@@ -218,6 +255,20 @@ export const goalsRelations = relations(goals, ({ one }) => ({
   }),
 }));
 
+export const notificationPreferencesRelations = relations(notificationPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [notificationPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -254,6 +305,18 @@ export const insertPerformanceReviewSchema = createInsertSchema(performanceRevie
   updatedAt: true,
 });
 
+export const insertNotificationPreferencesSchema = createInsertSchema(notificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -264,9 +327,13 @@ export type JobPosition = typeof jobPositions.$inferSelect;
 export type Feedback = typeof feedbacks.$inferSelect;
 export type Goal = typeof goals.$inferSelect;
 export type PerformanceReview = typeof performanceReviews.$inferSelect;
+export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
 
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type InsertGoal = z.infer<typeof insertGoalSchema>;
 export type InsertPerformanceReview = z.infer<typeof insertPerformanceReviewSchema>;
+export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
