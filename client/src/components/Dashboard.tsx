@@ -15,7 +15,8 @@ import {
   TrendingUp,
   TrendingDown,
   AlertCircle,
-  Building2
+  Building2,
+  Calendar
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
@@ -430,13 +431,23 @@ function Dashboard({ user }: DashboardProps) {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button 
-                    className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
-                    data-testid="button-add-employee"
-                  >
-                    <Plus className="w-5 h-5 mr-3" />
-                    Add New Employee
-                  </Button>
+                  {(user.role === 'tenant_admin' || user.role === 'manager') ? (
+                    <Button 
+                      className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
+                      data-testid="button-add-employee"
+                    >
+                      <Plus className="w-5 h-5 mr-3" />
+                      Add New Employee
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
+                      data-testid="button-schedule-1v1"
+                    >
+                      <Calendar className="w-5 h-5 mr-3" />
+                      Schedule 1v1
+                    </Button>
+                  )}
 
                   <Button 
                     className="w-full justify-start bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
