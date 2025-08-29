@@ -76,6 +76,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tenant billing information (Tenant Admin and above)
+  app.get("/api/tenant/billing", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (!currentUser || !currentUser.tenantId) {
+          return res.status(403).json({ message: "Access denied - No tenant association" });
+        }
+        
+        // Only allow tenant_admin, manager, or platform_admin to access billing
+        if (!currentUser.role || !['tenant_admin', 'manager', 'platform_admin'].includes(currentUser.role)) {
+          return res.status(403).json({ message: "Access denied - Insufficient permissions" });
+        }
+        
+        const tenant = await storage.getTenant(currentUser.tenantId!);
+        if (!tenant) {
+          return res.status(404).json({ message: "Tenant not found" });
+        }
+        
+        // Get pricing info for the tenant's tier
+        const pricingTiers = [
+          { id: 'mj_scott', name: 'MJ Scott', monthlyPrice: 0, yearlyPrice: 0, maxSeats: 10 },
+          { id: 'forming', name: 'Forming', monthlyPrice: 5, yearlyPrice: 4, maxSeats: -1 },
+          { id: 'storming', name: 'Storming', monthlyPrice: 10, yearlyPrice: 8, maxSeats: -1 },
+          { id: 'norming', name: 'Norming', monthlyPrice: 15, yearlyPrice: 12, maxSeats: -1 },
+          { id: 'performing', name: 'Performing', monthlyPrice: 20, yearlyPrice: 16, maxSeats: -1 },
+          { id: 'appsumo', name: 'AppSumo Lifetime', monthlyPrice: 0, yearlyPrice: 0, maxSeats: -1 }
+        ];
+        
+        const currentTier = pricingTiers.find(tier => tier.id === tenant.subscriptionTier);
+        const employeeCount = await storage.getEmployeesByTenant(tenant.id);
+        
+        res.json({
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            domain: tenant.domain,
+            subscriptionTier: tenant.subscriptionTier,
+            maxEmployees: tenant.maxEmployees,
+            isActive: tenant.isActive,
+            createdAt: tenant.createdAt,
+            updatedAt: tenant.updatedAt
+          },
+          subscription: currentTier,
+          usage: {
+            currentEmployees: employeeCount.length,
+            maxEmployees: tenant.maxEmployees
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching tenant billing:", error);
+      res.status(500).json({ message: "Failed to fetch tenant billing information" });
+    }
+  });
+
   // Platform tenant management for Platform Super Admins
   app.get("/api/platform/tenants", isAuthenticated, async (req, res) => {
     try {

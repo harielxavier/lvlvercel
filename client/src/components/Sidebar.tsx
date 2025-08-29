@@ -98,7 +98,7 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
         },
         {
           icon: CreditCard,
-          label: 'Billing & Subscription',
+          label: 'Account Billing',
           href: '/billing'
         },
         {

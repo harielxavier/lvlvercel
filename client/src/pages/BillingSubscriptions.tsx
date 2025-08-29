@@ -29,6 +29,30 @@ interface PlatformMetrics {
   monthlyRecurringRevenue: number;
 }
 
+interface TenantBilling {
+  tenant: {
+    id: string;
+    name: string;
+    domain: string;
+    subscriptionTier: string;
+    maxEmployees: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  subscription: {
+    id: string;
+    name: string;
+    monthlyPrice: number;
+    yearlyPrice: number;
+    maxSeats: number;
+  };
+  usage: {
+    currentEmployees: number;
+    maxEmployees: number;
+  };
+}
+
 export default function BillingSubscriptions() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
@@ -62,16 +86,29 @@ export default function BillingSubscriptions() {
     );
   }
   
+  // Determine if user is platform admin or tenant-level user
+  const isPlatformAdmin = user?.role === 'platform_admin';
+  
+  // Platform admin queries (only if platform admin)
   const { data: tenants, isLoading: tenantsLoading, error } = useQuery<Tenant[]>({
-    queryKey: ['/api/platform/tenants']
+    queryKey: ['/api/platform/tenants'],
+    enabled: isPlatformAdmin
   });
 
   const { data: metrics } = useQuery<PlatformMetrics>({
-    queryKey: ['/api/platform/metrics']
+    queryKey: ['/api/platform/metrics'],
+    enabled: isPlatformAdmin
   });
 
-  // Handle auth errors
-  if (error && isUnauthorizedError(error)) {
+  // Tenant billing query (only if not platform admin)
+  const { data: tenantBilling, isLoading: tenantBillingLoading, error: tenantBillingError } = useQuery<TenantBilling>({
+    queryKey: ['/api/tenant/billing'],
+    enabled: !isPlatformAdmin
+  });
+
+  // Handle auth errors for both platform and tenant queries
+  const currentError = isPlatformAdmin ? error : tenantBillingError;
+  if (currentError && isUnauthorizedError(currentError)) {
     toast({
       title: "Unauthorized",
       description: "You are logged out. Logging in again...",
@@ -129,10 +166,13 @@ export default function BillingSubscriptions() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold gradient-text" data-testid="heading-billing-subscriptions">
-                Billing & Subscriptions
+                {isPlatformAdmin ? 'Billing & Subscriptions' : 'Account Billing'}
               </h1>
               <p className="text-sm text-muted-foreground" data-testid="text-billing-description">
-                Monitor subscription tiers, revenue, and billing across all customer tenants
+                {isPlatformAdmin 
+                  ? 'Monitor subscription tiers, revenue, and billing across all customer tenants'
+                  : 'View your organization\'s subscription details and billing information'
+                }
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -147,160 +187,338 @@ export default function BillingSubscriptions() {
 
       {/* Content */}
       <div className="p-8 space-y-8">
-        {/* Revenue Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="glass-card border-0 animate-fade-in" data-testid="card-mrr">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Monthly Recurring Revenue</p>
-                  <p className="text-3xl font-bold text-foreground" data-testid="metric-mrr">
-                    ${metrics?.monthlyRecurringRevenue || 0}
-                  </p>
-                  <p className="text-sm text-primary font-medium mt-1 flex items-center">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    Ready to scale
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-0 animate-fade-in" data-testid="card-active-subscriptions">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
-                  <p className="text-3xl font-bold text-foreground" data-testid="metric-active-subs">
-                    {isLoading ? <Skeleton className="h-8 w-16" /> : metrics?.activeSubscriptions || 0}
-                  </p>
-                  <p className="text-sm text-green-600 font-medium mt-1">Platform ready</p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-0 animate-fade-in" data-testid="card-total-tenants-billing">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Customer Tenants</p>
-                  <p className="text-3xl font-bold text-foreground" data-testid="metric-tenants-billing">
-                    {isLoading ? <Skeleton className="h-8 w-16" /> : tenants?.length || 0}
-                  </p>
-                  <p className="text-sm text-blue-600 font-medium mt-1">Ready for onboarding</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-0 animate-fade-in" data-testid="card-conversion-rate">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Conversion Rate</p>
-                  <p className="text-3xl font-bold text-foreground">0%</p>
-                  <p className="text-sm text-orange-600 font-medium mt-1">Awaiting customers</p>
-                </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Subscription Breakdown */}
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <CreditCard className="w-5 h-5 mr-2 text-primary" />
-              Subscription Tier Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { tier: 'mj_scott', name: 'MJ Scott', price: 'FREE', target: 'VIP/Special Access' },
-                { tier: 'forming', name: 'Forming', price: '$5/mo', target: 'Startups (1-25)' },
-                { tier: 'storming', name: 'Storming', price: '$10/mo', target: 'Growing (25-100)' },
-                { tier: 'norming', name: 'Norming', price: '$15/mo', target: 'Established (100-500)' },
-                { tier: 'performing', name: 'Performing', price: '$20/mo', target: 'Enterprise (500+)' },
-                { tier: 'appsumo', name: 'AppSumo', price: 'FREE', target: 'Lifetime Deal' }
-              ].map((tierInfo) => {
-                const tenantCount = tenants?.filter((t) => t.subscriptionTier === tierInfo.tier).length || 0;
-                return (
-                  <div key={tierInfo.tier} className="p-4 rounded-lg border bg-card">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium">{tierInfo.name}</h3>
-                      <Badge className={getTierColor(tierInfo.tier)}>
-                        {tierInfo.price}
-                      </Badge>
+        {isPlatformAdmin ? (
+          // Platform Admin View
+          <>
+            {/* Revenue Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="glass-card border-0 animate-fade-in" data-testid="card-mrr">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Monthly Recurring Revenue</p>
+                      <p className="text-3xl font-bold text-foreground" data-testid="metric-mrr">
+                        ${metrics?.monthlyRecurringRevenue || 0}
+                      </p>
+                      <p className="text-sm text-primary font-medium mt-1 flex items-center">
+                        <TrendingUp className="w-3 h-3 mr-1" />
+                        Ready to scale
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{tierInfo.target}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-primary">{tenantCount}</span>
-                      <span className="text-xs text-muted-foreground">customers</span>
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                      <DollarSign className="w-6 h-6 text-primary" />
                     </div>
                   </div>
-                );
-              })}
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card border-0 animate-fade-in" data-testid="card-active-subscriptions">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
+                      <p className="text-3xl font-bold text-foreground" data-testid="metric-active-subs">
+                        {tenantsLoading ? <Skeleton className="h-8 w-16" /> : metrics?.activeSubscriptions || 0}
+                      </p>
+                      <p className="text-sm text-green-600 font-medium mt-1">Platform ready</p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card border-0 animate-fade-in" data-testid="card-total-tenants-billing">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total Customer Tenants</p>
+                      <p className="text-3xl font-bold text-foreground" data-testid="metric-tenants-billing">
+                        {tenantsLoading ? <Skeleton className="h-8 w-16" /> : tenants?.length || 0}
+                      </p>
+                      <p className="text-sm text-blue-600 font-medium mt-1">Ready for onboarding</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <Building2 className="w-6 h-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card border-0 animate-fade-in" data-testid="card-conversion-rate">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Conversion Rate</p>
+                      <p className="text-3xl font-bold text-foreground">0%</p>
+                      <p className="text-sm text-orange-600 font-medium mt-1">Awaiting customers</p>
+                    </div>
+                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-orange-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Tenant Billing Details */}
-        {tenants && tenants.length > 0 && (
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="w-5 h-5 mr-2 text-primary" />
-                Customer Billing Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {tenants.map((tenant) => (
-                  <div key={tenant.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-primary" />
+            {/* Subscription Breakdown */}
+            <Card className="glass-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2 text-primary" />
+                  Subscription Tier Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[
+                    { tier: 'mj_scott', name: 'MJ Scott', price: 'FREE', target: 'VIP/Special Access' },
+                    { tier: 'forming', name: 'Forming', price: '$5/mo', target: 'Startups (1-25)' },
+                    { tier: 'storming', name: 'Storming', price: '$10/mo', target: 'Growing (25-100)' },
+                    { tier: 'norming', name: 'Norming', price: '$15/mo', target: 'Established (100-500)' },
+                    { tier: 'performing', name: 'Performing', price: '$20/mo', target: 'Enterprise (500+)' },
+                    { tier: 'appsumo', name: 'AppSumo', price: 'FREE', target: 'Lifetime Deal' }
+                  ].map((tierInfo) => {
+                    const tenantCount = tenants?.filter((t) => t.subscriptionTier === tierInfo.tier).length || 0;
+                    return (
+                      <div key={tierInfo.tier} className="p-4 rounded-lg border bg-card">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium">{tierInfo.name}</h3>
+                          <Badge className={getTierColor(tierInfo.tier)}>
+                            {tierInfo.price}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">{tierInfo.target}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl font-bold text-primary">{tenantCount}</span>
+                          <span className="text-xs text-muted-foreground">customers</span>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-medium">{tenant.name}</h3>
-                        <p className="text-sm text-muted-foreground">{tenant.domain}</p>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tenant Billing Details */}
+            {tenants && tenants.length > 0 && (
+              <Card className="glass-card border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-primary" />
+                    Customer Billing Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {tenants.map((tenant) => (
+                      <div key={tenant.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{tenant.name}</h3>
+                            <p className="text-sm text-muted-foreground">{tenant.domain}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <Badge className={getTierColor(tenant.subscriptionTier || 'forming')}>
+                            {getTierDisplayName(tenant.subscriptionTier || 'forming')}
+                          </Badge>
+                          <div className="text-right">
+                            <p className="font-medium">
+                              ${getTierPrice(tenant.subscriptionTier || 'forming').monthly}/mo
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              ${getTierPrice(tenant.subscriptionTier || 'forming').yearly}/mo (yearly)
+                            </p>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            <Settings className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <Badge className={getTierColor(tenant.subscriptionTier || 'forming')}>
-                        {getTierDisplayName(tenant.subscriptionTier || 'forming')}
-                      </Badge>
-                      <div className="text-right">
-                        <p className="font-medium">
-                          ${getTierPrice(tenant.subscriptionTier || 'forming').monthly}/mo
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          ${getTierPrice(tenant.subscriptionTier || 'forming').yearly}/mo (yearly)
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <Settings className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    ))}
                   </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        ) : (
+          // Tenant Admin View
+          <>
+            {tenantBillingLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="glass-card border-0">
+                    <CardContent className="p-6">
+                      <Skeleton className="h-16 w-full" />
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            ) : tenantBilling ? (
+              <>
+                {/* Account Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="glass-card border-0 animate-fade-in" data-testid="card-subscription-plan">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Current Plan</p>
+                          <p className="text-2xl font-bold text-foreground" data-testid="text-current-plan">
+                            {tenantBilling.subscription?.name || 'Unknown'}
+                          </p>
+                          <p className="text-sm text-primary font-medium mt-1">
+                            ${tenantBilling.subscription?.monthlyPrice || 0}/month
+                          </p>
+                        </div>
+                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                          <CreditCard className="w-6 h-6 text-primary" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="glass-card border-0 animate-fade-in" data-testid="card-employee-usage">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Employee Usage</p>
+                          <p className="text-2xl font-bold text-foreground" data-testid="text-employee-count">
+                            {tenantBilling.usage?.currentEmployees || 0}
+                            {tenantBilling.usage?.maxEmployees > 0 && (
+                              <span className="text-sm text-muted-foreground">
+                                /{tenantBilling.usage.maxEmployees}
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-sm text-green-600 font-medium mt-1">
+                            {tenantBilling.usage?.maxEmployees === -1 ? 'Unlimited' : 'Within limits'}
+                          </p>
+                        </div>
+                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                          <Users className="w-6 h-6 text-green-600" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="glass-card border-0 animate-fade-in" data-testid="card-account-status">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Account Status</p>
+                          <p className="text-2xl font-bold text-foreground">
+                            {tenantBilling.tenant?.isActive ? 'Active' : 'Inactive'}
+                          </p>
+                          <p className="text-sm text-green-600 font-medium mt-1">
+                            {tenantBilling.tenant?.isActive ? 'All systems operational' : 'Account suspended'}
+                          </p>
+                        </div>
+                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                          <Building2 className="w-6 h-6 text-blue-600" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Subscription Details */}
+                <Card className="glass-card border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <CreditCard className="w-5 h-5 mr-2 text-primary" />
+                      Subscription Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="font-medium mb-3">Plan Information</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Plan Name:</span>
+                            <span className="font-medium">{tenantBilling.subscription?.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Monthly Price:</span>
+                            <span className="font-medium">${tenantBilling.subscription?.monthlyPrice}/month</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Yearly Price:</span>
+                            <span className="font-medium">${tenantBilling.subscription?.yearlyPrice}/month (billed yearly)</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Employee Limit:</span>
+                            <span className="font-medium">
+                              {tenantBilling.subscription?.maxSeats === -1 ? 'Unlimited' : tenantBilling.subscription?.maxSeats}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-medium mb-3">Account Information</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Organization:</span>
+                            <span className="font-medium">{tenantBilling.tenant?.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Domain:</span>
+                            <span className="font-medium">{tenantBilling.tenant?.domain}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Account Created:</span>
+                            <span className="font-medium">
+                              {new Date(tenantBilling.tenant?.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Last Updated:</span>
+                            <span className="font-medium">
+                              {new Date(tenantBilling.tenant?.updatedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Billing Actions */}
+                <Card className="glass-card border-0">
+                  <CardHeader>
+                    <CardTitle>Billing Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-4">
+                      <Button variant="outline">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Invoice
+                      </Button>
+                      <Button variant="outline">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        View Billing History
+                      </Button>
+                      <Button variant="outline">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Manage Payment Method
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Card className="glass-card border-0">
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">Unable to load billing information. Please try again later.</p>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
       </main>
