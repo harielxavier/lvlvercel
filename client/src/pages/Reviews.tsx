@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { FileText, Plus, Calendar, Clock, Star, Filter } from 'lucide-react';
-import { useEffect } from 'react';\nimport { useQuery } from '@tanstack/react-query';\nimport { Skeleton } from '@/components/ui/skeleton';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Reviews() {
   const { user, isLoading, isAuthenticated } = useUserContext();
