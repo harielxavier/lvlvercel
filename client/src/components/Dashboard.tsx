@@ -47,7 +47,7 @@ export default function Dashboard({ user }: DashboardProps) {
   return (
     <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="main-dashboard">
       {/* Header */}
-      <header className="bg-white/70 backdrop-blur-sm border-b border-white/20 sticky top-0 z-40">
+      <header className="glass-morphism border-b sticky top-0 z-40">
         <div className="px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -59,15 +59,15 @@ export default function Dashboard({ user }: DashboardProps) {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="hover:bg-white/50" data-testid="button-header-action-1">
+              <Button variant="ghost" size="icon" data-testid="button-header-action-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM9 7H4l5-5v5zM9 17v5l-5-5h5zM15 7V2l5 5h-5z"></path>
                 </svg>
               </Button>
-              <Button variant="ghost" size="icon" className="relative hover:bg-white/50" data-testid="button-notifications">
+              <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
                 <AlertCircle className="w-5 h-5" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs text-white font-medium">3</span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full flex items-center justify-center">
+                  <span className="text-xs text-destructive-foreground font-medium">3</span>
                 </div>
               </Button>
             </div>
@@ -91,13 +91,13 @@ export default function Dashboard({ user }: DashboardProps) {
                       {(metrics as any)?.totalEmployees || 0}
                     </p>
                   )}
-                  <p className="text-sm text-green-600 font-medium mt-1 flex items-center">
+                  <p className="text-sm text-primary font-medium mt-1 flex items-center">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     +12 this month
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary" />
                 </div>
               </div>
             </CardContent>

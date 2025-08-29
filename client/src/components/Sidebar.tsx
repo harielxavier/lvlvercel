@@ -210,17 +210,17 @@ export default function Sidebar({ user }: SidebarProps) {
     >
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-6 border-b border-white/20">
+        <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center justify-between">
             {!isCollapsed && (
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm">LVL UP</h3>
+                  <h3 className="font-semibold text-sm text-sidebar-foreground">LVL UP</h3>
                   <p className="text-xs text-muted-foreground">Performance</p>
                 </div>
               </div>
@@ -229,7 +229,7 @@ export default function Sidebar({ user }: SidebarProps) {
               variant="ghost"
               size="icon"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hover:bg-white/20"
+              className="hover:bg-sidebar-accent"
               data-testid="button-toggle-sidebar"
             >
               <ChevronLeft className={cn("w-5 h-5 transition-transform", isCollapsed && "rotate-180")} />
@@ -238,18 +238,18 @@ export default function Sidebar({ user }: SidebarProps) {
           
           {/* Tenant & Role Info */}
           {!isCollapsed && user.tenant && (
-            <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+            <div className="mt-4 p-3 bg-sidebar-accent rounded-xl border border-sidebar-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-sm text-blue-900" data-testid="text-tenant-name">
+                  <p className="font-medium text-sm text-sidebar-foreground" data-testid="text-tenant-name">
                     {user.tenant.name}
                   </p>
-                  <p className="text-xs text-blue-700 capitalize" data-testid="text-user-role">
+                  <p className="text-xs text-muted-foreground capitalize" data-testid="text-user-role">
                     {user.role.replace('_', ' ')}
                   </p>
                 </div>
                 <Badge 
-                  className="px-2 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium"
+                  className="px-2 py-1 bg-primary text-primary-foreground text-xs font-medium"
                   data-testid="badge-subscription-tier"
                 >
                   {getTierDisplayName(user.tenant.subscriptionTier)}
@@ -284,7 +284,7 @@ export default function Sidebar({ user }: SidebarProps) {
                             variant={typeof item.badge === 'string' ? 'secondary' : 'outline'}
                             className={cn(
                               "text-xs font-medium",
-                              typeof item.badge === 'string' && item.badge === 'New' && "bg-green-100 text-green-800"
+                              typeof item.badge === 'string' && item.badge === 'New' && "bg-primary/10 text-primary"
                             )}
                             data-testid={`badge-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                           >
@@ -292,7 +292,7 @@ export default function Sidebar({ user }: SidebarProps) {
                           </Badge>
                         )}
                         {item.notification && (
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" data-testid={`notification-${item.label.toLowerCase().replace(/\s+/g, '-')}`}></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" data-testid={`notification-${item.label.toLowerCase().replace(/\s+/g, '-')}`}></div>
                         )}
                       </div>
                     </>
@@ -304,18 +304,18 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-white/20">
+        <div className="p-4 border-t border-sidebar-border">
           <div 
-            className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors"
+            className="flex items-center space-x-3 p-3 rounded-xl hover:bg-sidebar-accent cursor-pointer transition-colors"
             data-testid="user-profile-section"
           >
-            <Avatar className="w-10 h-10 border-2 border-white">
+            <Avatar className="w-10 h-10 border-2 border-sidebar-border">
               <AvatarImage 
                 src={user.profileImageUrl} 
                 alt={`${user.firstName} ${user.lastName}`}
                 className="object-cover"
               />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+              <AvatarFallback className="bg-primary text-primary-foreground">
                 {user.firstName?.[0]}{user.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
