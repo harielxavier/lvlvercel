@@ -16,13 +16,11 @@ export default function OrganizationChart({ user }: OrganizationChartProps) {
   });
   
   // Find tenant admin (acts as CEO/top level)
-  const tenantAdmin = employees.find((emp: any) => emp.email?.includes('admin'));
+  const tenantAdmin = employees.find((emp: any) => emp.role === 'tenant_admin');
   
-  // Group employees by role type for department simulation
-  const managers = employees.filter((emp: any) => emp.email?.includes('manager'));
-  const regularEmployees = employees.filter((emp: any) => 
-    !emp.email?.includes('admin') && !emp.email?.includes('manager')
-  );
+  // Group employees by role type
+  const managers = employees.filter((emp: any) => emp.role === 'manager');
+  const regularEmployees = employees.filter((emp: any) => emp.role === 'employee');
   
   return (
     <Card className="glass-card border-0" data-testid="card-organization-structure">

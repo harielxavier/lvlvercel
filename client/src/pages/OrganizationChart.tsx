@@ -5,10 +5,24 @@ import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Building2, TrendingUp } from 'lucide-react';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import OrganizationChartComponent from '@/components/OrganizationChart';
 
 export default function OrganizationChart() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
+
+  // Fetch employees for this tenant
+  const { data: employees = [], isLoading: employeesLoading } = useQuery({
+    queryKey: ['/api/employees', user?.tenant?.id],
+    enabled: !!user?.tenant?.id && !!isAuthenticated,
+  });
+
+  // Calculate real metrics
+  const totalEmployees = employees.length;
+  const departmentCount = new Set(employees.map((emp: any) => emp.departmentId).filter(Boolean)).size || 1;
+  const managersCount = employees.filter((emp: any) => emp.role === 'manager').length;
+  const growthRate = totalEmployees > 0 ? Math.round((managersCount / totalEmployees) * 100) : 0;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -65,7 +79,11 @@ export default function OrganizationChart() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
-                    <p className="text-3xl font-bold text-foreground">127</p>
+                    {employeesLoading ? (
+                      <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{totalEmployees}</p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <Users className="w-6 h-6 text-blue-600" />
@@ -79,7 +97,11 @@ export default function OrganizationChart() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Departments</p>
-                    <p className="text-3xl font-bold text-foreground">8</p>
+                    {employeesLoading ? (
+                      <div className="h-9 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{departmentCount}</p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <Building2 className="w-6 h-6 text-green-600" />
@@ -92,8 +114,12 @@ export default function OrganizationChart() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Growth Rate</p>
-                    <p className="text-3xl font-bold text-foreground">12%</p>
+                    <p className="text-sm font-medium text-muted-foreground">Management Ratio</p>
+                    {employeesLoading ? (
+                      <div className="h-9 w-12 bg-gray-200 rounded animate-pulse"></div>
+                    ) : (
+                      <p className="text-3xl font-bold text-foreground">{growthRate}%</p>
+                    )}
                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-orange-600" />
@@ -103,20 +129,8 @@ export default function OrganizationChart() {
             </Card>
           </div>
 
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle>Organization Structure</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Organization Chart Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Interactive organization chart will be available in the next release.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Use the working organization chart component */}
+          <OrganizationChartComponent user={user} />
         </div>
       </main>
     </div>

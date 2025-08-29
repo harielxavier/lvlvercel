@@ -220,6 +220,7 @@ export class DatabaseStorage implements IStorage {
         firstName: users.firstName,
         lastName: users.lastName,
         email: users.email,
+        role: users.role,
         profileImageUrl: users.profileImageUrl
       })
       .from(employees)
