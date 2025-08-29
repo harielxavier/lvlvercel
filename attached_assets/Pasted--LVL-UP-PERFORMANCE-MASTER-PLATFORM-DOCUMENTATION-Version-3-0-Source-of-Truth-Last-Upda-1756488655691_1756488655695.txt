@@ -1,0 +1,578 @@
+# LVL UP PERFORMANCE - MASTER PLATFORM DOCUMENTATION
+**Version 3.0 - Source of Truth**  
+**Last Updated: August 27, 2025**  
+**Status: Production Ready**
+
+---
+
+## TABLE OF CONTENTS
+1. [Executive Overview](#executive-overview)
+2. [Platform Architecture](#platform-architecture)
+3. [Pricing & Feature Tiers](#pricing--feature-tiers)
+4. [User Management & Roles](#user-management--roles)
+5. [Core Features](#core-features)
+6. [Technical Implementation](#technical-implementation)
+7. [Tenant Registry](#tenant-registry)
+8. [Operational Procedures](#operational-procedures)
+9. [Development Status](#development-status)
+10. [Testing Framework](#testing-framework)
+
+---
+
+## EXECUTIVE OVERVIEW
+
+### Platform Status
+- **Platform Super Admins**: 3 (Mauricio, Michael, Kristen)
+- **Active Customer Tenants**: 6 (ready for expansion)
+- **Pricing Tiers**: 6 complete tiers
+- **Architecture**: Multi-tenant SaaS with proper isolation
+- **Total Active Users**: 35 across all tenants
+
+### Platform Hierarchy
+```
+LVL UP Platform
+├── Platform Super Admins (3)
+├── Customer Tenants (6)
+│   ├── Tenant Admins
+│   ├── Managers
+│   └── Employees
+└── 6 Pricing Tiers (Active)
+```
+
+### Key Metrics
+- **Platform Utilization**: 65.5% seat usage
+- **User Distribution**: 11.4% Super Admin, 20% Admin, 34.3% Manager, 34.3% Employee
+- **Universal Authentication**: Vamos!!86 (all users)
+
+---
+
+## PLATFORM ARCHITECTURE
+
+### Technology Stack
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Frontend | Next.js 14, React 18, Tailwind CSS, Framer Motion | SPA with SSR, modern UI |
+| State | React Query + Zustand | Cached queries, global state |
+| Backend | Firebase Cloud Functions (TypeScript) | Serverless API endpoints |
+| Database | Neon (PostgreSQL) | Primary relational database |
+| Auth | Firebase Auth | Email/password, custom claims |
+| Payments | Manual licensing system | License key management |
+| Email | Mailgun (mg.lvlupperformance.com) | Transactional emails |
+| Hosting | Netlify | Full-stack deployment |
+| Monitoring | Sentry, LogRocket, Firebase Analytics | Error tracking, analytics |
+
+### Database Schema (Neon PostgreSQL)
+```sql
+-- Core Tables
+tenants (
+  id, name, plan_tier, billing_interval, 
+  review_cycle, seats, trial_ends_at, 
+  feature_flags[], created_at, updated_at
+)
+
+users (
+  id, tenant_id, firebase_uid, role, 
+  first_name, last_name, email, department, 
+  title, manager_id, hire_date, is_admin, 
+  qr_code, unique_url, previous_locations[], 
+  created_at, updated_at
+)
+
+goals (
+  id, tenant_id, owner_id, department, 
+  title, status, start_date, end_date, 
+  progress, requires_approval, approval_reason
+)
+
+feedback (
+  id, tenant_id, target_id, giver_id, 
+  type, collaboration_score, communication_score, 
+  quality_score, initiative_score, reliability_score, 
+  overall_score, comment, anonymous, created_at
+)
+
+reviews (
+  id, tenant_id, employee_id, review_period, 
+  type, data_json, created_at
+)
+
+licenses (
+  id, tenant_id, code, seats, type, 
+  issued_date, expires_date, redeemed_by, 
+  redeemed_at
+)
+
+audit_logs (
+  id, tenant_id, actor_id, action, 
+  target, payload_json, timestamp
+)
+
+platform_config (
+  id, config_type, config_data_json, 
+  updated_at
+)
+```
+
+---
+
+## PRICING & FEATURE TIERS
+
+### Complete Tier Structure
+
+| Tier | Name | Monthly | Yearly | Max Seats | Target Market | Status |
+|------|------|---------|--------|-----------|---------------|--------|
+| 0 | MJ Scott | FREE | FREE | 10 | VIP/Special | Active |
+| 1 | Forming | $5.00 | $4.00 | Unlimited | Startups (1-25) | Active |
+| 2 | Storming | $10.00 | $8.00 | Unlimited | Growing (25-100) | Active |
+| 3 | Norming | $15.00 | $12.00 | Unlimited | Established (100-500) | Active |
+| 4 | Performing | $20.00 | $16.00 | Unlimited | Enterprise (500+) | Active |
+| 5 | AppSumo | FREE | FREE | Unlimited | Lifetime Deal | Active |
+
+### Tier 0: MJ Scott (FREE) - Basic HR Only
+**Included**:
+- Employee profiles (basic fields)
+- Basic reporting (3/month limit)
+- Email support
+- Team directory
+- Basic org chart view
+- Limited dashboard (basic metrics)
+- 10 employee maximum
+- 2 goals per user limit
+- 25 feedback submissions/month
+- 5GB storage
+
+**Excluded**:
+- Performance management
+- 360° feedback
+- Advanced analytics
+- QR code feedback
+- API access
+
+### Tier 1: Forming ($5/month)
+**Everything in MJ Scott PLUS**:
+- Core performance management
+- 360° feedback system
+- Goal tracking (unlimited)
+- Basic analytics
+- QR code feedback
+- Unlimited feedback submissions
+- 25GB storage
+
+### Tier 2: Storming ($10/month)
+**Everything in Forming PLUS**:
+- Advanced performance reviews
+- Team collaboration tools
+- Custom performance criteria
+- Priority support
+- Advanced reporting
+- Department analytics
+- 100GB storage
+
+### Tier 3: Norming ($15/month)
+**Everything in Storming PLUS**:
+- Enterprise analytics
+- Multi-department management
+- Custom workflows
+- API access
+- Dedicated account manager
+- Integration capabilities
+- 500GB storage
+
+### Tier 4: Performing ($20/month)
+**Everything in Norming PLUS**:
+- Full enterprise suite
+- Custom integrations
+- Advanced security & compliance
+- White-label options
+- Premium support & training
+- Unlimited storage
+- SSO capabilities
+
+### Tier 5: AppSumo Lifetime (FREE)
+**Special lifetime access including**:
+- Core performance management
+- 360° feedback
+- Goal tracking
+- Basic analytics
+- QR code feedback
+- Lifetime access
+- Limited to first-year launch
+
+### License Management System
+- Manual license code generation
+- Seat-based enforcement
+- Referral discount codes
+- Volume discount tiers
+- Annual vs monthly pricing (20% discount)
+- Cancellation retention offers
+
+---
+
+## USER MANAGEMENT & ROLES
+
+### Role Hierarchy
+
+#### Platform Super Admin
+- **Domain**: @lvlupperformance.com only
+- **Current Users**: Mauricio, Michael, Kristen
+- **Access**: Complete platform control
+- **Capabilities**:
+  - All tenant management
+  - Platform configuration
+  - License management
+  - System monitoring
+  - Cross-tenant impersonation
+
+#### Tenant Admin
+- **Scope**: Full tenant control
+- **Capabilities**:
+  - Company settings
+  - User management (CRUD)
+  - License management
+  - Department structure
+  - Performance cycles
+  - Integration setup
+
+#### Manager
+- **Scope**: Team/department
+- **Capabilities**:
+  - Team performance management
+  - Goal approval
+  - Review administration
+  - Team analytics
+  - Direct report management
+
+#### Employee
+- **Scope**: Personal
+- **Capabilities**:
+  - Personal goals
+  - Self-assessments
+  - Peer feedback
+  - Profile management
+  - Performance viewing
+
+### Permission Matrix
+
+| Feature | Platform Admin | Tenant Admin | Manager | Employee |
+|---------|---------------|--------------|---------|----------|
+| Platform Management | ✅ Full | ❌ | ❌ | ❌ |
+| Tenant Settings | ✅ All | ✅ Own | ❌ | ❌ |
+| User Management | ✅ All | ✅ Tenant | ✅ Team | ✅ Self |
+| Performance Reviews | ✅ All | ✅ Tenant | ✅ Team | ✅ Own |
+| Analytics | ✅ Platform | ✅ Company | ✅ Team | ✅ Personal |
+| Licensing | ✅ All | ✅ Own | ❌ | ❌ |
+| API Access | ✅ Platform | ✅ Tenant | ✅ Limited | ❌ |
+
+---
+
+## CORE FEATURES
+
+### Employee Management
+- **Profile Fields** (BambooHR standard):
+  - Identity: employeeNumber, firstName, lastName, preferredName
+  - Contact: workEmail, homeEmail, mobilePhone, workPhone
+  - Location: address1/2, city, state, zipcode, country
+  - Employment: status, hireDate, originalHireDate, terminationDate
+  - Organization: jobTitle, department, division, location, reportsTo
+  - **Custom**: QRCode, uniqueURL (for feedback collection)
+  - **Tracking**: Previous locations/positions history
+
+### Performance Management
+- **5-Criteria Rating System**:
+  1. Collaboration
+  2. Communication
+  3. Quality
+  4. Initiative
+  5. Reliability
+
+- **Feedback Features**:
+  - Anonymous option
+  - QR code/unique URL access
+  - External feedback capability
+  - Minimum quota enforcement
+  - AI sentiment analysis
+
+### Goal Management (OKR)
+- Hierarchical goal structure
+- Approval workflows
+- Progress tracking
+- Department alignment
+- Quarterly/annual cycles
+
+### Analytics & Reporting
+- **Dashboard Types**:
+  - Manager: Team metrics, reviews due, attention items
+  - Employee: Personal performance, goals, feedback
+  - HR: Company-wide analytics
+  - Platform: Cross-tenant metrics
+
+- **Report Types**:
+  - Individual performance
+  - Team summary
+  - Department analysis
+  - Annual resume
+  - Custom exports
+
+### Review System
+- **Cycle Options**: Rolling (90-day) or calendar-based
+- **Components**: Self-assessment, manager review, peer feedback
+- **Documentation**: Complete history with audit trail
+
+---
+
+## TECHNICAL IMPLEMENTATION
+
+### Cloud Functions (Completed)
+- ✅ License Management: `generateLicense`, `redeemLicenseCode`
+- ✅ Audit System: `logAuditEvent`, `exportAuditLogs`
+- ✅ Employee Management: `createEmployee`, `bulkImportEmployees`
+- ✅ Reporting: `generateReport` (CSV complete, PDF pending)
+- ✅ Email System: `sendTestEmail`, templates configured
+- ✅ Database Operations: Neon PostgreSQL queries
+
+### Email Configuration
+```
+Provider: Mailgun
+Domain: mg.lvlupperformance.com
+API Key: [Stored in platform_config table]
+DNS Records: SPF, DKIM, DMARC configured
+Templates: Centralized in email-templates.ts
+```
+
+### Netlify Deployment Configuration
+```
+Build Command: npm run build
+Publish Directory: .next
+Functions Directory: netlify/functions
+Environment Variables:
+  - DATABASE_URL (Neon connection string)
+  - FIREBASE_CONFIG
+  - MAILGUN_API_KEY
+  - MAILGUN_DOMAIN
+```
+
+### Security & Compliance
+- **Authentication**: Firebase Auth with custom claims
+- **Database**: Row-level security in Neon
+- **Data Isolation**: Tenant-based query filtering
+- **Audit Trail**: Stored in audit_logs table
+- **Backups**: Neon automatic backups
+- **Rate Limiting**: Netlify edge functions
+- **GDPR**: Data export capabilities
+
+---
+
+## TENANT REGISTRY
+
+### Current Active Tenants
+
+| Company | Tier | Identifier | Users | Admin |
+|---------|------|------------|-------|-------|
+| LVL UP Performance | Platform | lvlup-performance | 5 | Platform Owner |
+| AppSumo Company | AppSumo | appsumo-company | 5 | sarah.mitchell@ |
+| Formy Company | Forming | formy-company | 5 | robert.kim@ |
+| MJ Scott Company | MJ Scott | mjscott-company | 5 | jennifer.park@ |
+| Normy Company | Norming | normy-company | 5 | sarah.chen@ |
+| Performy Company | Performing | performy-company | 5 | david.wilson@ |
+| Stormy Company | Storming | stormy-company | 5 | matthew.thompson@ |
+
+### Platform Access
+- **Production URL**: https://lvl-up-performance.netlify.app
+- **Universal Password**: Vamos!!86
+- **Alternative Test Passwords**: password, admin, demo, test
+
+---
+
+## OPERATIONAL PROCEDURES
+
+### Tenant Onboarding Process
+1. **Company Setup**
+   - Create tenant record in Neon
+   - Generate license code
+   - Configure tier features
+   - Assign initial admin
+
+2. **Organizational Structure**
+   - Define departments
+   - Create job positions
+   - Establish reporting relationships
+   - Import organizational chart
+
+3. **User Management**
+   - Bulk CSV import or manual entry
+   - Validate email formats (firstname@companyid.com)
+   - Create Firebase Auth users
+   - Sync to Neon database
+   - Send welcome emails
+
+4. **Configuration**
+   - Set review cycles
+   - Configure workflows
+   - Enable tier features
+   - Set up integrations
+
+5. **Training & Launch**
+   - Admin training
+   - User onboarding
+   - Best practices
+   - Go-live support
+
+### Database Migration from Firebase
+1. Export Firestore collections to JSON
+2. Transform to PostgreSQL schema
+3. Import to Neon database
+4. Update Cloud Functions to use SQL
+5. Test all queries and transactions
+
+### BambooHR Integration Guidelines
+**DO Structure Your Data**:
+- Map BambooHR fields to Neon columns
+- Establish foreign key relationships
+- Create indexes for performance
+- Set up data validation rules
+
+**DO Configure Permissions**:
+- Use row-level security
+- Create database roles
+- Set column-level permissions
+- Audit all data access
+
+**DO Automate Updates**:
+- Set up database triggers
+- Configure change notifications
+- Maintain audit trails
+- Schedule data syncs
+
+---
+
+## DEVELOPMENT STATUS
+
+### ✅ Completed Components
+- Authentication system
+- License management
+- Neon database schema
+- Audit logging framework
+- Employee creation/validation
+- Email infrastructure
+- Basic reporting (CSV)
+- Platform configuration
+
+### 🔄 In Progress
+- Frontend UI implementation
+- Org chart visualization (React Flow)
+- Dashboard components
+- PDF report generation
+- Neon query optimization
+- Netlify function setup
+
+### ❌ Pending
+- Complete UI polish
+- Advanced AI features
+- Mobile application
+- SSO implementation
+- HRIS integrations
+- Performance optimizations
+
+### Critical Tasks
+- Complete Neon database migration
+- Set up Netlify CI/CD pipeline
+- Configure production environment variables
+- Implement database connection pooling
+
+---
+
+## TESTING FRAMEWORK
+
+### Test Account Matrix
+| Role | Company | Email | Test Focus |
+|------|---------|-------|------------|
+| Super Admin | LVL UP | alexander.lee@lvlupperformance.com | Platform features |
+| Admin | AppSumo | sarah.mitchell@appsumocompany.com | Tenant management |
+| Manager | Formy | jonathan.taylor@formycompany.com | Team workflows |
+| Employee | Stormy | rachel.white@stormycompany.com | End-user experience |
+
+### QA Checklist
+- [ ] Authentication flow (login/logout)
+- [ ] Employee CRUD operations
+- [ ] Goal creation and management
+- [ ] Feedback submission process
+- [ ] Dashboard functionality
+- [ ] Report generation
+- [ ] License management
+- [ ] Cross-tenant isolation
+- [ ] Permission enforcement
+- [ ] Email delivery
+- [ ] Neon database queries
+- [ ] Netlify deployment
+
+### Database Testing
+- [ ] Connection pooling
+- [ ] Query performance
+- [ ] Transaction isolation
+- [ ] Backup/restore
+- [ ] Migration scripts
+
+### Sprint Timeline
+| Sprint | Focus | Deliverables |
+|--------|-------|--------------|
+| 1 | Database + Auth | Neon setup, login flow |
+| 2 | Core Features | Feedback, goals, employees |
+| 3 | Licensing + UI | Manual licensing, dashboards |
+| 4 | Polish + Deploy | Netlify setup, optimization |
+
+---
+
+## KEY IMPLEMENTATION NOTES
+
+### Employee Validation Rules
+1. Unique email within tenant (enforced by Neon constraint)
+2. Format: firstname@companyid.com
+3. Default password: Vamos!!86
+4. Manager hierarchy integrity (foreign key)
+5. Previous location tracking (JSONB array)
+
+### Neon Database Considerations
+- Connection string in environment variables
+- Use connection pooling for Cloud Functions
+- Implement retry logic for transient failures
+- Monitor query performance
+- Regular vacuum and analyze
+
+### Netlify Deployment Notes
+- Build caching for faster deploys
+- Environment variable management
+- Function timeout limits (10 seconds)
+- Static asset optimization
+- Preview deployments for testing
+
+### Future Enhancements
+- AI-powered retention risk analysis
+- Leadership potential detection
+- Team morale monitoring
+- Succession planning
+- Note-taking/calendar integration
+- Toxic employee detection AI
+- Churn risk prediction
+- Advanced Neon features (branching, point-in-time recovery)
+
+### Platform Metrics Dashboard
+- Active tenants count
+- License utilization
+- Platform-wide users
+- System uptime
+- Database performance metrics
+
+---
+
+## DOCUMENT CONTROL
+- **Classification**: Confidential - Internal Use Only
+- **Version**: 3.0 (Master Source of Truth)
+- **Created**: August 27, 2025
+- **Last Updated**: August 27, 2025
+- **Review Cycle**: Quarterly
+- **Owner**: Platform Administration Team
+- **Status**: Production Ready
+
+---
+
+*This document represents the complete operational specification and source of truth for the LVL UP Performance platform, fully updated for Neon PostgreSQL database and Netlify hosting.*
