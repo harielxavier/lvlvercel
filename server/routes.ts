@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema } from "@shared/schema";
+import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -127,6 +127,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete tenant (Platform Admin only)
+  app.delete("/api/platform/tenants/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const { id } = req.params;
+      await storage.deleteTenant(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting tenant:", error);
+      res.status(500).json({ message: "Failed to delete tenant" });
+    }
+  });
+
   // Get all users for testing (Platform Admin only)
   app.get("/api/platform/users", isAuthenticated, async (req, res) => {
     try {
@@ -142,6 +161,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching all users:", error);
       res.status(500).json({ message: "Failed to fetch all users" });
+    }
+  });
+
+  // User CRUD operations (Platform Admin only)
+  app.post("/api/platform/users", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const userData = z.object({
+        email: z.string().email(),
+        firstName: z.string(),
+        lastName: z.string(),
+        role: z.enum(['platform_admin', 'tenant_admin', 'manager', 'employee']),
+        tenantId: z.string().optional(),
+        profileImageUrl: z.string().optional(),
+      }).parse(req.body);
+      
+      const newUser = await storage.createUser(userData);
+      res.json(newUser);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.patch("/api/platform/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const { id } = req.params;
+      const updateData = z.object({
+        email: z.string().email().optional(),
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        role: z.enum(['platform_admin', 'tenant_admin', 'manager', 'employee']).optional(),
+        tenantId: z.string().optional(),
+        profileImageUrl: z.string().optional(),
+      }).parse(req.body);
+      
+      const updatedUser = await storage.updateUser(id, updateData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.delete("/api/platform/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const { id } = req.params;
+      await storage.deleteUser(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Login as user for testing (Platform Admin only)
+  app.post("/api/platform/login-as-user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      const { userId } = req.body;
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Create session for target user
+      const userSession = {
+        claims: {
+          sub: targetUser.id,
+          email: targetUser.email,
+          first_name: targetUser.firstName,
+          last_name: targetUser.lastName,
+          profile_image_url: targetUser.profileImageUrl || null,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60),
+        },
+        access_token: 'dev-token',
+        refresh_token: 'dev-refresh-token',
+        expires_at: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60),
+      };
+      
+      req.logIn(userSession, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+        res.json({ success: true, user: userSession.claims });
+      });
+    } catch (error) {
+      console.error("Error logging in as user:", error);
+      res.status(500).json({ message: "Failed to login as user" });
     }
   });
 

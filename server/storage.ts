@@ -29,11 +29,15 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, data: Partial<UpsertUser>): Promise<User>;
+  deleteUser(id: string): Promise<void>;
+  createUser(userData: UpsertUser): Promise<User>;
   
   // Tenant operations
   getTenant(id: string): Promise<Tenant | undefined>;
   createTenant(tenant: InsertTenant): Promise<Tenant>;
   updateTenant(id: string, data: Partial<InsertTenant>): Promise<Tenant>;
+  deleteTenant(id: string): Promise<void>;
   
   // Employee operations
   getEmployee(id: string): Promise<Employee | undefined>;
@@ -103,6 +107,27 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async updateUser(id: string, data: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  async createUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .returning();
+    return user;
+  }
+
   // Tenant operations
   async getTenant(id: string): Promise<Tenant | undefined> {
     const [tenant] = await db.select().from(tenants).where(eq(tenants.id, id));
@@ -124,6 +149,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tenants.id, id))
       .returning();
     return tenant;
+  }
+
+  async deleteTenant(id: string): Promise<void> {
+    await db.delete(tenants).where(eq(tenants.id, id));
   }
 
   // Employee operations

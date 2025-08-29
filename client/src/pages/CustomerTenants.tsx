@@ -1,8 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import {
   Building2,
   Users,
@@ -15,14 +21,46 @@ import {
   Mail,
   Key,
   UserCheck,
-  Copy
+  Copy,
+  Edit,
+  Trash2,
+  LogIn,
+  Save,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
+import { apiRequest } from '@/lib/queryClient';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import type { Tenant, User } from '@shared/schema';
+
+// Form schemas
+const userSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  role: z.enum(['platform_admin', 'tenant_admin', 'manager', 'employee']),
+  tenantId: z.string().optional(),
+});
+
+const tenantSchema = z.object({
+  name: z.string().min(1, 'Company name is required'),
+  domain: z.string().min(1, 'Domain is required'),
+  subscriptionTier: z.enum(['mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo']),
+  maxEmployees: z.number().min(-1, 'Max employees must be -1 (unlimited) or positive'),
+  isActive: z.boolean(),
+});
 
 export default function CustomerTenants() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Modal states
+  const [editUserModal, setEditUserModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
+  const [createUserModal, setCreateUserModal] = useState(false);
+  const [editTenantModal, setEditTenantModal] = useState<{ open: boolean; tenant: Tenant | null }>({ open: false, tenant: null });
   
   const { data: tenants, isLoading, error } = useQuery<Tenant[]>({
     queryKey: ['/api/platform/tenants']
@@ -30,6 +68,121 @@ export default function CustomerTenants() {
 
   const { data: users, isLoading: usersLoading } = useQuery<(User & { tenantName?: string | null })[]>({
     queryKey: ['/api/platform/users']
+  });
+
+  // Mutations
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: z.infer<typeof userSchema>) => {
+      return apiRequest('POST', '/api/platform/users', userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/users'] });
+      setCreateUserModal(false);
+      toast({ title: "User created successfully!" });
+    },
+    onError: (error) => {
+      console.error('Error creating user:', error);
+      toast({ 
+        title: "Error creating user", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: Partial<z.infer<typeof userSchema>> }) => {
+      return apiRequest('PATCH', `/api/platform/users/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/users'] });
+      setEditUserModal({ open: false, user: null });
+      toast({ title: "User updated successfully!" });
+    },
+    onError: (error) => {
+      console.error('Error updating user:', error);
+      toast({ 
+        title: "Error updating user", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest('DELETE', `/api/platform/users/${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/users'] });
+      toast({ title: "User deleted successfully!" });
+    },
+    onError: (error) => {
+      console.error('Error deleting user:', error);
+      toast({ 
+        title: "Error deleting user", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const updateTenantMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: Partial<z.infer<typeof tenantSchema>> }) => {
+      return apiRequest('PATCH', `/api/platform/tenants/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/tenants'] });
+      setEditTenantModal({ open: false, tenant: null });
+      toast({ title: "Company updated successfully!" });
+    },
+    onError: (error) => {
+      console.error('Error updating tenant:', error);
+      toast({ 
+        title: "Error updating company", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const deleteTenantMutation = useMutation({
+    mutationFn: async (tenantId: string) => {
+      return apiRequest('DELETE', `/api/platform/tenants/${tenantId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/tenants'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/users'] });
+      toast({ title: "Company deleted successfully!" });
+    },
+    onError: (error) => {
+      console.error('Error deleting tenant:', error);
+      toast({ 
+        title: "Error deleting company", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const loginAsUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest('POST', '/api/platform/login-as-user', { userId });
+    },
+    onSuccess: () => {
+      toast({ title: "Logged in successfully! Redirecting..." });
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    },
+    onError: (error) => {
+      console.error('Error logging in as user:', error);
+      toast({ 
+        title: "Error logging in as user", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
   });
 
   const copyToClipboard = (text: string) => {
@@ -97,6 +250,371 @@ export default function CustomerTenants() {
     }
   }
 
+  // Form components
+  const EditUserModal = ({ user, open, onClose }: { user: User | null; open: boolean; onClose: () => void }) => {
+    const form = useForm<z.infer<typeof userSchema>>({
+      resolver: zodResolver(userSchema),
+      defaultValues: {
+        email: user?.email || '',
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        role: user?.role as any || 'employee',
+        tenantId: user?.tenantId || '',
+      },
+    });
+
+    const onSubmit = (data: z.infer<typeof userSchema>) => {
+      if (user) {
+        updateUserMutation.mutate({ id: user.id, data });
+      }
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="platform_admin">Platform Admin</SelectItem>
+                          <SelectItem value="tenant_admin">Tenant Admin</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="employee">Employee</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tenantId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select company (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No Company (Platform Admin)</SelectItem>
+                          {tenants?.map((tenant) => (
+                            <SelectItem key={tenant.id} value={tenant.id}>
+                              {tenant.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={updateUserMutation.isPending}>
+                  {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const CreateUserModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+    const form = useForm<z.infer<typeof userSchema>>({
+      resolver: zodResolver(userSchema),
+      defaultValues: {
+        email: '',
+        firstName: '',
+        lastName: '',
+        role: 'employee',
+        tenantId: '',
+      },
+    });
+
+    const onSubmit = (data: z.infer<typeof userSchema>) => {
+      createUserMutation.mutate(data);
+      form.reset();
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" placeholder="user@company.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="John" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Doe" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="platform_admin">Platform Admin</SelectItem>
+                          <SelectItem value="tenant_admin">Tenant Admin</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="employee">Employee</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tenantId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select company (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No Company (Platform Admin)</SelectItem>
+                          {tenants?.map((tenant) => (
+                            <SelectItem key={tenant.id} value={tenant.id}>
+                              {tenant.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createUserMutation.isPending}>
+                  {createUserMutation.isPending ? 'Creating...' : 'Create User'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const EditTenantModal = ({ tenant, open, onClose }: { tenant: Tenant | null; open: boolean; onClose: () => void }) => {
+    const form = useForm<z.infer<typeof tenantSchema>>({
+      resolver: zodResolver(tenantSchema),
+      defaultValues: {
+        name: tenant?.name || '',
+        domain: tenant?.domain || '',
+        subscriptionTier: tenant?.subscriptionTier as any || 'forming',
+        maxEmployees: tenant?.maxEmployees || 0,
+        isActive: tenant?.isActive ?? true,
+      },
+    });
+
+    const onSubmit = (data: z.infer<typeof tenantSchema>) => {
+      if (tenant) {
+        updateTenantMutation.mutate({ id: tenant.id, data });
+      }
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Company</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="domain"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Domain</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="subscriptionTier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subscription Tier</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mj_scott">MJ Scott</SelectItem>
+                          <SelectItem value="forming">Forming</SelectItem>
+                          <SelectItem value="storming">Storming</SelectItem>
+                          <SelectItem value="norming">Norming</SelectItem>
+                          <SelectItem value="performing">Performing</SelectItem>
+                          <SelectItem value="appsumo">AppSumo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxEmployees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Employees (-1 for unlimited)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={updateTenantMutation.isPending}>
+                  {updateTenantMutation.isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-customer-tenants">
       {/* Header */}
@@ -112,6 +630,15 @@ export default function CustomerTenants() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <Button 
+                onClick={() => setCreateUserModal(true)}
+                variant="outline" 
+                className="mr-2"
+                data-testid="button-add-user"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
               <Button className="bg-primary hover:bg-primary/90" data-testid="button-add-tenant">
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Tenant
@@ -262,9 +789,58 @@ export default function CustomerTenants() {
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                <Key className="w-3 h-3" />
-                                <span>Vamos!!86</span>
+                              <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-2 text-xs text-muted-foreground mr-3">
+                                  <Key className="w-3 h-3" />
+                                  <span>Vamos!!86</span>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => loginAsUserMutation.mutate(user.id)}
+                                  disabled={loginAsUserMutation.isPending}
+                                  data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
+                                >
+                                  <LogIn className="w-3 h-3 mr-1" />
+                                  Login
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setEditUserModal({ open: true, user })}
+                                  data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-red-600 hover:text-red-700"
+                                      data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => deleteUserMutation.mutate(user.id)}
+                                        className="bg-red-600 hover:bg-red-700"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </div>
                             </div>
                           ))}
@@ -310,9 +886,58 @@ export default function CustomerTenants() {
                                 </Badge>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                              <Key className="w-3 h-3" />
-                              <span>Vamos!!86</span>
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground mr-3">
+                                <Key className="w-3 h-3" />
+                                <span>Vamos!!86</span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => loginAsUserMutation.mutate(user.id)}
+                                disabled={loginAsUserMutation.isPending}
+                                data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
+                              >
+                                <LogIn className="w-3 h-3 mr-1" />
+                                Login
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditUserModal({ open: true, user })}
+                                data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-red-600 hover:text-red-700"
+                                    data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Platform Admin</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteUserMutation.mutate(user.id)}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           </div>
                         ))}
@@ -380,9 +1005,43 @@ export default function CustomerTenants() {
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <Settings className="w-4 h-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setEditTenantModal({ open: true, tenant })}
+                        data-testid={`button-edit-tenant-${tenant.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        <Edit className="w-4 h-4" />
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                            data-testid={`button-delete-tenant-${tenant.name.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Company</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {tenant.name}? This will also delete all associated users and data. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteTenantMutation.mutate(tenant.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete Company
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
@@ -403,6 +1062,22 @@ export default function CustomerTenants() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modals */}
+      <EditUserModal 
+        user={editUserModal.user} 
+        open={editUserModal.open} 
+        onClose={() => setEditUserModal({ open: false, user: null })} 
+      />
+      <CreateUserModal 
+        open={createUserModal} 
+        onClose={() => setCreateUserModal(false)} 
+      />
+      <EditTenantModal 
+        tenant={editTenantModal.tenant} 
+        open={editTenantModal.open} 
+        onClose={() => setEditTenantModal({ open: false, tenant: null })} 
+      />
     </main>
   );
 }
