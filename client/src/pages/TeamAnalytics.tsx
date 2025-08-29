@@ -123,14 +123,10 @@ export default function TeamAnalytics() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Active Members</p>
-                    {employeesLoading ? (
-                      <Skeleton className="h-9 w-8 mt-1" />
-                    ) : (
-                      <>
-                        <p className="text-3xl font-bold text-foreground">{(employees as any[]).length}</p>
-                        <p className="text-sm text-blue-600">Real employees</p>
-                      </>
-                    )}
+                    <>
+                      <p className="text-3xl font-bold text-foreground">{(employees as any[]).length}</p>
+                      <p className="text-sm text-blue-600">Real employees</p>
+                    </>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <Users className="w-6 h-6 text-blue-600" />
@@ -144,14 +140,10 @@ export default function TeamAnalytics() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Goals Achieved</p>
-                    {employeesLoading ? (
-                      <Skeleton className="h-9 w-16 mt-1" />
-                    ) : (
-                      <>
-                        <p className="text-3xl font-bold text-foreground">{completedGoals}/{totalGoals}</p>
-                        <p className="text-sm text-purple-600">{Math.round((completedGoals / totalGoals) * 100)}% completion</p>
-                      </>
-                    )}
+                    <>
+                      <p className="text-3xl font-bold text-foreground">{completedGoals}/{totalGoals}</p>
+                      <p className="text-sm text-purple-600">{Math.round((completedGoals / totalGoals) * 100)}% completion</p>
+                    </>
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                     <Target className="w-6 h-6 text-purple-600" />
@@ -165,14 +157,10 @@ export default function TeamAnalytics() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Productivity Score</p>
-                    {employeesLoading ? (
-                      <Skeleton className="h-9 w-12 mt-1" />
-                    ) : (
-                      <>
-                        <p className="text-3xl font-bold text-foreground">{avgProductivityScore}</p>
-                        <p className="text-sm text-orange-600">{parseFloat(avgProductivityScore) > 8.5 ? 'Above average' : parseFloat(avgProductivityScore) > 7 ? 'Average' : 'Below average'}</p>
-                      </>
-                    )}
+                    <>
+                      <p className="text-3xl font-bold text-foreground">{avgProductivityScore}</p>
+                      <p className="text-sm text-orange-600">{parseFloat(avgProductivityScore) > 8.5 ? 'Above average' : parseFloat(avgProductivityScore) > 7 ? 'Average' : 'Below average'}</p>
+                    </>
                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                     <BarChart3 className="w-6 h-6 text-orange-600" />
@@ -188,21 +176,7 @@ export default function TeamAnalytics() {
                 <CardTitle>Team Member Performance</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {employeesLoading ? (
-                  [...Array(4)].map((_, index) => (
-                    <div key={index} className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-4 w-12" />
-                      </div>
-                      <Skeleton className="h-2 w-full" />
-                      <div className="flex justify-between">
-                        <Skeleton className="h-3 w-16" />
-                        <Skeleton className="h-3 w-20" />
-                      </div>
-                    </div>
-                  ))
-                ) : teamStats.length > 0 ? (
+                {teamStats.length > 0 ? (
                   teamStats.map((member: any, index: number) => (
                     <div key={index} className="space-y-3">
                       <div className="flex items-center justify-between">

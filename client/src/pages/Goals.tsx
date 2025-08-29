@@ -234,13 +234,9 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                    {goalsLoading ? (
-                      <Skeleton className="h-9 w-8 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-green-600">
-                        {completedGoals.length}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-green-600">
+                      {completedGoals.length}
+                    </p>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <CheckCircle className="w-6 h-6 text-green-600" />
@@ -254,13 +250,9 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">In Progress</p>
-                    {goalsLoading ? (
-                      <Skeleton className="h-9 w-8 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-orange-600">
-                        {inProgressGoals.length}
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-orange-600">
+                      {inProgressGoals.length}
+                    </p>
                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                     <Clock className="w-6 h-6 text-orange-600" />
@@ -274,13 +266,9 @@ export default function Goals() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
-                    {goalsLoading ? (
-                      <Skeleton className="h-9 w-12 mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold text-foreground">
-                        {avgProgress}%
-                      </p>
-                    )}
+                    <p className="text-3xl font-bold text-foreground">
+                      {avgProgress}%
+                    </p>
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-purple-600" />
