@@ -847,6 +847,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user's complete performance data (employee + goals + feedback)
+  app.get('/api/user/performance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const employee = await storage.getEmployeeByUserId(userId);
+      if (!employee) {
+        return res.status(404).json({ message: 'Employee record not found' });
+      }
+
+      // Fetch goals and feedback in parallel
+      const [goals, feedback] = await Promise.all([
+        storage.getGoalsByEmployee(employee.id),
+        storage.getFeedbacksByEmployee(employee.id)
+      ]);
+
+      res.json({
+        employee,
+        goals,
+        feedback
+      });
+    } catch (error) {
+      console.error('Error fetching performance data:', error);
+      res.status(500).json({ message: 'Failed to fetch performance data' });
+    }
+  });
+
   // Get employee feedback
   app.get('/api/employee/:employeeId/feedback', isAuthenticated, async (req: any, res) => {
     try {

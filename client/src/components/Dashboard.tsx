@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,11 @@ interface DashboardProps {
   user: any;
 }
 
-export default function Dashboard({ user }: DashboardProps) {
+function Dashboard({ user }: DashboardProps) {
   const { toast } = useToast();
 
   // Use different API endpoints based on user role
-  const isPlatformAdmin = user.role === 'platform_admin';
+  const isPlatformAdmin = React.useMemo(() => user.role === 'platform_admin', [user.role]);
   const { data: metrics, isLoading: metricsLoading, error } = useQuery({
     queryKey: isPlatformAdmin ? ['/api/platform/metrics'] : ['/api/dashboard/metrics', user.tenant?.id],
     enabled: isPlatformAdmin || !!user.tenant?.id,
@@ -600,3 +601,5 @@ export default function Dashboard({ user }: DashboardProps) {
     </main>
   );
 }
+
+export default React.memo(Dashboard);

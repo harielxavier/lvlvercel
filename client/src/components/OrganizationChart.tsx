@@ -1,19 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useQuery } from '@tanstack/react-query';
 import { Users, Building2 } from 'lucide-react';
 
 interface OrganizationChartProps {
   user: any;
+  employees: any[];
+  employeesLoading: boolean;
 }
 
-export default function OrganizationChart({ user }: OrganizationChartProps) {
-  // Get employees for the organization chart
-  const { data: employees = [], isLoading: employeesLoading } = useQuery({
-    queryKey: ['/api/employees', user.tenant?.id],
-    enabled: !!user.tenant?.id,
-  });
+export default function OrganizationChart({ user, employees = [], employeesLoading }: OrganizationChartProps) {
   
   // Find tenant admin (acts as CEO/top level)
   const tenantAdmin = employees.find((emp: any) => emp.role === 'tenant_admin');

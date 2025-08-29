@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Building2, TrendingUp } from 'lucide-react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -80,7 +81,7 @@ export default function OrganizationChart() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
                     {employeesLoading ? (
-                      <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
+                      <Skeleton className="h-9 w-16" />
                     ) : (
                       <p className="text-3xl font-bold text-foreground">{totalEmployees}</p>
                     )}
@@ -98,7 +99,7 @@ export default function OrganizationChart() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Departments</p>
                     {employeesLoading ? (
-                      <div className="h-9 w-8 bg-gray-200 rounded animate-pulse"></div>
+                      <Skeleton className="h-9 w-8" />
                     ) : (
                       <p className="text-3xl font-bold text-foreground">{departmentCount}</p>
                     )}
@@ -116,7 +117,7 @@ export default function OrganizationChart() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Management Ratio</p>
                     {employeesLoading ? (
-                      <div className="h-9 w-12 bg-gray-200 rounded animate-pulse"></div>
+                      <Skeleton className="h-9 w-12" />
                     ) : (
                       <p className="text-3xl font-bold text-foreground">{growthRate}%</p>
                     )}
@@ -130,7 +131,7 @@ export default function OrganizationChart() {
           </div>
 
           {/* Use the working organization chart component */}
-          <OrganizationChartComponent user={user} />
+          <OrganizationChartComponent user={user} employees={employees} employeesLoading={employeesLoading} />
         </div>
       </main>
     </div>

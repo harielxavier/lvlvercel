@@ -100,7 +100,11 @@ export const employees = pgTable("employees", {
   status: varchar("status").default('active'), // active, inactive, terminated
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("employees_user_id_idx").on(table.userId),
+  index("employees_tenant_id_idx").on(table.tenantId),
+  index("employees_feedback_url_idx").on(table.feedbackUrl),
+]);
 
 // Feedback submissions table
 export const feedbacks = pgTable("feedbacks", {
@@ -115,7 +119,9 @@ export const feedbacks = pgTable("feedbacks", {
   isAnonymous: boolean("is_anonymous").default(false),
   sentiment: varchar("sentiment"), // positive, negative, neutral
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("feedbacks_employee_id_idx").on(table.employeeId),
+]);
 
 // Performance goals table
 export const goals = pgTable("goals", {
@@ -128,7 +134,9 @@ export const goals = pgTable("goals", {
   progress: integer("progress").default(0), // 0-100
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("goals_employee_id_idx").on(table.employeeId),
+]);
 
 // Performance reviews table
 export const performanceReviews = pgTable("performance_reviews", {

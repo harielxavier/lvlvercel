@@ -15,26 +15,17 @@ export default function Performance() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
   
-  // Get current user's employee data
-  const { data: employee, isLoading: employeeLoading } = useQuery({
-    queryKey: ['/api/user/employee'],
+  // Get complete performance data (employee + goals + feedback) in one call
+  const { data: performanceData, isLoading: performanceLoading } = useQuery({
+    queryKey: ['/api/user/performance'],
     retry: false,
     enabled: !!user,
   });
 
-  // Get employee goals
-  const { data: goals = [], isLoading: goalsLoading } = useQuery({
-    queryKey: ['/api/employee', (employee as any)?.id, 'goals'],
-    enabled: !!(employee as any)?.id,
-    retry: false,
-  });
-
-  // Get employee feedback
-  const { data: feedback = [], isLoading: feedbackLoading } = useQuery({
-    queryKey: ['/api/employee', (employee as any)?.id, 'feedback'],
-    enabled: !!(employee as any)?.id,
-    retry: false,
-  });
+  const employee = performanceData?.employee;
+  const goals = performanceData?.goals || [];
+  const feedback = performanceData?.feedback || [];
+  const performanceIsLoading = performanceLoading;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -179,7 +170,7 @@ export default function Performance() {
                 <CardTitle>Current Goals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {goalsLoading ? (
+                {performanceIsLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map(i => (
                       <div key={i} className="animate-pulse">
@@ -223,7 +214,7 @@ export default function Performance() {
                 <CardTitle>Recent Feedback</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {feedbackLoading ? (
+                {performanceIsLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map(i => (
                       <div key={i} className="animate-pulse">
