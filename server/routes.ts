@@ -432,6 +432,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System Settings Management (Platform Admin only)
+  app.get("/api/platform/system-settings", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { category } = req.query;
+      const settings = category 
+        ? await storage.getSystemSettingsByCategory(category as string)
+        : await storage.getSystemSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching system settings:", error);
+      res.status(500).json({ message: "Failed to fetch system settings" });
+    }
+  });
+
+  app.get("/api/platform/system-settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { key } = req.params;
+      const setting = await storage.getSystemSetting(key);
+      if (!setting) {
+        return res.status(404).json({ message: "System setting not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      console.error("Error fetching system setting:", error);
+      res.status(500).json({ message: "Failed to fetch system setting" });
+    }
+  });
+
+  app.post("/api/platform/system-settings", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { insertSystemSettingSchema } = await import("@shared/schema");
+      const validatedData = insertSystemSettingSchema.parse({
+        ...req.body,
+        lastModifiedBy: user.claims.sub,
+      });
+      
+      const setting = await storage.upsertSystemSetting(validatedData);
+      res.status(201).json(setting);
+    } catch (error) {
+      console.error("Error creating/updating system setting:", error);
+      res.status(500).json({ message: "Failed to create/update system setting" });
+    }
+  });
+
+  app.patch("/api/platform/system-settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { key } = req.params;
+      const { value } = req.body;
+      
+      const setting = await storage.updateSystemSetting(key, value, user.claims.sub);
+      res.json(setting);
+    } catch (error) {
+      console.error("Error updating system setting:", error);
+      res.status(500).json({ message: "Failed to update system setting" });
+    }
+  });
+
+  app.delete("/api/platform/system-settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { key } = req.params;
+      await storage.deleteSystemSetting(key);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting system setting:", error);
+      res.status(500).json({ message: "Failed to delete system setting" });
+    }
+  });
+
+  // Test notification system (Platform Admin only)
+  app.post("/api/platform/test-notification", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { type, email, message } = req.body;
+      
+      // Test notification functionality
+      if (type === 'email') {
+        // TODO: Implement email sending with configured SMTP
+        console.log(`Test email notification sent to ${email}: ${message}`);
+        res.json({ success: true, message: "Email test notification sent successfully" });
+      } else if (type === 'sms') {
+        // TODO: Implement SMS sending with Twilio
+        console.log(`Test SMS notification: ${message}`);
+        res.json({ success: true, message: "SMS test notification sent successfully" });
+      } else {
+        res.status(400).json({ message: "Invalid notification type" });
+      }
+    } catch (error) {
+      console.error("Error testing notification:", error);
+      res.status(500).json({ message: "Failed to test notification" });
+    }
+  });
+
   // Get all users for testing (Platform Admin only)
   app.get("/api/platform/users", isAuthenticated, async (req, res) => {
     try {

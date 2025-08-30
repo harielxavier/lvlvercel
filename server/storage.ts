@@ -11,6 +11,7 @@ import {
   notificationPreferences,
   pricingTiers,
   billingAuditLog,
+  systemSettings,
   type User,
   type UpsertUser,
   type Tenant,
@@ -33,6 +34,8 @@ import {
   type InsertPricingTier,
   type BillingAuditLog,
   type InsertBillingAuditLog,
+  type SystemSetting,
+  type InsertSystemSetting,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql } from "drizzle-orm";
@@ -129,6 +132,14 @@ export interface IStorage {
   
   // Tenant billing operations
   changeTenantTier(tenantId: string, newTierId: string, userId: string): Promise<Tenant>;
+  
+  // System settings operations
+  getSystemSettings(): Promise<SystemSetting[]>;
+  getSystemSetting(key: string): Promise<SystemSetting | undefined>;
+  getSystemSettingsByCategory(category: string): Promise<SystemSetting[]>;
+  upsertSystemSetting(setting: InsertSystemSetting): Promise<SystemSetting>;
+  updateSystemSetting(key: string, value: any, userId: string): Promise<SystemSetting>;
+  deleteSystemSetting(key: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -739,6 +750,65 @@ export class DatabaseStorage implements IStorage {
     });
 
     return updatedTenant;
+  }
+
+  // System settings operations
+  async getSystemSettings(): Promise<SystemSetting[]> {
+    return await db.select().from(systemSettings).orderBy(systemSettings.category, systemSettings.settingKey);
+  }
+
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> {
+    const [setting] = await db
+      .select()
+      .from(systemSettings)
+      .where(eq(systemSettings.settingKey, key));
+    return setting;
+  }
+
+  async getSystemSettingsByCategory(category: string): Promise<SystemSetting[]> {
+    return await db
+      .select()
+      .from(systemSettings)
+      .where(eq(systemSettings.category, category))
+      .orderBy(systemSettings.settingKey);
+  }
+
+  async upsertSystemSetting(settingData: InsertSystemSetting): Promise<SystemSetting> {
+    const [setting] = await db
+      .insert(systemSettings)
+      .values({
+        ...settingData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: systemSettings.settingKey,
+        set: {
+          settingValue: settingData.settingValue,
+          description: settingData.description,
+          lastModifiedBy: settingData.lastModifiedBy,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return setting;
+  }
+
+  async updateSystemSetting(key: string, value: any, userId: string): Promise<SystemSetting> {
+    const [setting] = await db
+      .update(systemSettings)
+      .set({
+        settingValue: value,
+        lastModifiedBy: userId,
+        updatedAt: new Date(),
+      })
+      .where(eq(systemSettings.settingKey, key))
+      .returning();
+    return setting;
+  }
+
+  async deleteSystemSetting(key: string): Promise<void> {
+    await db.delete(systemSettings).where(eq(systemSettings.settingKey, key));
   }
 }
 

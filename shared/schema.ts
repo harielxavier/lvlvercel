@@ -202,6 +202,19 @@ export const billingAuditLog = pgTable("billing_audit_log", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// System settings table for platform-wide configuration
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  settingKey: varchar("setting_key").notNull().unique(),
+  settingValue: jsonb("setting_value").notNull(),
+  category: varchar("category").notNull(), // 'platform', 'security', 'notifications', 'database', 'performance'
+  description: text("description"),
+  isEditable: boolean("is_editable").default(true),
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Notifications table
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -371,6 +384,12 @@ export const insertBillingAuditLogSchema = createInsertSchema(billingAuditLog).o
   createdAt: true,
 });
 
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -385,6 +404,7 @@ export type NotificationPreferences = typeof notificationPreferences.$inferSelec
 export type Notification = typeof notifications.$inferSelect;
 export type PricingTier = typeof pricingTiers.$inferSelect;
 export type BillingAuditLog = typeof billingAuditLog.$inferSelect;
+export type SystemSetting = typeof systemSettings.$inferSelect;
 
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
@@ -395,3 +415,4 @@ export type InsertNotificationPreferences = z.infer<typeof insertNotificationPre
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
 export type InsertBillingAuditLog = z.infer<typeof insertBillingAuditLogSchema>;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
