@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPricingTierSchema, type PricingTier } from "@shared/schema";
-import { Plus, Edit, Trash2, DollarSign, Users, Star, Eye, History } from "lucide-react";
+import { Plus, Edit, Trash2, DollarSign, Users, Star, Eye, History, Crown, Zap, Shield, Target, TrendingUp, Sparkles } from "lucide-react";
 import { z } from "zod";
+import Sidebar from "@/components/Sidebar";
+import { useUserContext } from "@/context/UserContext";
 
 const pricingTierFormSchema = insertPricingTierSchema.extend({
   features: z.array(z.string()).min(1, "At least one feature is required"),
@@ -25,6 +27,7 @@ const pricingTierFormSchema = insertPricingTierSchema.extend({
 type PricingTierFormData = z.infer<typeof pricingTierFormSchema>;
 
 export default function PricingManagement() {
+  const { user } = useUserContext();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<PricingTier | null>(null);
@@ -35,6 +38,18 @@ export default function PricingManagement() {
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Redirect if not platform admin
+  useEffect(() => {
+    if (user && user.role !== 'platform_admin') {
+      toast({
+        title: "Access Denied",
+        description: "Platform administrator access required.",
+        variant: "destructive",
+      });
+      window.location.href = "/";
+    }
+  }, [user, toast]);
 
   const form = useForm<PricingTierFormData>({
     resolver: zodResolver(pricingTierFormSchema),
@@ -213,158 +228,220 @@ export default function PricingManagement() {
     });
   };
 
+  if (!user || user.role !== 'platform_admin') {
+    return null;
+  }
+
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 lg:ml-80">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Pricing Management</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage subscription tiers, pricing, and features for your platform
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsAuditDialogOpen(true)}
-              data-testid="button-view-audit-log"
-            >
-              <History className="w-4 h-4 mr-2" />
-              Audit Log
-            </Button>
-            <Button
-              onClick={() => setIsCreateDialogOpen(true)}
-              data-testid="button-create-tier"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Tier
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {pricingTiers.map((tier: PricingTier) => (
-          <Card key={tier.id} className="relative" data-testid={`card-pricing-tier-${tier.id}`}>
-            <CardHeader>
+    <div className="flex min-h-screen bg-background">
+      <Sidebar />
+      <div className="flex-1 lg:ml-80">
+        <div className="p-8">
+          {/* Hero Section */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 p-8 mb-8 text-white">
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="relative z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    {tier.name}
-                    {!tier.isActive && (
-                      <Badge variant="secondary" data-testid={`badge-inactive-${tier.id}`}>
-                        Inactive
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  {tier.description && (
-                    <CardDescription>{tier.description}</CardDescription>
-                  )}
+                  <div className="flex items-center gap-3 mb-4">
+                    <Crown className="w-8 h-8" />
+                    <h1 className="text-4xl font-bold tracking-tight">Pricing Management</h1>
+                  </div>
+                  <p className="text-lg text-white/90 max-w-2xl">
+                    Design and manage subscription tiers that scale with your customers' success. 
+                    Create compelling value propositions that drive growth.
+                  </p>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-3">
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditTier(tier)}
-                    data-testid={`button-edit-${tier.id}`}
+                    variant="secondary"
+                    onClick={() => setIsAuditDialogOpen(true)}
+                    data-testid="button-view-audit-log"
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/20"
                   >
-                    <Edit className="w-4 h-4" />
+                    <History className="w-4 h-4 mr-2" />
+                    Audit Log
                   </Button>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteTier(tier)}
-                    data-testid={`button-delete-${tier.id}`}
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    data-testid="button-create-tier"
+                    className="bg-white text-purple-600 hover:bg-white/90"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Tier
                   </Button>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <DollarSign className="w-4 h-4" />
-                  Monthly
-                </div>
-                <div className="font-semibold" data-testid={`text-monthly-price-${tier.id}`}>
-                  {formatPrice(tier.monthlyPrice)}
-                </div>
-              </div>
+            </div>
+          </div>
+
+          {/* Pricing Tiers Grid */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {pricingTiers.map((tier: PricingTier, index: number) => {
+              const isPopular = index === 1; // Make middle tier popular
+              const tierIcons = [Star, Zap, Crown, Shield, Target, TrendingUp];
+              const TierIcon = tierIcons[index % tierIcons.length];
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <DollarSign className="w-4 h-4" />
-                  Yearly
-                </div>
-                <div className="font-semibold" data-testid={`text-yearly-price-${tier.id}`}>
-                  {formatPrice(tier.yearlyPrice)}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="w-4 h-4" />
-                  Max Seats
-                </div>
-                <div className="font-semibold" data-testid={`text-max-seats-${tier.id}`}>
-                  {tier.maxSeats === -1 ? "Unlimited" : tier.maxSeats}
-                </div>
-              </div>
-
-              {tier.targetMarket && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Star className="w-4 h-4" />
-                    Target Market
-                  </div>
-                  <div className="text-sm" data-testid={`text-target-market-${tier.id}`}>
-                    {tier.targetMarket}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-2">
-                <div className="text-sm font-medium mb-2">Features:</div>
-                <div className="space-y-1">
-                  {(tier.features as string[]).slice(0, 3).map((feature, index) => (
-                    <div key={index} className="text-sm text-muted-foreground flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      {feature}
-                    </div>
-                  ))}
-                  {(tier.features as string[]).length > 3 && (
-                    <div className="text-sm text-muted-foreground">
-                      +{(tier.features as string[]).length - 3} more features
+              return (
+                <Card 
+                  key={tier.id} 
+                  className={`relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                    isPopular 
+                      ? 'ring-2 ring-purple-500 shadow-xl border-purple-200 dark:border-purple-800' 
+                      : 'hover:shadow-lg'
+                  }`} 
+                  data-testid={`card-pricing-tier-${tier.id}`}
+                >
+                  {isPopular && (
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-blue-500" />
+                  )}
+                  {isPopular && (
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Most Popular
+                      </Badge>
                     </div>
                   )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${
+                          isPopular 
+                            ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white' 
+                            : 'bg-muted'
+                        }`}>
+                          <TierIcon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <CardTitle className="flex items-center gap-2 text-xl">
+                            {tier.name}
+                            {!tier.isActive && (
+                              <Badge variant="secondary" data-testid={`badge-inactive-${tier.id}`}>
+                                Inactive
+                              </Badge>
+                            )}
+                          </CardTitle>
+                          {tier.description && (
+                            <CardDescription className="mt-1">{tier.description}</CardDescription>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditTier(tier)}
+                          data-testid={`button-edit-${tier.id}`}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTier(tier)}
+                          data-testid={`button-delete-${tier.id}`}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Pricing Display */}
+                    <div className="text-center pb-4 border-b">
+                      <div className="space-y-2">
+                        <div className={`text-3xl font-bold ${
+                          isPopular ? 'text-purple-600 dark:text-purple-400' : ''
+                        }`} data-testid={`text-monthly-price-${tier.id}`}>
+                          {formatPrice(tier.monthlyPrice)}
+                          <span className="text-sm font-normal text-muted-foreground">/month</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground" data-testid={`text-yearly-price-${tier.id}`}>
+                          {formatPrice(tier.yearlyPrice)}/year (save {Math.round((1 - (tier.yearlyPrice / 12) / tier.monthlyPrice) * 100)}%)
+                        </div>
+                      </div>
+                    </div>
 
-      {/* Create/Edit Tier Dialog */}
-      <Dialog open={isCreateDialogOpen || isEditDialogOpen} onOpenChange={(open) => {
-        if (!open) {
-          setIsCreateDialogOpen(false);
-          setIsEditDialogOpen(false);
-          setEditingTier(null);
-          form.reset();
-          setFeaturesInput("");
-        }
-      }}>
+                    {/* Key Metrics */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-xs font-medium text-muted-foreground">Max Seats</span>
+                        </div>
+                        <div className="font-semibold" data-testid={`text-max-seats-${tier.id}`}>
+                          {tier.maxSeats === -1 ? "∞" : tier.maxSeats}
+                        </div>
+                      </div>
+                      
+                      {tier.targetMarket && (
+                        <div className="text-center p-3 rounded-lg bg-muted/50">
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <Target className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-xs font-medium text-muted-foreground">Target</span>
+                          </div>
+                          <div className="text-sm font-medium" data-testid={`text-target-market-${tier.id}`}>
+                            {tier.targetMarket}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Features List */}
+                    <div>
+                      <div className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Star className="w-4 h-4" />
+                        Features
+                      </div>
+                      <div className="space-y-2">
+                        {(tier.features as string[]).slice(0, 4).map((feature, featureIndex) => (
+                          <div key={featureIndex} className="text-sm flex items-center gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                              isPopular ? 'bg-purple-500' : 'bg-primary'
+                            }`} />
+                            {feature}
+                          </div>
+                        ))}
+                        {(tier.features as string[]).length > 4 && (
+                          <div className="text-sm text-muted-foreground font-medium">
+                            +{(tier.features as string[]).length - 4} more features
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Create/Edit Tier Dialog */}
+          <Dialog open={isCreateDialogOpen || isEditDialogOpen} onOpenChange={(open) => {
+            if (!open) {
+              setIsCreateDialogOpen(false);
+              setIsEditDialogOpen(false);
+              setEditingTier(null);
+              form.reset();
+              setFeaturesInput("");
+            }
+          }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle data-testid="dialog-title-tier-form">
@@ -686,6 +763,8 @@ export default function PricingManagement() {
           </div>
         </DialogContent>
       </Dialog>
+        </div>
+      </div>
     </div>
   );
 }
