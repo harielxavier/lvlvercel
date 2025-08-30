@@ -351,7 +351,7 @@ export default function CustomerTenants() {
                           <SelectValue placeholder="Select company (optional)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Company (Platform Admin)</SelectItem>
+                          <SelectItem value="none">No Company (Platform Admin)</SelectItem>
                           {tenants?.map((tenant) => (
                             <SelectItem key={tenant.id} value={tenant.id}>
                               {tenant.name}
@@ -478,7 +478,7 @@ export default function CustomerTenants() {
                           <SelectValue placeholder="Select company (optional)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Company (Platform Admin)</SelectItem>
+                          <SelectItem value="none">No Company (Platform Admin)</SelectItem>
                           {tenants?.map((tenant) => (
                             <SelectItem key={tenant.id} value={tenant.id}>
                               {tenant.name}
