@@ -86,6 +86,11 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: Settings,
           label: 'System Settings',
           href: '/system-settings'
+        },
+        {
+          icon: MessageSquare,
+          label: 'Support Dashboard',
+          href: '/support-dashboard'
         }
       ];
 

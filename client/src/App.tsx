@@ -12,6 +12,7 @@ import CustomerTenants from "@/pages/CustomerTenants";
 import PlatformAnalytics from "@/pages/PlatformAnalytics";
 import BillingSubscriptions from "@/pages/BillingSubscriptions";
 import SystemSettings from "@/pages/SystemSettings";
+import SupportDashboard from "@/pages/SupportDashboard";
 import OrganizationChart from "@/pages/OrganizationChart";
 import EmployeeManagement from "@/pages/EmployeeManagement";
 import Performance from "@/pages/Performance";
@@ -97,6 +98,7 @@ function Router() {
       <Route path="/billing" component={BillingSubscriptions} />
       <Route path="/pricing" component={PricingManagement} />
       <Route path="/system-settings" component={SystemSettings} />
+      <Route path="/support-dashboard" component={SupportDashboard} />
       
       {/* Tenant Admin Routes */}
       <Route path="/org-chart" component={OrganizationChart} />

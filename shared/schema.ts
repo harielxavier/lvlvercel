@@ -37,6 +37,18 @@ export const notificationTypeEnum = pgEnum('notification_type', ['feedback_recei
 // Notification status enum
 export const notificationStatusEnum = pgEnum('notification_status', ['unread', 'read', 'archived']);
 
+// Support ticket status enum
+export const ticketStatusEnum = pgEnum('ticket_status', ['open', 'pending', 'in_progress', 'resolved', 'closed']);
+
+// Support ticket priority enum
+export const ticketPriorityEnum = pgEnum('ticket_priority', ['low', 'medium', 'high', 'urgent']);
+
+// Support integration enum
+export const supportIntegrationEnum = pgEnum('support_integration', ['zendesk', 'freshdesk', 'salesforce']);
+
+// Knowledge base category enum
+export const kbCategoryEnum = pgEnum('kb_category', ['getting_started', 'features', 'billing', 'troubleshooting', 'api', 'security']);
+
 // User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -215,6 +227,114 @@ export const systemSettings = pgTable("system_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Support tickets table
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").references(() => tenants.id),
+  userId: varchar("user_id").references(() => users.id),
+  externalTicketId: varchar("external_ticket_id"), // ID from Zendesk/Freshdesk/Salesforce
+  integration: supportIntegrationEnum("integration"), // Which system created this
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  status: ticketStatusEnum("status").default('open'),
+  priority: ticketPriorityEnum("priority").default('medium'),
+  category: varchar("category"), // 'technical', 'billing', 'feature_request', 'bug'
+  assignedToId: varchar("assigned_to_id").references(() => users.id),
+  escalationLevel: integer("escalation_level").default(0),
+  lastEscalatedAt: timestamp("last_escalated_at"),
+  firstResponseAt: timestamp("first_response_at"),
+  resolvedAt: timestamp("resolved_at"),
+  customerEmail: varchar("customer_email"),
+  metadata: jsonb("metadata"), // Additional data from external systems
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Support integration configurations
+export const supportIntegrations = pgTable("support_integrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  platform: supportIntegrationEnum("platform").notNull(),
+  apiKey: varchar("api_key"), // Encrypted
+  apiSecret: varchar("api_secret"), // Encrypted  
+  subdomain: varchar("subdomain"), // For Zendesk/Freshdesk
+  instanceUrl: varchar("instance_url"), // For Salesforce
+  isActive: boolean("is_active").default(false),
+  webhookUrl: varchar("webhook_url"),
+  lastSyncedAt: timestamp("last_synced_at"),
+  syncErrors: integer("sync_errors").default(0),
+  configuredBy: varchar("configured_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Knowledge base articles
+export const knowledgeBase = pgTable("knowledge_base", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  category: kbCategoryEnum("category").notNull(),
+  slug: varchar("slug").notNull().unique(),
+  tags: text("tags").array(),
+  isPublished: boolean("is_published").default(false),
+  viewCount: integer("view_count").default(0),
+  helpfulVotes: integer("helpful_votes").default(0),
+  unhelpfulVotes: integer("unhelpful_votes").default(0),
+  authorId: varchar("author_id").references(() => users.id),
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Live chat sessions
+export const chatSessions = pgTable("chat_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").references(() => tenants.id),
+  userId: varchar("user_id").references(() => users.id),
+  agentId: varchar("agent_id").references(() => users.id),
+  status: varchar("status").default('waiting'), // 'waiting', 'active', 'ended'
+  startedAt: timestamp("started_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+  rating: integer("rating"), // 1-5
+  feedback: text("feedback"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Chat messages
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().references(() => chatSessions.id),
+  senderId: varchar("sender_id").references(() => users.id),
+  senderType: varchar("sender_type").notNull(), // 'user', 'agent', 'system'
+  message: text("message").notNull(),
+  messageType: varchar("message_type").default('text'), // 'text', 'file', 'image'
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// System health monitoring
+export const systemHealth = pgTable("system_health", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  component: varchar("component").notNull(), // 'database', 'auth', 'api', 'notifications'
+  status: varchar("status").notNull(), // 'operational', 'degraded', 'down', 'maintenance'
+  responseTime: integer("response_time"), // in milliseconds
+  uptime: decimal("uptime", { precision: 5, scale: 2 }), // percentage
+  errorRate: decimal("error_rate", { precision: 5, scale: 2 }), // percentage
+  lastChecked: timestamp("last_checked").defaultNow(),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Password reset tokens
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdBy: varchar("created_by").references(() => users.id), // Platform admin who initiated reset
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Notifications table
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -390,6 +510,44 @@ export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit
   updatedAt: true,
 });
 
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportIntegrationSchema = createInsertSchema(supportIntegrations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertKnowledgeBaseSchema = createInsertSchema(knowledgeBase).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSystemHealthSchema = createInsertSchema(systemHealth).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -416,3 +574,18 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
 export type InsertBillingAuditLog = z.infer<typeof insertBillingAuditLogSchema>;
 export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type InsertSupportIntegration = z.infer<typeof insertSupportIntegrationSchema>;
+export type InsertKnowledgeBase = z.infer<typeof insertKnowledgeBaseSchema>;
+export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type InsertSystemHealth = z.infer<typeof insertSystemHealthSchema>;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type SupportIntegration = typeof supportIntegrations.$inferSelect;
+export type KnowledgeBase = typeof knowledgeBase.$inferSelect;
+export type ChatSession = typeof chatSessions.$inferSelect;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type SystemHealth = typeof systemHealth.$inferSelect;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;

@@ -1332,6 +1332,270 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========== SUPPORT SYSTEM ROUTES ==========
+
+  // Support Tickets Management
+  app.get("/api/support/tickets", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      
+      // Platform admins can see all tickets, others see only their tenant's tickets
+      const tenantId = currentUser?.role === 'platform_admin' ? undefined : currentUser?.tenantId;
+      const tickets = await storage.getSupportTickets(tenantId as string);
+      res.json(tickets);
+    } catch (error) {
+      console.error("Error fetching support tickets:", error);
+      res.status(500).json({ message: "Failed to fetch support tickets" });
+    }
+  });
+
+  app.post("/api/support/tickets", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      
+      const { insertSupportTicketSchema } = await import("@shared/schema");
+      const ticketData = insertSupportTicketSchema.parse({
+        ...req.body,
+        userId: user.claims.sub,
+        tenantId: currentUser?.tenantId,
+      });
+      
+      const ticket = await storage.createSupportTicket(ticketData);
+      res.status(201).json(ticket);
+    } catch (error) {
+      console.error("Error creating support ticket:", error);
+      res.status(500).json({ message: "Failed to create support ticket" });
+    }
+  });
+
+  app.patch("/api/support/tickets/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+      
+      const ticket = await storage.updateSupportTicket(id, updateData);
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error updating support ticket:", error);
+      res.status(500).json({ message: "Failed to update support ticket" });
+    }
+  });
+
+  // Support Integrations Management (Platform Admin only)
+  app.get("/api/support/integrations", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      if (currentUser?.role !== 'platform_admin') {
+        return res.status(403).json({ message: "Access denied - Platform Admin required" });
+      }
+      
+      const integrations = await storage.getSupportIntegrations();
+      res.json(integrations);
+    } catch (error) {
+      console.error("Error fetching support integrations:", error);
+      res.status(500).json({ message: "Failed to fetch support integrations" });
+    }
+  });
+
+  app.post("/api/support/integrations", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      if (currentUser?.role !== 'platform_admin') {
+        return res.status(403).json({ message: "Access denied - Platform Admin required" });
+      }
+      
+      const { insertSupportIntegrationSchema } = await import("@shared/schema");
+      const integrationData = insertSupportIntegrationSchema.parse({
+        ...req.body,
+        configuredBy: user.claims.sub,
+      });
+      
+      const integration = await storage.createSupportIntegration(integrationData);
+      res.status(201).json(integration);
+    } catch (error) {
+      console.error("Error creating support integration:", error);
+      res.status(500).json({ message: "Failed to create support integration" });
+    }
+  });
+
+  // Knowledge Base Management
+  app.get("/api/knowledge-base", async (req: any, res) => {
+    try {
+      const { category } = req.query;
+      const articles = await storage.getKnowledgeBaseArticles(category);
+      res.json(articles);
+    } catch (error) {
+      console.error("Error fetching knowledge base articles:", error);
+      res.status(500).json({ message: "Failed to fetch knowledge base articles" });
+    }
+  });
+
+  app.get("/api/knowledge-base/:slug", async (req: any, res) => {
+    try {
+      const { slug } = req.params;
+      const article = await storage.getKnowledgeBaseArticle(slug);
+      if (!article) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+      
+      // Increment view count
+      await storage.incrementKnowledgeBaseViews(article.id);
+      res.json(article);
+    } catch (error) {
+      console.error("Error fetching knowledge base article:", error);
+      res.status(500).json({ message: "Failed to fetch knowledge base article" });
+    }
+  });
+
+  app.post("/api/knowledge-base", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      if (!['platform_admin', 'tenant_admin'].includes(currentUser?.role || '')) {
+        return res.status(403).json({ message: "Access denied - Admin required" });
+      }
+      
+      const { insertKnowledgeBaseSchema } = await import("@shared/schema");
+      const articleData = insertKnowledgeBaseSchema.parse({
+        ...req.body,
+        authorId: user.claims.sub,
+      });
+      
+      const article = await storage.createKnowledgeBaseArticle(articleData);
+      res.status(201).json(article);
+    } catch (error) {
+      console.error("Error creating knowledge base article:", error);
+      res.status(500).json({ message: "Failed to create knowledge base article" });
+    }
+  });
+
+  // Live Chat System
+  app.post("/api/chat/sessions", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      
+      const { insertChatSessionSchema } = await import("@shared/schema");
+      const sessionData = insertChatSessionSchema.parse({
+        userId: user.claims.sub,
+        tenantId: currentUser?.tenantId,
+        status: 'waiting',
+      });
+      
+      const session = await storage.createChatSession(sessionData);
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Error creating chat session:", error);
+      res.status(500).json({ message: "Failed to create chat session" });
+    }
+  });
+
+  app.get("/api/chat/sessions/:id/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const messages = await storage.getChatMessages(id);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+  });
+
+  app.post("/api/chat/sessions/:id/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.user as any;
+      
+      const { insertChatMessageSchema } = await import("@shared/schema");
+      const messageData = insertChatMessageSchema.parse({
+        sessionId: id,
+        senderId: user.claims.sub,
+        senderType: 'user',
+        message: req.body.message,
+      });
+      
+      const message = await storage.createChatMessage(messageData);
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({ message: "Failed to create chat message" });
+    }
+  });
+
+  // System Health Monitoring
+  app.get("/api/system/health", async (req: any, res) => {
+    try {
+      const healthStatus = await storage.getSystemHealthStatus();
+      res.json(healthStatus);
+    } catch (error) {
+      console.error("Error fetching system health:", error);
+      res.status(500).json({ message: "Failed to fetch system health" });
+    }
+  });
+
+  app.post("/api/system/health", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      if (currentUser?.role !== 'platform_admin') {
+        return res.status(403).json({ message: "Access denied - Platform Admin required" });
+      }
+      
+      const { insertSystemHealthSchema } = await import("@shared/schema");
+      const healthData = insertSystemHealthSchema.parse(req.body);
+      
+      const health = await storage.updateSystemHealth(healthData);
+      res.json(health);
+    } catch (error) {
+      console.error("Error updating system health:", error);
+      res.status(500).json({ message: "Failed to update system health" });
+    }
+  });
+
+  // Password Reset Management (Platform Admin only)
+  app.post("/api/admin/password-reset", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const currentUser = await storage.getUser(user.claims.sub);
+      if (currentUser?.role !== 'platform_admin') {
+        return res.status(403).json({ message: "Access denied - Platform Admin required" });
+      }
+      
+      const { userId } = req.body;
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Generate password reset token
+      const { randomUUID } = require('crypto');
+      const token = randomUUID();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      
+      const { insertPasswordResetTokenSchema } = await import("@shared/schema");
+      const tokenData = insertPasswordResetTokenSchema.parse({
+        userId,
+        token,
+        expiresAt,
+        createdBy: user.claims.sub,
+      });
+      
+      const resetToken = await storage.createPasswordResetToken(tokenData);
+      
+      // TODO: Send reset token via email
+      console.log(`Password reset token generated for ${targetUser.email}: ${token}`);
+      
+      res.json({ success: true, message: "Password reset token generated" });
+    } catch (error) {
+      console.error("Error generating password reset token:", error);
+      res.status(500).json({ message: "Failed to generate password reset token" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

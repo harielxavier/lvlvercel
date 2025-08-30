@@ -12,6 +12,13 @@ import {
   pricingTiers,
   billingAuditLog,
   systemSettings,
+  supportTickets,
+  supportIntegrations,
+  knowledgeBase,
+  chatSessions,
+  chatMessages,
+  systemHealth,
+  passwordResetTokens,
   type User,
   type UpsertUser,
   type Tenant,
@@ -36,9 +43,23 @@ import {
   type InsertBillingAuditLog,
   type SystemSetting,
   type InsertSystemSetting,
+  type SupportTicket,
+  type InsertSupportTicket,
+  type SupportIntegration,
+  type InsertSupportIntegration,
+  type KnowledgeBase,
+  type InsertKnowledgeBase,
+  type ChatSession,
+  type InsertChatSession,
+  type ChatMessage,
+  type InsertChatMessage,
+  type SystemHealth,
+  type InsertSystemHealth,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql } from "drizzle-orm";
+import { eq, and, desc, count, sql, lt } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -140,6 +161,40 @@ export interface IStorage {
   upsertSystemSetting(setting: InsertSystemSetting): Promise<SystemSetting>;
   updateSystemSetting(key: string, value: any, userId: string): Promise<SystemSetting>;
   deleteSystemSetting(key: string): Promise<void>;
+  
+  // Support ticket operations
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  getSupportTickets(tenantId?: string): Promise<SupportTicket[]>;
+  getSupportTicket(id: string): Promise<SupportTicket | undefined>;
+  updateSupportTicket(id: string, data: Partial<InsertSupportTicket>): Promise<SupportTicket>;
+  
+  // Support integration operations
+  createSupportIntegration(integration: InsertSupportIntegration): Promise<SupportIntegration>;
+  getSupportIntegrations(): Promise<SupportIntegration[]>;
+  updateSupportIntegration(id: string, data: Partial<InsertSupportIntegration>): Promise<SupportIntegration>;
+  
+  // Knowledge base operations
+  createKnowledgeBaseArticle(article: InsertKnowledgeBase): Promise<KnowledgeBase>;
+  getKnowledgeBaseArticles(category?: string): Promise<KnowledgeBase[]>;
+  getKnowledgeBaseArticle(slug: string): Promise<KnowledgeBase | undefined>;
+  incrementKnowledgeBaseViews(id: string): Promise<void>;
+  
+  // Live chat operations
+  createChatSession(session: InsertChatSession): Promise<ChatSession>;
+  getChatSession(id: string): Promise<ChatSession | undefined>;
+  updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  getChatMessages(sessionId: string): Promise<ChatMessage[]>;
+  
+  // System health operations
+  updateSystemHealth(health: InsertSystemHealth): Promise<SystemHealth>;
+  getSystemHealthStatus(): Promise<SystemHealth[]>;
+  
+  // Password reset operations
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(token: string): Promise<void>;
+  deleteExpiredPasswordResetTokens(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -809,6 +864,218 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSystemSetting(key: string): Promise<void> {
     await db.delete(systemSettings).where(eq(systemSettings.settingKey, key));
+  }
+
+  // Support ticket operations
+  async createSupportTicket(ticketData: InsertSupportTicket): Promise<SupportTicket> {
+    const [ticket] = await db
+      .insert(supportTickets)
+      .values({
+        ...ticketData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return ticket;
+  }
+
+  async getSupportTickets(tenantId?: string): Promise<SupportTicket[]> {
+    let query = db.select().from(supportTickets);
+    
+    if (tenantId) {
+      query = query.where(eq(supportTickets.tenantId, tenantId));
+    }
+    
+    return query.orderBy(desc(supportTickets.createdAt));
+  }
+
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const [ticket] = await db
+      .select()
+      .from(supportTickets)
+      .where(eq(supportTickets.id, id));
+    return ticket;
+  }
+
+  async updateSupportTicket(id: string, data: Partial<InsertSupportTicket>): Promise<SupportTicket> {
+    const [ticket] = await db
+      .update(supportTickets)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return ticket;
+  }
+
+  // Support integration operations
+  async createSupportIntegration(integrationData: InsertSupportIntegration): Promise<SupportIntegration> {
+    const [integration] = await db
+      .insert(supportIntegrations)
+      .values({
+        ...integrationData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return integration;
+  }
+
+  async getSupportIntegrations(): Promise<SupportIntegration[]> {
+    return await db.select().from(supportIntegrations).orderBy(supportIntegrations.platform);
+  }
+
+  async updateSupportIntegration(id: string, data: Partial<InsertSupportIntegration>): Promise<SupportIntegration> {
+    const [integration] = await db
+      .update(supportIntegrations)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(supportIntegrations.id, id))
+      .returning();
+    return integration;
+  }
+
+  // Knowledge base operations
+  async createKnowledgeBaseArticle(articleData: InsertKnowledgeBase): Promise<KnowledgeBase> {
+    const [article] = await db
+      .insert(knowledgeBase)
+      .values({
+        ...articleData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return article;
+  }
+
+  async getKnowledgeBaseArticles(category?: string): Promise<KnowledgeBase[]> {
+    let query = db.select().from(knowledgeBase).where(eq(knowledgeBase.isPublished, true));
+    
+    if (category) {
+      query = query.where(and(eq(knowledgeBase.isPublished, true), eq(knowledgeBase.category, category)));
+    }
+    
+    return query.orderBy(desc(knowledgeBase.viewCount));
+  }
+
+  async getKnowledgeBaseArticle(slug: string): Promise<KnowledgeBase | undefined> {
+    const [article] = await db
+      .select()
+      .from(knowledgeBase)
+      .where(eq(knowledgeBase.slug, slug));
+    return article;
+  }
+
+  async incrementKnowledgeBaseViews(id: string): Promise<void> {
+    await db
+      .update(knowledgeBase)
+      .set({ viewCount: sql`${knowledgeBase.viewCount} + 1` })
+      .where(eq(knowledgeBase.id, id));
+  }
+
+  // Live chat operations
+  async createChatSession(sessionData: InsertChatSession): Promise<ChatSession> {
+    const [session] = await db
+      .insert(chatSessions)
+      .values({
+        ...sessionData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return session;
+  }
+
+  async getChatSession(id: string): Promise<ChatSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(chatSessions)
+      .where(eq(chatSessions.id, id));
+    return session;
+  }
+
+  async updateChatSession(id: string, data: Partial<InsertChatSession>): Promise<ChatSession> {
+    const [session] = await db
+      .update(chatSessions)
+      .set(data)
+      .where(eq(chatSessions.id, id))
+      .returning();
+    return session;
+  }
+
+  async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
+    const [message] = await db
+      .insert(chatMessages)
+      .values({
+        ...messageData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return message;
+  }
+
+  async getChatMessages(sessionId: string): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.sessionId, sessionId))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  // System health operations
+  async updateSystemHealth(healthData: InsertSystemHealth): Promise<SystemHealth> {
+    const [health] = await db
+      .insert(systemHealth)
+      .values({
+        ...healthData,
+        createdAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: systemHealth.component,
+        set: {
+          status: healthData.status,
+          responseTime: healthData.responseTime,
+          uptime: healthData.uptime,
+          errorRate: healthData.errorRate,
+          lastChecked: new Date(),
+          metadata: healthData.metadata,
+        },
+      })
+      .returning();
+    return health;
+  }
+
+  async getSystemHealthStatus(): Promise<SystemHealth[]> {
+    return await db.select().from(systemHealth).orderBy(systemHealth.component);
+  }
+
+  // Password reset operations
+  async createPasswordResetToken(tokenData: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [token] = await db
+      .insert(passwordResetTokens)
+      .values({
+        ...tokenData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return token;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [resetToken] = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.token, token));
+    return resetToken;
+  }
+
+  async markPasswordResetTokenUsed(token: string): Promise<void> {
+    await db
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.token, token));
+  }
+
+  async deleteExpiredPasswordResetTokens(): Promise<void> {
+    await db
+      .delete(passwordResetTokens)
+      .where(lt(passwordResetTokens.expiresAt, new Date()));
   }
 }
 
