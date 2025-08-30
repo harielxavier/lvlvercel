@@ -64,7 +64,7 @@ export default function OrganizationChart({ user, employees = [], employeesLoadi
           </div>
         )}
         
-        {/* Real Team Structure */}
+        {/* Show ALL Managers */}
         {employeesLoading ? (
           <div className="flex justify-center space-x-8">
             {[1, 2, 3].map(i => (
@@ -75,64 +75,61 @@ export default function OrganizationChart({ user, employees = [], employeesLoadi
               </div>
             ))}
           </div>
-        ) : employees.length > 0 ? (
-          <div className="flex justify-center space-x-8" data-testid="org-department-heads">
-            <div className="text-center" data-testid="department-management">
-              <Avatar className="w-12 h-12 mx-auto mb-2 border-2 border-purple-200">
-                {managers[0] ? (
-                  <>
+        ) : managers.length > 0 ? (
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-center text-muted-foreground">Management Team</h3>
+            <div className="flex flex-wrap justify-center gap-4" data-testid="org-managers">
+              {managers.map((manager: any) => (
+                <div key={manager.id} className="text-center" data-testid={`manager-${manager.id}`}>
+                  <Avatar className="w-12 h-12 mx-auto mb-2 border-2 border-purple-200">
                     <AvatarImage 
-                      src={managers[0].profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${managers[0].id}`}
-                      alt={`${managers[0].firstName} ${managers[0].lastName}`}
+                      src={manager.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${manager.id}`}
+                      alt={`${manager.firstName} ${manager.lastName}`}
                       className="object-cover"
                     />
                     <AvatarFallback>
-                      {managers[0].firstName?.charAt(0)}{managers[0].lastName?.charAt(0)}
+                      {manager.firstName?.charAt(0)}{manager.lastName?.charAt(0)}
                     </AvatarFallback>
-                  </>
-                ) : (
-                  <AvatarFallback>MG</AvatarFallback>
-                )}
-              </Avatar>
-              <p className="font-medium text-xs">Management</p>
-              <p className="text-xs text-muted-foreground">{managers.length} managers</p>
-            </div>
-            
-            <div className="text-center" data-testid="department-team">
-              <Avatar className="w-12 h-12 mx-auto mb-2 border-2 border-green-200">
-                {regularEmployees[0] ? (
-                  <>
-                    <AvatarImage 
-                      src={regularEmployees[0].profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${regularEmployees[0].id}`}
-                      alt={`${regularEmployees[0].firstName} ${regularEmployees[0].lastName}`}
-                      className="object-cover"
-                    />
-                    <AvatarFallback>
-                      {regularEmployees[0].firstName?.charAt(0)}{regularEmployees[0].lastName?.charAt(0)}
-                    </AvatarFallback>
-                  </>
-                ) : (
-                  <AvatarFallback>TM</AvatarFallback>
-                )}
-              </Avatar>
-              <p className="font-medium text-xs">Team Members</p>
-              <p className="text-xs text-muted-foreground">{regularEmployees.length} employees</p>
-            </div>
-            
-            <div className="text-center" data-testid="department-total">
-              <Avatar className="w-12 h-12 mx-auto mb-2 border-2 border-blue-200">
-                <AvatarFallback><Users className="w-6 h-6" /></AvatarFallback>
-              </Avatar>
-              <p className="font-medium text-xs">Total Team</p>
-              <p className="text-xs text-muted-foreground">{employees.length} people</p>
+                  </Avatar>
+                  <p className="font-medium text-xs">{manager.firstName} {manager.lastName}</p>
+                  <p className="text-xs text-muted-foreground">Manager</p>
+                  <p className="text-xs text-muted-foreground">{manager.department?.name || 'Department'}</p>
+                </div>
+              ))}
             </div>
           </div>
-        ) : (
+        ) : null}
+        
+        {/* Show ALL Regular Employees */}
+        {employeesLoading ? null : regularEmployees.length > 0 ? (
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-center text-muted-foreground">Team Members</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="org-employees">
+              {regularEmployees.map((employee: any) => (
+                <div key={employee.id} className="text-center" data-testid={`employee-${employee.id}`}>
+                  <Avatar className="w-12 h-12 mx-auto mb-2 border-2 border-green-200">
+                    <AvatarImage 
+                      src={employee.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.id}`}
+                      alt={`${employee.firstName} ${employee.lastName}`}
+                      className="object-cover"
+                    />
+                    <AvatarFallback>
+                      {employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="font-medium text-xs">{employee.firstName} {employee.lastName}</p>
+                  <p className="text-xs text-muted-foreground">{employee.jobTitle || 'Employee'}</p>
+                  <p className="text-xs text-muted-foreground">{employee.department?.name || 'Department'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : employees.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Users className="w-12 h-12 mx-auto mb-2" />
             <p className="text-sm">No team structure available</p>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
