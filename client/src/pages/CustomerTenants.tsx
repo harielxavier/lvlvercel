@@ -629,30 +629,30 @@ export default function CustomerTenants() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar user={user} />
-      <main className="flex-1 transition-all duration-300 ease-in-out" data-testid="page-customer-tenants">
+      <main className="flex-1 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-customer-tenants">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40">
-        <div className="px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold gradient-text" data-testid="heading-customer-tenants">
+              <h1 className="text-xl sm:text-2xl font-bold gradient-text" data-testid="heading-customer-tenants">
                 Customer Tenants
               </h1>
               <p className="text-sm text-muted-foreground" data-testid="text-tenants-description">
                 Manage all customer organizations and their subscription tiers
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
               <Button 
                 onClick={() => setCreateUserModal(true)}
                 variant="outline" 
-                className="mr-2"
+                className="w-full sm:w-auto"
                 data-testid="button-add-user"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add User
               </Button>
-              <Button className="bg-primary hover:bg-primary/90" data-testid="button-add-tenant">
+              <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" data-testid="button-add-tenant">
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Tenant
               </Button>
@@ -662,9 +662,9 @@ export default function CustomerTenants() {
       </header>
 
       {/* Content */}
-      <div className="p-8 space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
         {/* Platform Status */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           <Card className="glass-card border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -756,7 +756,7 @@ export default function CustomerTenants() {
                   
                   return (
                     <div key={tenant.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                             <Building2 className="w-5 h-5 text-primary" />
@@ -782,19 +782,19 @@ export default function CustomerTenants() {
                             return (roleOrder[a.role as keyof typeof roleOrder] || 3) - (roleOrder[b.role as keyof typeof roleOrder] || 3);
                           })
                           .map((user) => (
-                            <div key={user.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                            <div key={user.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
                               <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                                   <Users className="w-4 h-4 text-primary" />
                                 </div>
-                                <div className="flex items-center space-x-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                                   <button
                                     onClick={() => copyToClipboard(user.email || '')}
                                     className="flex items-center space-x-2 hover:text-primary transition-colors"
                                     data-testid={`button-copy-email-${user.firstName?.toLowerCase()}`}
                                   >
                                     <Mail className="w-4 h-4" />
-                                    <span className="font-mono text-sm">{user.email}</span>
+                                    <span className="font-mono text-sm break-all">{user.email}</span>
                                     <Copy className="w-3 h-3 opacity-50" />
                                   </button>
                                   <Badge className={getRoleColor(user.role || 'employee')}>
@@ -802,58 +802,60 @@ export default function CustomerTenants() {
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <div className="flex items-center space-x-2 text-xs text-muted-foreground mr-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                                   <Key className="w-3 h-3" />
                                   <span>Vamos!!86</span>
                                 </div>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => loginAsUserMutation.mutate(user.id)}
-                                  disabled={loginAsUserMutation.isPending}
-                                  data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
-                                >
-                                  <LogIn className="w-3 h-3 mr-1" />
-                                  Login
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setEditUserModal({ open: true, user })}
-                                  data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="text-red-600 hover:text-red-700"
-                                      data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete User</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => deleteUserMutation.mutate(user.id)}
-                                        className="bg-red-600 hover:bg-red-700"
+                                <div className="flex items-center space-x-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => loginAsUserMutation.mutate(user.id)}
+                                    disabled={loginAsUserMutation.isPending}
+                                    data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
+                                  >
+                                    <LogIn className="w-3 h-3 mr-1" />
+                                    <span className="hidden sm:inline">Login</span>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setEditUserModal({ open: true, user })}
+                                    data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-red-600 hover:text-red-700"
+                                        data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
                                       >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => deleteUserMutation.mutate(user.id)}
+                                          className="bg-red-600 hover:bg-red-700"
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
                               </div>
                             </div>
                           ))}
