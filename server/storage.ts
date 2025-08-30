@@ -9,6 +9,8 @@ import {
   performanceReviews,
   notifications,
   notificationPreferences,
+  pricingTiers,
+  billingAuditLog,
   type User,
   type UpsertUser,
   type Tenant,
@@ -27,6 +29,10 @@ import {
   type NotificationPreferences,
   type InsertNotification,
   type InsertNotificationPreferences,
+  type PricingTier,
+  type InsertPricingTier,
+  type BillingAuditLog,
+  type InsertBillingAuditLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql } from "drizzle-orm";
@@ -109,6 +115,20 @@ export interface IStorage {
   // Notification preferences operations
   getUserNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined>;
   upsertNotificationPreferences(preferences: InsertNotificationPreferences): Promise<NotificationPreferences>;
+  
+  // Pricing tier management operations
+  getPricingTiers(): Promise<PricingTier[]>;
+  getPricingTier(id: string): Promise<PricingTier | undefined>;
+  createPricingTier(tier: InsertPricingTier): Promise<PricingTier>;
+  updatePricingTier(id: string, data: Partial<InsertPricingTier>): Promise<PricingTier>;
+  deletePricingTier(id: string): Promise<void>;
+  
+  // Billing audit log operations
+  createBillingAuditLog(log: InsertBillingAuditLog): Promise<BillingAuditLog>;
+  getBillingAuditLog(tenantId?: string, limit?: number): Promise<BillingAuditLog[]>;
+  
+  // Tenant billing operations
+  changeTenantTier(tenantId: string, newTierId: string, userId: string): Promise<Tenant>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -610,6 +630,115 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return preferences;
+  }
+
+  // Pricing tier management operations
+  async getPricingTiers(): Promise<PricingTier[]> {
+    return await db
+      .select()
+      .from(pricingTiers)
+      .where(eq(pricingTiers.isActive, true))
+      .orderBy(pricingTiers.sortOrder);
+  }
+
+  async getPricingTier(id: string): Promise<PricingTier | undefined> {
+    const [tier] = await db
+      .select()
+      .from(pricingTiers)
+      .where(eq(pricingTiers.id, id));
+    return tier;
+  }
+
+  async createPricingTier(tierData: InsertPricingTier): Promise<PricingTier> {
+    const [tier] = await db
+      .insert(pricingTiers)
+      .values({
+        ...tierData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return tier;
+  }
+
+  async updatePricingTier(id: string, data: Partial<InsertPricingTier>): Promise<PricingTier> {
+    const [tier] = await db
+      .update(pricingTiers)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(pricingTiers.id, id))
+      .returning();
+    return tier;
+  }
+
+  async deletePricingTier(id: string): Promise<void> {
+    // Soft delete by setting isActive to false
+    await db
+      .update(pricingTiers)
+      .set({ 
+        isActive: false, 
+        updatedAt: new Date() 
+      })
+      .where(eq(pricingTiers.id, id));
+  }
+
+  // Billing audit log operations
+  async createBillingAuditLog(logData: InsertBillingAuditLog): Promise<BillingAuditLog> {
+    const [log] = await db
+      .insert(billingAuditLog)
+      .values({
+        ...logData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return log;
+  }
+
+  async getBillingAuditLog(tenantId?: string, limit: number = 100): Promise<BillingAuditLog[]> {
+    const query = db
+      .select()
+      .from(billingAuditLog)
+      .orderBy(desc(billingAuditLog.createdAt))
+      .limit(limit);
+    
+    if (tenantId) {
+      return query.where(eq(billingAuditLog.tenantId, tenantId));
+    }
+    
+    return query;
+  }
+
+  // Tenant billing operations
+  async changeTenantTier(tenantId: string, newTierId: string, userId: string): Promise<Tenant> {
+    // Get current tenant data for audit log
+    const currentTenant = await this.getTenant(tenantId);
+    if (!currentTenant) {
+      throw new Error('Tenant not found');
+    }
+
+    // Update tenant subscription tier
+    const [updatedTenant] = await db
+      .update(tenants)
+      .set({
+        subscriptionTier: newTierId as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(tenants.id, tenantId))
+      .returning();
+
+    // Create audit log entry
+    await this.createBillingAuditLog({
+      tenantId,
+      userId,
+      action: 'tier_change',
+      oldValue: { subscriptionTier: currentTenant.subscriptionTier },
+      newValue: { subscriptionTier: newTierId },
+      description: `Tenant tier changed from ${currentTenant.subscriptionTier} to ${newTierId}`,
+    });
+
+    return updatedTenant;
   }
 }
 

@@ -30,7 +30,8 @@ import {
   MoreHorizontal,
   UserPlus,
   Menu,
-  X
+  X,
+  DollarSign
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -70,6 +71,11 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: CreditCard,
           label: 'Billing & Subscriptions',
           href: '/billing'
+        },
+        {
+          icon: DollarSign,
+          label: 'Pricing Management',
+          href: '/pricing'
         },
         {
           icon: BarChart3,

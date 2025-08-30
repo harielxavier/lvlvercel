@@ -29,7 +29,7 @@ export const sessions = pgTable(
 export const userRoleEnum = pgEnum('user_role', ['platform_admin', 'tenant_admin', 'manager', 'employee']);
 
 // Subscription tiers enum
-export const subscriptionTierEnum = pgEnum('subscription_tier', ['platform', 'mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo']);
+export const subscriptionTierEnum = pgEnum('subscription_tier', ['platform', 'mj_scott', 'forming', 'storming', 'norming', 'performing', 'appsumo', 'custom']);
 
 // Notification types enum
 export const notificationTypeEnum = pgEnum('notification_type', ['feedback_received', 'goal_reminder', 'performance_review', 'system_update', 'weekly_digest']);
@@ -172,6 +172,34 @@ export const notificationPreferences = pgTable("notification_preferences", {
   weeklyDigest: boolean("weekly_digest").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Pricing tiers table (for dynamic pricing management)
+export const pricingTiers = pgTable("pricing_tiers", {
+  id: varchar("id").primaryKey(), // e.g., 'forming', 'storming', etc.
+  name: varchar("name").notNull(),
+  description: text("description"),
+  monthlyPrice: integer("monthly_price").notNull(), // in cents
+  yearlyPrice: integer("yearly_price").notNull(), // in cents
+  maxSeats: integer("max_seats").default(-1), // -1 for unlimited
+  features: jsonb("features").notNull(), // Array of feature strings
+  targetMarket: text("target_market"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Billing audit log table
+export const billingAuditLog = pgTable("billing_audit_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").references(() => tenants.id),
+  userId: varchar("user_id").references(() => users.id), // Admin who made the change
+  action: varchar("action").notNull(), // 'tier_change', 'price_update', 'tier_create', etc.
+  oldValue: jsonb("old_value"),
+  newValue: jsonb("new_value"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Notifications table
@@ -333,6 +361,16 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   readAt: true,
 });
 
+export const insertPricingTierSchema = createInsertSchema(pricingTiers).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBillingAuditLogSchema = createInsertSchema(billingAuditLog).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -345,6 +383,8 @@ export type Goal = typeof goals.$inferSelect;
 export type PerformanceReview = typeof performanceReviews.$inferSelect;
 export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type PricingTier = typeof pricingTiers.$inferSelect;
+export type BillingAuditLog = typeof billingAuditLog.$inferSelect;
 
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
@@ -353,3 +393,5 @@ export type InsertGoal = z.infer<typeof insertGoalSchema>;
 export type InsertPerformanceReview = z.infer<typeof insertPerformanceReviewSchema>;
 export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
+export type InsertBillingAuditLog = z.infer<typeof insertBillingAuditLogSchema>;

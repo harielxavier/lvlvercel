@@ -28,6 +28,7 @@ import FeedbackCollection from "@/pages/FeedbackCollection";
 import PeerFeedback from "@/pages/PeerFeedback";
 import Profile from "@/pages/Profile";
 import PublicFeedbackForm from "@/pages/PublicFeedbackForm";
+import PricingManagement from "@/pages/PricingManagement";
 import { useLocation } from "wouter";
 
 function Router() {
@@ -94,6 +95,7 @@ function Router() {
       <Route path="/tenants" component={CustomerTenants} />
       <Route path="/analytics" component={PlatformAnalytics} />
       <Route path="/billing" component={BillingSubscriptions} />
+      <Route path="/pricing" component={PricingManagement} />
       <Route path="/system-settings" component={SystemSettings} />
       
       {/* Tenant Admin Routes */}

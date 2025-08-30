@@ -234,6 +234,204 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Platform Super Admin - Pricing Tier Management Routes
+  app.get("/api/platform/pricing-tiers", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const tiers = await storage.getPricingTiers();
+      res.json(tiers);
+    } catch (error) {
+      console.error("Error fetching pricing tiers:", error);
+      res.status(500).json({ message: "Failed to fetch pricing tiers" });
+    }
+  });
+
+  app.get("/api/platform/pricing-tiers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { id } = req.params;
+      const tier = await storage.getPricingTier(id);
+      if (!tier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+      res.json(tier);
+    } catch (error) {
+      console.error("Error fetching pricing tier:", error);
+      res.status(500).json({ message: "Failed to fetch pricing tier" });
+    }
+  });
+
+  app.post("/api/platform/pricing-tiers", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { insertPricingTierSchema } = await import("@shared/schema");
+      const validatedData = insertPricingTierSchema.parse(req.body);
+      const tier = await storage.createPricingTier(validatedData);
+      
+      // Create audit log entry
+      await storage.createBillingAuditLog({
+        userId: user.claims.sub,
+        action: 'tier_create',
+        newValue: tier,
+        description: `Created new pricing tier: ${tier.name}`,
+      });
+      
+      res.status(201).json(tier);
+    } catch (error) {
+      console.error("Error creating pricing tier:", error);
+      res.status(500).json({ message: "Failed to create pricing tier" });
+    }
+  });
+
+  app.put("/api/platform/pricing-tiers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { id } = req.params;
+      const { insertPricingTierSchema } = await import("@shared/schema");
+      
+      // Get old values for audit log
+      const oldTier = await storage.getPricingTier(id);
+      if (!oldTier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+      
+      const validatedData = insertPricingTierSchema.partial().parse(req.body);
+      const updatedTier = await storage.updatePricingTier(id, validatedData);
+      
+      // Create audit log entry
+      await storage.createBillingAuditLog({
+        userId: user.claims.sub,
+        action: 'tier_update',
+        oldValue: oldTier,
+        newValue: updatedTier,
+        description: `Updated pricing tier: ${updatedTier.name}`,
+      });
+      
+      res.json(updatedTier);
+    } catch (error) {
+      console.error("Error updating pricing tier:", error);
+      res.status(500).json({ message: "Failed to update pricing tier" });
+    }
+  });
+
+  app.delete("/api/platform/pricing-tiers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { id } = req.params;
+      
+      // Get tier data for audit log before deletion
+      const tier = await storage.getPricingTier(id);
+      if (!tier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+      
+      await storage.deletePricingTier(id);
+      
+      // Create audit log entry
+      await storage.createBillingAuditLog({
+        userId: user.claims.sub,
+        action: 'tier_delete',
+        oldValue: tier,
+        description: `Deleted pricing tier: ${tier.name}`,
+      });
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting pricing tier:", error);
+      res.status(500).json({ message: "Failed to delete pricing tier" });
+    }
+  });
+
+  // Platform Super Admin - Tenant Tier Management
+  app.put("/api/platform/tenants/:tenantId/tier", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { tenantId } = req.params;
+      const { tierId } = req.body;
+      
+      if (!tierId) {
+        return res.status(400).json({ message: "Tier ID is required" });
+      }
+      
+      // Verify the tier exists
+      const tier = await storage.getPricingTier(tierId);
+      if (!tier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+      
+      const updatedTenant = await storage.changeTenantTier(tenantId, tierId, user.claims.sub);
+      res.json(updatedTenant);
+    } catch (error) {
+      console.error("Error changing tenant tier:", error);
+      res.status(500).json({ message: "Failed to change tenant tier" });
+    }
+  });
+
+  // Platform Super Admin - Billing Audit Log
+  app.get("/api/platform/billing-audit", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (user.claims.sub) {
+        const currentUser = await storage.getUser(user.claims.sub);
+        if (currentUser?.role !== 'platform_admin') {
+          return res.status(403).json({ message: "Access denied - Platform Admin required" });
+        }
+      }
+      
+      const { tenantId, limit } = req.query;
+      const auditLog = await storage.getBillingAuditLog(
+        tenantId as string || undefined,
+        limit ? parseInt(limit as string) : 100
+      );
+      res.json(auditLog);
+    } catch (error) {
+      console.error("Error fetching billing audit log:", error);
+      res.status(500).json({ message: "Failed to fetch billing audit log" });
+    }
+  });
+
   // Get all users for testing (Platform Admin only)
   app.get("/api/platform/users", isAuthenticated, async (req, res) => {
     try {
