@@ -129,9 +129,17 @@ export const goals = pgTable("goals", {
   employeeId: varchar("employee_id").notNull().references(() => employees.id),
   title: varchar("title").notNull(),
   description: text("description"),
+  category: varchar("category"), // professional, team, product, leadership, personal
+  priority: varchar("priority").default('medium'), // high, medium, low
+  goalType: varchar("goal_type").default('personal'), // personal, team, department, company
+  difficulty: varchar("difficulty").default('medium'), // easy, medium, hard, expert
+  visibility: varchar("visibility").default('private'), // private, team, public
   targetDate: timestamp("target_date"),
-  status: varchar("status").default('in_progress'), // in_progress, completed, overdue
+  status: varchar("status").default('in_progress'), // in_progress, completed, overdue, on_hold
   progress: integer("progress").default(0), // 0-100
+  milestones: jsonb("milestones"), // Array of milestone objects
+  tags: text("tags").array(), // Array of tags for organization
+  notes: text("notes"), // Additional notes and updates
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
