@@ -758,7 +758,7 @@ export default function CustomerTenants() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar user={user} />
-      <main className="flex-1 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-customer-tenants">
+      <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-customer-tenants">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40 backdrop-blur-xl">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
@@ -785,57 +785,117 @@ export default function CustomerTenants() {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
-        {/* Platform Status */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 animate-fade-in">
-          <Card className="glass-card border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Customer Tenants</p>
-                  <div className="text-3xl font-bold text-foreground">
-                    {isLoading ? <Skeleton className="h-8 w-12" /> : tenants?.length || 0}
+      {/* Content - Bento Box Layout */}
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
+          {/* Large Card - Total Tenants */}
+          <Card className="glass-card border-0 lg:col-span-2 lg:row-span-2">
+            <CardContent className="p-8">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Building2 className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-sm text-primary font-medium mt-1 flex items-center">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    Ready for onboarding
-                  </p>
+                  <Badge className="bg-primary/10 text-primary border-primary/20">Platform Overview</Badge>
                 </div>
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-primary" />
+                <div className="flex-1">
+                  <p className="text-lg font-medium text-muted-foreground mb-2">Total Customer Tenants</p>
+                  <div className="text-5xl font-bold text-foreground mb-4">
+                    {isLoading ? <Skeleton className="h-12 w-16" /> : tenants?.length || 0}
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Active Organizations</span>
+                      <span className="font-medium text-green-600">
+                        {isLoading ? <Skeleton className="h-4 w-8" /> : tenants?.filter((t: any) => t.isActive).length || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Total Users</span>
+                      <span className="font-medium">{usersLoading ? <Skeleton className="h-4 w-8" /> : users?.length || 0}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-primary font-medium">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Ready for scale
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Medium Card - Active Subscriptions */}
           <Card className="glass-card border-0">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
-                  <div className="text-3xl font-bold text-foreground">
-                    {isLoading ? <Skeleton className="h-8 w-12" /> : tenants?.filter((t: any) => t.isActive).length || 0}
-                  </div>
-                  <p className="text-sm text-green-600 font-medium mt-1">All systems operational</p>
-                </div>
+              <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                   <Crown className="w-6 h-6 text-green-600" />
                 </div>
+                <Badge className="bg-green-100 text-green-800">Active</Badge>
               </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Active Subscriptions</p>
+              <div className="text-3xl font-bold text-foreground mb-2">
+                {isLoading ? <Skeleton className="h-8 w-12" /> : tenants?.filter((t: any) => t.isActive).length || 0}
+              </div>
+              <p className="text-xs text-green-600 font-medium">All systems operational</p>
             </CardContent>
           </Card>
 
+          {/* Medium Card - Revenue */}
           <Card className="glass-card border-0">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Platform Revenue</p>
-                  <p className="text-3xl font-bold text-foreground">$0</p>
-                  <p className="text-sm text-muted-foreground mt-1">Ready to scale</p>
-                </div>
+              <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-orange-600" />
+                </div>
+                <Badge className="bg-orange-100 text-orange-800">Revenue</Badge>
+              </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Platform Revenue</p>
+              <div className="text-3xl font-bold text-foreground mb-2">$0</div>
+              <p className="text-xs text-muted-foreground">Ready to scale</p>
+            </CardContent>
+          </Card>
+
+          {/* Wide Card - Quick Actions */}
+          <Card className="glass-card border-0 lg:col-span-2">
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Quick Actions</h3>
+                  <p className="text-sm text-muted-foreground">Manage platform operations</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={() => setCreateTenantModal(true)}
+                    data-testid="button-quick-add-tenant"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Add Tenant</span>
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={() => setCreateUserModal(true)}
+                    data-testid="button-quick-add-user"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span className="hidden sm:inline">Add User</span>
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={() => toast({ title: "Settings", description: "Settings panel coming soon!" })}
+                    data-testid="button-quick-settings"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span className="hidden sm:inline">Settings</span>
+                  </Button>
                 </div>
               </div>
             </CardContent>
