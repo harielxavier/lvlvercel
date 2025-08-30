@@ -31,7 +31,9 @@ import {
   UserPlus,
   Menu,
   X,
-  DollarSign
+  DollarSign,
+  Tag,
+  Gift
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -76,6 +78,11 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: DollarSign,
           label: 'Pricing Management',
           href: '/pricing'
+        },
+        {
+          icon: Tag,
+          label: 'Discount Codes',
+          href: '/discounts'
         },
         {
           icon: BarChart3,
@@ -186,6 +193,11 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: MessageSquare,
           label: 'Feedback Collection',
           href: '/feedback-collection'
+        },
+        {
+          icon: Gift,
+          label: 'Referral Dashboard',
+          href: '/referrals'
         },
         {
           icon: Target,

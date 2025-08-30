@@ -19,6 +19,10 @@ import {
   chatMessages,
   systemHealth,
   passwordResetTokens,
+  discountCodes,
+  discountCodeUsages,
+  referrals,
+  referralRewards,
   type User,
   type UpsertUser,
   type Tenant,
@@ -57,6 +61,14 @@ import {
   type InsertSystemHealth,
   type PasswordResetToken,
   type InsertPasswordResetToken,
+  type DiscountCode,
+  type InsertDiscountCode,
+  type DiscountCodeUsage,
+  type InsertDiscountCodeUsage,
+  type Referral,
+  type InsertReferral,
+  type ReferralReward,
+  type InsertReferralReward,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, lt } from "drizzle-orm";
@@ -880,13 +892,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSupportTickets(tenantId?: string): Promise<SupportTicket[]> {
-    let query = db.select().from(supportTickets);
-    
     if (tenantId) {
-      query = query.where(eq(supportTickets.tenantId, tenantId));
+      return await db
+        .select()
+        .from(supportTickets)
+        .where(eq(supportTickets.tenantId, tenantId))
+        .orderBy(desc(supportTickets.createdAt));
     }
     
-    return query.orderBy(desc(supportTickets.createdAt));
+    return await db
+      .select()
+      .from(supportTickets)
+      .orderBy(desc(supportTickets.createdAt));
   }
 
   async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
@@ -946,13 +963,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getKnowledgeBaseArticles(category?: string): Promise<KnowledgeBase[]> {
-    let query = db.select().from(knowledgeBase).where(eq(knowledgeBase.isPublished, true));
-    
     if (category) {
-      query = query.where(and(eq(knowledgeBase.isPublished, true), eq(knowledgeBase.category, category)));
+      return await db
+        .select()
+        .from(knowledgeBase)
+        .where(and(eq(knowledgeBase.isPublished, true), eq(knowledgeBase.category, category)))
+        .orderBy(desc(knowledgeBase.viewCount));
     }
     
-    return query.orderBy(desc(knowledgeBase.viewCount));
+    return await db
+      .select()
+      .from(knowledgeBase)
+      .where(eq(knowledgeBase.isPublished, true))
+      .orderBy(desc(knowledgeBase.viewCount));
   }
 
   async getKnowledgeBaseArticle(slug: string): Promise<KnowledgeBase | undefined> {
@@ -1076,6 +1099,243 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(passwordResetTokens)
       .where(lt(passwordResetTokens.expiresAt, new Date()));
+  }
+
+  // Discount code operations
+  async createDiscountCode(codeData: InsertDiscountCode): Promise<DiscountCode> {
+    const [discountCode] = await db
+      .insert(discountCodes)
+      .values({
+        ...codeData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return discountCode;
+  }
+
+  async getDiscountCodes(): Promise<DiscountCode[]> {
+    return await db
+      .select()
+      .from(discountCodes)
+      .orderBy(desc(discountCodes.createdAt));
+  }
+
+  async getDiscountCode(code: string): Promise<DiscountCode | undefined> {
+    const [discountCode] = await db
+      .select()
+      .from(discountCodes)
+      .where(eq(discountCodes.code, code));
+    return discountCode;
+  }
+
+  async getDiscountCodeById(id: string): Promise<DiscountCode | undefined> {
+    const [discountCode] = await db
+      .select()
+      .from(discountCodes)
+      .where(eq(discountCodes.id, id));
+    return discountCode;
+  }
+
+  async updateDiscountCode(id: string, data: Partial<InsertDiscountCode>): Promise<DiscountCode> {
+    const [discountCode] = await db
+      .update(discountCodes)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(discountCodes.id, id))
+      .returning();
+    return discountCode;
+  }
+
+  async incrementDiscountUsage(id: string): Promise<void> {
+    await db
+      .update(discountCodes)
+      .set({ 
+        currentUsageCount: sql`${discountCodes.currentUsageCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(discountCodes.id, id));
+  }
+
+  async validateDiscountCode(code: string, userId?: string): Promise<{ valid: boolean; discount?: DiscountCode; reason?: string }> {
+    const discount = await this.getDiscountCode(code);
+    
+    if (!discount) {
+      return { valid: false, reason: 'Discount code not found' };
+    }
+
+    if (discount.status !== 'active') {
+      return { valid: false, reason: 'Discount code is not active' };
+    }
+
+    const now = new Date();
+    if (discount.validUntil && now > discount.validUntil) {
+      return { valid: false, reason: 'Discount code has expired' };
+    }
+
+    if (discount.maxUsageTotal !== -1 && discount.currentUsageCount >= discount.maxUsageTotal) {
+      return { valid: false, reason: 'Discount code usage limit reached' };
+    }
+
+    // Check per-user usage limit if user is provided
+    if (userId && discount.maxUsagePerUser > 0) {
+      const userUsageCount = await db
+        .select({ count: count() })
+        .from(discountCodeUsages)
+        .where(and(
+          eq(discountCodeUsages.discountCodeId, discount.id),
+          eq(discountCodeUsages.userId, userId)
+        ));
+      
+      if (userUsageCount[0].count >= discount.maxUsagePerUser) {
+        return { valid: false, reason: 'Personal usage limit reached for this code' };
+      }
+    }
+
+    return { valid: true, discount };
+  }
+
+  async recordDiscountUsage(usageData: InsertDiscountCodeUsage): Promise<DiscountCodeUsage> {
+    const [usage] = await db
+      .insert(discountCodeUsages)
+      .values({
+        ...usageData,
+        usedAt: new Date(),
+      })
+      .returning();
+    
+    // Increment the usage count
+    await this.incrementDiscountUsage(usageData.discountCodeId);
+    
+    return usage;
+  }
+
+  async getDiscountUsagesByCode(discountCodeId: string): Promise<DiscountCodeUsage[]> {
+    return await db
+      .select()
+      .from(discountCodeUsages)
+      .where(eq(discountCodeUsages.discountCodeId, discountCodeId))
+      .orderBy(desc(discountCodeUsages.usedAt));
+  }
+
+  // Referral operations
+  async createReferral(referralData: InsertReferral): Promise<Referral> {
+    const [referral] = await db
+      .insert(referrals)
+      .values({
+        ...referralData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return referral;
+  }
+
+  async getReferralsByUser(userId: string): Promise<Referral[]> {
+    return await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referrerUserId, userId))
+      .orderBy(desc(referrals.createdAt));
+  }
+
+  async getReferralByCode(code: string): Promise<Referral | undefined> {
+    const [referral] = await db
+      .select()
+      .from(referrals)
+      .where(eq(referrals.referralCode, code));
+    return referral;
+  }
+
+  async updateReferral(id: string, data: Partial<InsertReferral>): Promise<Referral> {
+    const [referral] = await db
+      .update(referrals)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(referrals.id, id))
+      .returning();
+    return referral;
+  }
+
+  async completeReferral(referralCode: string, referredUserId: string): Promise<Referral> {
+    const [referral] = await db
+      .update(referrals)
+      .set({ 
+        referredUserId,
+        status: 'completed',
+        completedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(referrals.referralCode, referralCode))
+      .returning();
+    return referral;
+  }
+
+  async generateReferralCode(userId: string): Promise<string> {
+    // Generate a unique referral code like "JOHN-X7K9M"
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    const firstName = user.firstName?.toUpperCase() || 'USER';
+    const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const code = `${firstName}-${randomSuffix}`;
+    
+    // Check if code already exists
+    const existing = await this.getReferralByCode(code);
+    if (existing) {
+      // Try again with a different suffix
+      return this.generateReferralCode(userId);
+    }
+    
+    return code;
+  }
+
+  async createReferralReward(rewardData: InsertReferralReward): Promise<ReferralReward> {
+    const [reward] = await db
+      .insert(referralRewards)
+      .values({
+        ...rewardData,
+        createdAt: new Date(),
+      })
+      .returning();
+    return reward;
+  }
+
+  async getReferralRewardsByUser(userId: string): Promise<ReferralReward[]> {
+    return await db
+      .select()
+      .from(referralRewards)
+      .where(eq(referralRewards.userId, userId))
+      .orderBy(desc(referralRewards.createdAt));
+  }
+
+  async markReferralRewardApplied(rewardId: string, invoiceId: string): Promise<ReferralReward> {
+    const [reward] = await db
+      .update(referralRewards)
+      .set({ 
+        appliedToInvoice: invoiceId,
+        appliedAt: new Date()
+      })
+      .where(eq(referralRewards.id, rewardId))
+      .returning();
+    return reward;
+  }
+
+  async getReferralStats(userId: string): Promise<{
+    totalReferrals: number;
+    completedReferrals: number;
+    pendingReferrals: number;
+    totalRewards: number;
+    availableRewards: number;
+  }> {
+    const referrals = await this.getReferralsByUser(userId);
+    const rewards = await this.getReferralRewardsByUser(userId);
+    
+    return {
+      totalReferrals: referrals.length,
+      completedReferrals: referrals.filter(r => r.status === 'completed').length,
+      pendingReferrals: referrals.filter(r => r.status === 'pending').length,
+      totalRewards: rewards.reduce((sum, r) => sum + r.rewardValue, 0),
+      availableRewards: rewards.filter(r => !r.appliedAt).reduce((sum, r) => sum + r.rewardValue, 0),
+    };
   }
 }
 

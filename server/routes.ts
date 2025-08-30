@@ -1596,6 +1596,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discount code management routes (Platform Admin only)
+  app.get('/api/platform/discount-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'platform_admin') {
+        return res.status(403).json({ message: 'Platform admin access required' });
+      }
+
+      const codes = await storage.getDiscountCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error("Error fetching discount codes:", error);
+      res.status(500).json({ message: "Failed to fetch discount codes" });
+    }
+  });
+
+  app.post('/api/platform/discount-codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'platform_admin') {
+        return res.status(403).json({ message: 'Platform admin access required' });
+      }
+
+      const codeData = {
+        ...req.body,
+        createdBy: user.id,
+      };
+
+      const code = await storage.createDiscountCode(codeData);
+      res.status(201).json(code);
+    } catch (error) {
+      console.error("Error creating discount code:", error);
+      res.status(500).json({ message: "Failed to create discount code" });
+    }
+  });
+
+  app.patch('/api/platform/discount-codes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'platform_admin') {
+        return res.status(403).json({ message: 'Platform admin access required' });
+      }
+
+      const { id } = req.params;
+      const code = await storage.updateDiscountCode(id, req.body);
+      res.json(code);
+    } catch (error) {
+      console.error("Error updating discount code:", error);
+      res.status(500).json({ message: "Failed to update discount code" });
+    }
+  });
+
+  app.get('/api/platform/discount-codes/:id/usage', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'platform_admin') {
+        return res.status(403).json({ message: 'Platform admin access required' });
+      }
+
+      const { id } = req.params;
+      const usage = await storage.getDiscountUsagesByCode(id);
+      res.json(usage);
+    } catch (error) {
+      console.error("Error fetching discount usage:", error);
+      res.status(500).json({ message: "Failed to fetch discount usage" });
+    }
+  });
+
+  // Discount code validation (public for checkout)
+  app.post('/api/validate-discount', async (req, res) => {
+    try {
+      const { code, userId } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ message: 'Discount code is required' });
+      }
+
+      const validation = await storage.validateDiscountCode(code, userId);
+      res.json(validation);
+    } catch (error) {
+      console.error("Error validating discount code:", error);
+      res.status(500).json({ message: "Failed to validate discount code" });
+    }
+  });
+
+  // Apply discount code during checkout
+  app.post('/api/apply-discount', isAuthenticated, async (req: any, res) => {
+    try {
+      const { discountCodeId, orderValue, stripeInvoiceId } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const discountCode = await storage.getDiscountCodeById(discountCodeId);
+      if (!discountCode) {
+        return res.status(404).json({ message: 'Discount code not found' });
+      }
+
+      // Calculate discount amount
+      let discountAmount = 0;
+      if (discountCode.discountType === 'percentage') {
+        discountAmount = Math.round((orderValue * discountCode.discountValue) / 100);
+      } else if (discountCode.discountType === 'fixed_amount') {
+        discountAmount = discountCode.discountValue;
+      }
+
+      // Record usage
+      const usage = await storage.recordDiscountUsage({
+        discountCodeId,
+        userId,
+        tenantId: user?.tenantId || null,
+        orderValue,
+        discountAmount,
+        stripeInvoiceId,
+      });
+
+      res.json({ usage, discountAmount });
+    } catch (error) {
+      console.error("Error applying discount:", error);
+      res.status(500).json({ message: "Failed to apply discount" });
+    }
+  });
+
+  // Referral system routes
+  app.get('/api/user/referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const referrals = await storage.getReferralsByUser(userId);
+      const stats = await storage.getReferralStats(userId);
+      const rewards = await storage.getReferralRewardsByUser(userId);
+
+      res.json({ referrals, stats, rewards });
+    } catch (error) {
+      console.error("Error fetching user referrals:", error);
+      res.status(500).json({ message: "Failed to fetch referrals" });
+    }
+  });
+
+  app.post('/api/user/referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { referredEmail, campaignName } = req.body;
+
+      // Generate unique referral code
+      const referralCode = await storage.generateReferralCode(userId);
+
+      const referral = await storage.createReferral({
+        referrerUserId: userId,
+        referredEmail,
+        referralCode,
+        campaignName: campaignName || 'default',
+        rewardType: 'discount',
+        rewardValue: 2000, // $20 in cents
+      });
+
+      res.status(201).json(referral);
+    } catch (error) {
+      console.error("Error creating referral:", error);
+      res.status(500).json({ message: "Failed to create referral" });
+    }
+  });
+
+  // Complete referral when referred user signs up
+  app.post('/api/complete-referral', async (req, res) => {
+    try {
+      const { referralCode, referredUserId } = req.body;
+
+      if (!referralCode || !referredUserId) {
+        return res.status(400).json({ message: 'Referral code and referred user ID are required' });
+      }
+
+      const referral = await storage.completeReferral(referralCode, referredUserId);
+      
+      // Create rewards for both referrer and referred user
+      const referrerReward = await storage.createReferralReward({
+        referralId: referral.id,
+        userId: referral.referrerUserId,
+        rewardType: 'referrer_bonus',
+        rewardValue: referral.rewardValue || 2000,
+        rewardDescription: 'Referral bonus - friend signed up',
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      });
+
+      const referredReward = await storage.createReferralReward({
+        referralId: referral.id,
+        userId: referredUserId,
+        rewardType: 'referee_discount',
+        rewardValue: 1000, // $10 discount for new user
+        rewardDescription: 'Welcome discount from referral',
+        expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days
+      });
+
+      res.json({ referral, referrerReward, referredReward });
+    } catch (error) {
+      console.error("Error completing referral:", error);
+      res.status(500).json({ message: "Failed to complete referral" });
+    }
+  });
+
+  // Apply referral reward to invoice
+  app.post('/api/apply-referral-reward', isAuthenticated, async (req: any, res) => {
+    try {
+      const { rewardId, stripeInvoiceId } = req.body;
+      const userId = req.user.claims.sub;
+
+      // Verify the reward belongs to the user
+      const rewards = await storage.getReferralRewardsByUser(userId);
+      const reward = rewards.find(r => r.id === rewardId);
+
+      if (!reward) {
+        return res.status(404).json({ message: 'Reward not found' });
+      }
+
+      if (reward.appliedAt) {
+        return res.status(400).json({ message: 'Reward already applied' });
+      }
+
+      const updatedReward = await storage.markReferralRewardApplied(rewardId, stripeInvoiceId);
+      res.json(updatedReward);
+    } catch (error) {
+      console.error("Error applying referral reward:", error);
+      res.status(500).json({ message: "Failed to apply referral reward" });
+    }
+  });
+
+  // Platform admin - view all referrals
+  app.get('/api/platform/referrals', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (!user || user.role !== 'platform_admin') {
+        return res.status(403).json({ message: 'Platform admin access required' });
+      }
+
+      // This would need a new storage method to get all referrals
+      // For now, return empty array as placeholder
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching platform referrals:", error);
+      res.status(500).json({ message: "Failed to fetch platform referrals" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

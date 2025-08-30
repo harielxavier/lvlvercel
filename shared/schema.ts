@@ -49,6 +49,15 @@ export const supportIntegrationEnum = pgEnum('support_integration', ['zendesk', 
 // Knowledge base category enum
 export const kbCategoryEnum = pgEnum('kb_category', ['getting_started', 'features', 'billing', 'troubleshooting', 'api', 'security']);
 
+// Discount code type enum
+export const discountTypeEnum = pgEnum('discount_type', ['percentage', 'fixed_amount', 'free_trial', 'seat_discount']);
+
+// Discount code status enum
+export const discountStatusEnum = pgEnum('discount_status', ['active', 'expired', 'disabled', 'used_up']);
+
+// Referral status enum
+export const referralStatusEnum = pgEnum('referral_status', ['pending', 'completed', 'cancelled', 'rewarded']);
+
 // User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -335,6 +344,84 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Discount codes table for promotional campaigns and customer acquisition
+export const discountCodes = pgTable("discount_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").notNull().unique(), // e.g., "WELCOME20", "SAVE50"
+  name: varchar("name").notNull(), // Human-readable name for admin
+  description: text("description"), // What this code is for
+  discountType: discountTypeEnum("discount_type").notNull(),
+  discountValue: integer("discount_value").notNull(), // percentage (20) or cents (2000)
+  minOrderValue: integer("min_order_value").default(0), // minimum order in cents
+  maxUsageTotal: integer("max_usage_total").default(-1), // -1 for unlimited
+  maxUsagePerUser: integer("max_usage_per_user").default(1),
+  currentUsageCount: integer("current_usage_count").default(0),
+  validFrom: timestamp("valid_from").defaultNow(),
+  validUntil: timestamp("valid_until"),
+  applicableToPlans: text("applicable_to_plans").array(), // which subscription plans
+  status: discountStatusEnum("status").default('active'),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("discount_codes_code_idx").on(table.code),
+  index("discount_codes_status_idx").on(table.status),
+]);
+
+// Discount code usage tracking
+export const discountCodeUsages = pgTable("discount_code_usages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  discountCodeId: varchar("discount_code_id").notNull().references(() => discountCodes.id),
+  userId: varchar("user_id").references(() => users.id),
+  tenantId: varchar("tenant_id").references(() => tenants.id),
+  orderValue: integer("order_value").notNull(), // original order value in cents
+  discountAmount: integer("discount_amount").notNull(), // actual discount applied in cents
+  stripeInvoiceId: varchar("stripe_invoice_id"), // link to Stripe invoice
+  usedAt: timestamp("used_at").defaultNow(),
+}, (table) => [
+  index("discount_usages_code_idx").on(table.discountCodeId),
+  index("discount_usages_user_idx").on(table.userId),
+]);
+
+// User referrals table for viral growth and customer acquisition  
+export const referrals = pgTable("referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerUserId: varchar("referrer_user_id").notNull().references(() => users.id),
+  referredUserId: varchar("referred_user_id").references(() => users.id), // null until they sign up
+  referredEmail: varchar("referred_email"), // email they were referred with
+  referralCode: varchar("referral_code").notNull().unique(), // unique code like "JOHN-X7K9M"
+  campaignName: varchar("campaign_name"), // which referral campaign
+  status: referralStatusEnum("status").default('pending'),
+  rewardType: varchar("reward_type"), // 'discount', 'credit', 'free_months'
+  rewardValue: integer("reward_value"), // amount in cents or months
+  rewardApplied: boolean("reward_applied").default(false),
+  metadata: jsonb("metadata"), // additional campaign data
+  completedAt: timestamp("completed_at"), // when referred user subscribed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("referrals_referrer_idx").on(table.referrerUserId),
+  index("referrals_code_idx").on(table.referralCode),
+  index("referrals_status_idx").on(table.status),
+]);
+
+// Referral rewards tracking for both referrer and referred users
+export const referralRewards = pgTable("referral_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralId: varchar("referral_id").notNull().references(() => referrals.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  rewardType: varchar("reward_type").notNull(), // 'referrer_bonus', 'referee_discount'
+  rewardValue: integer("reward_value").notNull(), // amount in cents
+  rewardDescription: text("reward_description"), // human readable
+  appliedToInvoice: varchar("applied_to_invoice"), // Stripe invoice ID
+  appliedAt: timestamp("applied_at"),
+  expiresAt: timestamp("expires_at"), // when reward expires if unused
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("referral_rewards_user_idx").on(table.userId),
+  index("referral_rewards_referral_idx").on(table.referralId),
+]);
+
 // Notifications table
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -548,6 +635,29 @@ export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTo
   createdAt: true,
 });
 
+export const insertDiscountCodeSchema = createInsertSchema(discountCodes).omit({
+  id: true,
+  currentUsageCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDiscountCodeUsageSchema = createInsertSchema(discountCodeUsages).omit({
+  id: true,
+  usedAt: true,
+});
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertReferralRewardSchema = createInsertSchema(referralRewards).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -589,3 +699,12 @@ export type ChatSession = typeof chatSessions.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type SystemHealth = typeof systemHealth.$inferSelect;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type DiscountCode = typeof discountCodes.$inferSelect;
+export type DiscountCodeUsage = typeof discountCodeUsages.$inferSelect;
+export type Referral = typeof referrals.$inferSelect;
+export type ReferralReward = typeof referralRewards.$inferSelect;
+
+export type InsertDiscountCode = z.infer<typeof insertDiscountCodeSchema>;
+export type InsertDiscountCodeUsage = z.infer<typeof insertDiscountCodeUsageSchema>;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type InsertReferralReward = z.infer<typeof insertReferralRewardSchema>;
