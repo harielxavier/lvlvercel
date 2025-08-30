@@ -94,7 +94,7 @@ function Router() {
       
       {/* Platform Admin Routes */}
       <Route path="/customer-tenants" component={CustomerTenants} />
-      <Route path="/analytics" component={PlatformAnalytics} />
+      <Route path="/platform-analytics" component={PlatformAnalytics} />
       <Route path="/billing" component={BillingSubscriptions} />
       <Route path="/pricing" component={PricingManagement} />
       <Route path="/system-settings" component={SystemSettings} />

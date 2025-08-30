@@ -80,7 +80,7 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
         {
           icon: BarChart3,
           label: 'Platform Analytics',
-          href: '/analytics'
+          href: '/platform-analytics'
         },
         {
           icon: Settings,
