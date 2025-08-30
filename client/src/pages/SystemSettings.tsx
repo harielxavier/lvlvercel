@@ -26,6 +26,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useUserContext } from '@/context/UserContext';
+import Sidebar from '@/components/Sidebar';
 import {
   Settings,
   Shield,
@@ -56,8 +58,17 @@ interface SystemSetting {
 }
 
 export default function SystemSettings() {
+  const { user } = useUserContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
   const [editingSetting, setEditingSetting] = useState<SystemSetting | null>(null);
   const [editValue, setEditValue] = useState<any>('');
   const [testNotificationOpen, setTestNotificationOpen] = useState(false);
@@ -181,23 +192,28 @@ export default function SystemSettings() {
 
   if (isLoading) {
     return (
-      <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-system-settings">
-        <div className="p-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="h-64 bg-gray-200 rounded"></div>
-              <div className="h-64 bg-gray-200 rounded"></div>
+      <div className="flex h-screen bg-background">
+        <Sidebar user={user} />
+        <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out" data-testid="page-system-settings">
+          <div className="p-8">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="h-64 bg-gray-200 rounded"></div>
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-system-settings">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-system-settings">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40">
         <div className="px-8 py-4">
@@ -510,5 +526,6 @@ export default function SystemSettings() {
         </DialogContent>
       </Dialog>
     </main>
+    </div>
   );
 }
