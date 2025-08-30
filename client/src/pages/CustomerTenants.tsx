@@ -71,6 +71,7 @@ export default function CustomerTenants() {
   // Modal states
   const [editUserModal, setEditUserModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
   const [createUserModal, setCreateUserModal] = useState(false);
+  const [createTenantModal, setCreateTenantModal] = useState(false);
   const [editTenantModal, setEditTenantModal] = useState<{ open: boolean; tenant: Tenant | null }>({ open: false, tenant: null });
   
   const { data: tenants, isLoading, error } = useQuery<Tenant[]>({
@@ -132,6 +133,25 @@ export default function CustomerTenants() {
       console.error('Error deleting user:', error);
       toast({ 
         title: "Error deleting user", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const createTenantMutation = useMutation({
+    mutationFn: async (tenantData: z.infer<typeof tenantSchema>) => {
+      return apiRequest('POST', '/api/platform/tenants', tenantData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/platform/tenants'] });
+      setCreateTenantModal(false);
+      toast({ title: "Tenant created successfully!" });
+    },
+    onError: (error) => {
+      console.error('Error creating tenant:', error);
+      toast({ 
+        title: "Error creating tenant", 
         description: error.message, 
         variant: "destructive" 
       });
@@ -517,6 +537,115 @@ export default function CustomerTenants() {
     );
   };
 
+  const CreateTenantModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+    const form = useForm<z.infer<typeof tenantSchema>>({
+      resolver: zodResolver(tenantSchema),
+      defaultValues: {
+        name: '',
+        domain: '',
+        subscriptionTier: 'forming',
+        maxEmployees: -1,
+        isActive: true,
+      },
+    });
+
+    const onSubmit = (data: z.infer<typeof tenantSchema>) => {
+      createTenantMutation.mutate(data);
+      form.reset();
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Tenant</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Acme Corporation" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="domain"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Domain</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="acme.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="subscriptionTier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subscription Tier</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mj_scott">MJ Scott</SelectItem>
+                          <SelectItem value="forming">Forming</SelectItem>
+                          <SelectItem value="storming">Storming</SelectItem>
+                          <SelectItem value="norming">Norming</SelectItem>
+                          <SelectItem value="performing">Performing</SelectItem>
+                          <SelectItem value="appsumo">AppSumo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxEmployees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Employees (-1 for unlimited)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        placeholder="-1" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createTenantMutation.isPending}>
+                  {createTenantMutation.isPending ? 'Creating...' : 'Create Tenant'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   const EditTenantModal = ({ tenant, open, onClose }: { tenant: Tenant | null; open: boolean; onClose: () => void }) => {
     const form = useForm<z.infer<typeof tenantSchema>>({
       resolver: zodResolver(tenantSchema),
@@ -631,7 +760,7 @@ export default function CustomerTenants() {
       <Sidebar user={user} />
       <main className="flex-1 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-customer-tenants">
       {/* Header */}
-      <header className="glass-morphism border-b sticky top-0 z-40">
+      <header className="glass-morphism border-b sticky top-0 z-40 backdrop-blur-xl">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -652,7 +781,11 @@ export default function CustomerTenants() {
                 <Plus className="w-4 h-4 mr-2" />
                 Add User
               </Button>
-              <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto" data-testid="button-add-tenant">
+              <Button 
+                onClick={() => setCreateTenantModal(true)}
+                className="bg-primary hover:bg-primary/90 w-full sm:w-auto" 
+                data-testid="button-add-tenant"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Tenant
               </Button>
@@ -664,7 +797,7 @@ export default function CustomerTenants() {
       {/* Content */}
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
         {/* Platform Status */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 animate-fade-in">
           <Card className="glass-card border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -1068,7 +1201,10 @@ export default function CustomerTenants() {
                 <p className="text-muted-foreground mb-4">
                   The platform is ready for customer onboarding. Start by adding your first customer organization.
                 </p>
-                <Button className="bg-primary hover:bg-primary/90">
+                <Button 
+                  onClick={() => setCreateTenantModal(true)}
+                  className="bg-primary hover:bg-primary/90"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Add First Customer
                 </Button>
@@ -1087,6 +1223,10 @@ export default function CustomerTenants() {
       <CreateUserModal 
         open={createUserModal} 
         onClose={() => setCreateUserModal(false)} 
+      />
+      <CreateTenantModal 
+        open={createTenantModal} 
+        onClose={() => setCreateTenantModal(false)} 
       />
       <EditTenantModal 
         tenant={editTenantModal.tenant} 
