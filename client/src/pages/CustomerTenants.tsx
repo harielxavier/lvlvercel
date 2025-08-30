@@ -773,15 +773,6 @@ export default function CustomerTenants() {
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
               <Button 
-                onClick={() => setCreateUserModal(true)}
-                variant="outline" 
-                className="w-full sm:w-auto"
-                data-testid="button-add-user"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add User
-              </Button>
-              <Button 
                 onClick={() => setCreateTenantModal(true)}
                 className="bg-primary hover:bg-primary/90 w-full sm:w-auto" 
                 data-testid="button-add-tenant"
