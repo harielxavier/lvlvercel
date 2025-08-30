@@ -14,6 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useUserContext } from "@/context/UserContext";
+import Sidebar from "@/components/Sidebar";
 import {
   TicketIcon,
   MessageCircle,
@@ -101,7 +103,16 @@ const integrationSchema = z.object({
 });
 
 export default function SupportDashboard() {
+  const { user } = useUserContext();
   const { toast } = useToast();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [newTicketOpen, setNewTicketOpen] = useState(false);
   const [newArticleOpen, setNewArticleOpen] = useState(false);
@@ -238,8 +249,10 @@ export default function SupportDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-support-dashboard">
+        <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -844,7 +857,8 @@ export default function SupportDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
