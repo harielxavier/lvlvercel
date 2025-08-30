@@ -163,7 +163,7 @@ export default function DiscountManagement() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar />
+      <Sidebar user={user} />
       <div className="flex-1 lg:ml-80">
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">

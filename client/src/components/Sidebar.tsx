@@ -254,7 +254,7 @@ export default function Sidebar({ user }: SidebarProps) {
     }
   }, [isMobileOpen]);
   
-  const menuItems = getMenuItemsForRole(user.role, user.tenant?.subscriptionTier);
+  const menuItems = user ? getMenuItemsForRole(user.role, user.tenant?.subscriptionTier) : [];
 
   return (
     <>
