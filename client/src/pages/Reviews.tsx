@@ -126,7 +126,7 @@ export default function Reviews() {
   };
 
   const getEmployeeData = (employeeId: string) => {
-    return employees.find((emp: Employee) => emp.id === employeeId);
+    return employees.find((emp: Employee) => emp.id === employeeId) || null;
   };
 
   const getStatusColor = (status: string) => {

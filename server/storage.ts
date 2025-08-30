@@ -54,6 +54,7 @@ export interface IStorage {
   getEmployeesByTenant(tenantId: string): Promise<Employee[]>;
   createEmployee(employee: InsertEmployee): Promise<Employee>;
   updateEmployee(id: string, data: Partial<InsertEmployee>): Promise<Employee>;
+  createEmployeeWithLimitCheck(employee: InsertEmployee, maxEmployees: number): Promise<Employee>;
   
   // Department operations
   getDepartmentsByTenant(tenantId: string): Promise<Department[]>;
@@ -146,7 +147,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(id: string): Promise<void> {
-    await db.delete(users).where(eq(users.id, id));
+    const result = await db.delete(users).where(eq(users.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`User with id ${id} not found or could not be deleted`);
+    }
   }
 
   async createUser(userData: UpsertUser): Promise<User> {
@@ -181,7 +185,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTenant(id: string): Promise<void> {
-    await db.delete(tenants).where(eq(tenants.id, id));
+    try {
+      const result = await db.delete(tenants).where(eq(tenants.id, id));
+      if (result.rowCount === 0) {
+        throw new Error(`Tenant with id ${id} not found or could not be deleted`);
+      }
+    } catch (error: any) {
+      if (error.code === '23503') { // Foreign key constraint violation
+        throw new Error('Cannot delete tenant: There are associated records (employees, departments, etc.). Please remove all associated records first.');
+      }
+      throw error;
+    }
   }
 
   // Employee operations
@@ -228,18 +242,67 @@ export class DatabaseStorage implements IStorage {
       .where(eq(employees.tenantId, tenantId));
   }
 
+  // Atomic method to create employee with subscription limit check
+  async createEmployeeWithLimitCheck(employeeData: InsertEmployee, maxEmployees: number): Promise<Employee> {
+    // Use a transaction to ensure atomicity
+    return await db.transaction(async (tx) => {
+      // Get current count within the transaction
+      const [{ count: currentCount }] = await tx
+        .select({ count: count() })
+        .from(employees)
+        .where(eq(employees.tenantId, employeeData.tenantId));
+      
+      // Check if adding another employee would exceed the limit
+      if (currentCount >= maxEmployees) {
+        throw new Error(`Employee limit reached. Cannot exceed ${maxEmployees} employees.`);
+      }
+      
+      // Generate unique feedback URL
+      const feedbackUrl = `${employeeData.userId.slice(0, 8)}-${randomUUID().slice(0, 4)}`;
+      
+      try {
+        const [employee] = await tx
+          .insert(employees)
+          .values({
+            ...employeeData,
+            feedbackUrl,
+          })
+          .returning();
+        return employee;
+      } catch (error: any) {
+        if (error.code === '23505') { // Unique constraint violation
+          throw new Error('Employee already exists or duplicate feedback URL generated');
+        }
+        if (error.code === '23503') { // Foreign key constraint violation
+          throw new Error('Invalid tenant, user, or department reference');
+        }
+        throw error;
+      }
+    });
+  }
+
   async createEmployee(employeeData: InsertEmployee): Promise<Employee> {
     // Generate unique feedback URL
     const feedbackUrl = `${employeeData.userId.slice(0, 8)}-${randomUUID().slice(0, 4)}`;
     
-    const [employee] = await db
-      .insert(employees)
-      .values({
-        ...employeeData,
-        feedbackUrl,
-      })
-      .returning();
-    return employee;
+    try {
+      const [employee] = await db
+        .insert(employees)
+        .values({
+          ...employeeData,
+          feedbackUrl,
+        })
+        .returning();
+      return employee;
+    } catch (error: any) {
+      if (error.code === '23505') { // Unique constraint violation
+        throw new Error('Employee already exists or duplicate feedback URL generated');
+      }
+      if (error.code === '23503') { // Foreign key constraint violation
+        throw new Error('Invalid tenant, user, or department reference');
+      }
+      throw error;
+    }
   }
 
   async updateEmployee(id: string, data: Partial<InsertEmployee>): Promise<Employee> {

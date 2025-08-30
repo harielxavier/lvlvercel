@@ -16,15 +16,27 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // Ensure session secret is properly configured
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret) {
+    if (isDevelopment) {
+      console.warn("⚠️  WARNING: SESSION_SECRET not set, using development fallback");
+    } else {
+      throw new Error("SESSION_SECRET environment variable is required in production");
+    }
+  }
+  
   return session({
-    secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
+    secret: sessionSecret || "dev-secret-key-change-in-production",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Allow HTTP in development
+      secure: !isDevelopment, // Secure cookies in production, allow HTTP in development
       maxAge: sessionTtl,
+      sameSite: 'strict', // CSRF protection
     },
   });
 }
@@ -107,19 +119,30 @@ export async function setupAuth(app: Express) {
 
     // Development login handler
     app.post("/api/dev-login", async (req, res) => {
-      const { userId } = req.body;
-      const user = await storage.getUser(userId);
-      if (user) {
-        const userSession = createDevUserSession(user);
-        req.logIn(userSession, (err) => {
-          if (err) {
-            console.error('Login error:', err);
-            return res.status(500).json({ error: "Login failed" });
-          }
-          res.json({ success: true, user: userSession.claims });
-        });
-      } else {
-        res.status(404).json({ error: "User not found" });
+      try {
+        const { userId } = req.body;
+        
+        // Validate userId format (basic UUID validation)
+        if (!userId || typeof userId !== 'string' || !/^[a-f\d-]{36}$/i.test(userId)) {
+          return res.status(400).json({ error: "Invalid user ID format" });
+        }
+        
+        const user = await storage.getUser(userId);
+        if (user) {
+          const userSession = createDevUserSession(user);
+          req.logIn(userSession, (err) => {
+            if (err) {
+              console.error('Login error:', err);
+              return res.status(500).json({ error: "Login failed" });
+            }
+            res.json({ success: true, user: userSession.claims });
+          });
+        } else {
+          res.status(404).json({ error: "User not found" });
+        }
+      } catch (error) {
+        console.error('Development login error:', error);
+        res.status(500).json({ error: "Internal server error" });
       }
     });
 

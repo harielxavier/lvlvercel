@@ -23,7 +23,7 @@ export default function OrganizationChart() {
   const employeesArray = (employees as any[]) || [];
   const totalEmployees = employeesArray.length;
   const departmentCount = new Set(employeesArray.map((emp: any) => emp.departmentId).filter(Boolean)).size || 1;
-  const managersCount = employeesArray.filter((emp: any) => emp.role === 'manager').length;
+  const managersCount = employeesArray.filter((emp: any) => emp.role && emp.role === 'manager').length;
   const growthRate = totalEmployees > 0 ? Math.round((managersCount / totalEmployees) * 100) : 0;
 
   useEffect(() => {

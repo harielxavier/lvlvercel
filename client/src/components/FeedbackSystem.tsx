@@ -25,8 +25,11 @@ export default function FeedbackSystem({ user }: FeedbackSystemProps) {
     enabled: !!user.tenant?.id,
   });
   
+  const metricsData = (metrics as any) || {};
+  const employeesArray = Array.isArray(employees) ? employees : [];
+  
   // Pick the first employee as sample (could be random or most recent)
-  const sampleEmployee = employees[0];
+  const sampleEmployee = employeesArray.length > 0 ? employeesArray[0] : null;
 
   const handleCopyFeedbackLink = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -58,17 +61,17 @@ export default function FeedbackSystem({ user }: FeedbackSystemProps) {
             <div className="flex items-center space-x-3 mb-3">
               <Avatar className="w-12 h-12 border-2 border-white">
                 <AvatarImage 
-                  src={sampleEmployee.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${sampleEmployee.id}`}
-                  alt={`${sampleEmployee.firstName} ${sampleEmployee.lastName}`}
+                  src={sampleEmployee.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${sampleEmployee.id || 'default'}`}
+                  alt={`${sampleEmployee.firstName || 'Unknown'} ${sampleEmployee.lastName || 'User'}`}
                   className="object-cover"
                 />
                 <AvatarFallback>
-                  {sampleEmployee.firstName?.charAt(0)}{sampleEmployee.lastName?.charAt(0)}
+                  {(sampleEmployee.firstName?.charAt(0) || 'U')}{(sampleEmployee.lastName?.charAt(0) || 'U')}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <p className="font-semibold text-blue-900" data-testid="text-sample-employee-name">
-                  {sampleEmployee.firstName} {sampleEmployee.lastName}
+                  {sampleEmployee.firstName || 'Unknown'} {sampleEmployee.lastName || 'User'}
                 </p>
                 <p className="text-sm text-blue-700" data-testid="text-sample-employee-role">
                   {sampleEmployee.email?.includes('admin') ? 'Tenant Admin' : 
@@ -109,7 +112,7 @@ export default function FeedbackSystem({ user }: FeedbackSystemProps) {
                 <div className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-2">
                     <span className="text-xl font-bold text-green-600" data-testid="text-performance-score">
-                      {metrics?.avgPerformance || 85}
+                      {metricsData.avgPerformance || 85}
                     </span>
                   </div>
                   <p className="text-xs text-blue-700">Score</p>
@@ -117,7 +120,7 @@ export default function FeedbackSystem({ user }: FeedbackSystemProps) {
                 <div className="text-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-2">
                     <span className="text-xl font-bold text-purple-600" data-testid="text-review-count">
-                      {metrics?.totalFeedback || 0}
+                      {metricsData.totalFeedback || 0}
                     </span>
                   </div>
                   <p className="text-xs text-blue-700">Reviews</p>
@@ -135,11 +138,11 @@ export default function FeedbackSystem({ user }: FeedbackSystemProps) {
         {/* Real Feedback Stats */}
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 bg-green-50 rounded-xl border border-green-100" data-testid="stat-total-feedback">
-            <p className="text-2xl font-bold text-green-600">{metrics?.totalEmployees || 0}</p>
+            <p className="text-2xl font-bold text-green-600">{metricsData.totalEmployees || 0}</p>
             <p className="text-sm text-green-700">Active Employees</p>
           </div>
           <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100" data-testid="stat-avg-rating">
-            <p className="text-2xl font-bold text-blue-600">{((metrics?.avgPerformance || 85) / 100 * 5).toFixed(1)}</p>
+            <p className="text-2xl font-bold text-blue-600">{((metricsData.avgPerformance || 85) / 100 * 5).toFixed(1)}</p>
             <p className="text-sm text-blue-700">Avg Rating</p>
           </div>
         </div>

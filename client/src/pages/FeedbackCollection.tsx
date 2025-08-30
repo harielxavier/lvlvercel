@@ -21,11 +21,13 @@ export default function FeedbackCollection() {
     retry: false,
     enabled: !!user,
   });
+  
+  const employeeData = employee as any;
 
   // Get employee feedback
   const { data: feedback = [], isLoading: feedbackLoading } = useQuery({
-    queryKey: ['/api/employee', (employee as any)?.id, 'feedback'],
-    enabled: !!(employee as any)?.id,
+    queryKey: ['/api/employee', employeeData?.id, 'feedback'],
+    enabled: !!employeeData?.id,
     retry: false,
   });
 
@@ -79,8 +81,8 @@ export default function FeedbackCollection() {
     );
   }
 
-  const feedbackUrl = (employee as any)?.feedbackUrl 
-    ? `${window.location.origin}/feedback/${(employee as any).feedbackUrl}`
+  const feedbackUrl = employeeData?.feedbackUrl 
+    ? `${window.location.origin}/feedback/${employeeData.feedbackUrl}`
     : '';
 
   const copyToClipboard = (text: string) => {

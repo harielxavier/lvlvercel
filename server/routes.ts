@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import QRCode from 'qrcode';
 import { notificationService } from './notificationService';
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { validateParam, validateTenantAccess, validateUUID, validateURL } from "./validation";
 import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, insertGoalSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
 
@@ -36,9 +37,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard metrics
-  app.get("/api/dashboard/metrics/:tenantId", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard/metrics/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
     try {
       const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
       const metrics = await storage.getDashboardMetrics(tenantId);
       res.json(metrics);
     } catch (error) {
@@ -48,9 +57,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get recent activity for dashboard
-  app.get("/api/dashboard/activity/:tenantId", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard/activity/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
     try {
       const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
       const activity = await storage.getRecentActivity(tenantId);
       res.json(activity);
     } catch (error) {
@@ -318,6 +335,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       const { userId } = req.body;
+      
+      // Validate userId format
+      if (!userId || !validateUUID(userId)) {
+        return res.status(400).json({ message: "Invalid user ID format" });
+      }
+      
       const targetUser = await storage.getUser(userId);
       if (!targetUser) {
         return res.status(404).json({ message: "User not found" });
@@ -353,9 +376,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Employee management routes
-  app.get("/api/employees/:tenantId", isAuthenticated, async (req, res) => {
+  app.get("/api/employees/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
     try {
       const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
       const employees = await storage.getEmployeesByTenant(tenantId);
       res.json(employees);
     } catch (error) {
@@ -392,28 +423,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User must belong to a tenant" });
       }
       
-      // Check subscription limits
+      // Check subscription limits and create employee atomically
       const tenant = await storage.getTenant(tenantId as string);
       if (!tenant) {
         return res.status(404).json({ message: "Tenant not found" });
       }
       
-      // Get current employee count for the tenant
-      const currentEmployees = await storage.getEmployeesByTenant(tenantId as string);
-      
-      // Check if adding another employee would exceed the subscription limit
       const maxEmployees = tenant.maxEmployees || 25; // Default to 25 if null
-      if (currentEmployees.length >= maxEmployees) {
-        return res.status(400).json({ 
-          message: `Employee limit reached. Your ${tenant.subscriptionTier} plan supports up to ${maxEmployees} employees. Please upgrade your subscription to add more team members.` 
-        });
-      }
       
-      // Ensure the employee is created in the correct tenant
-      const employee = await storage.createEmployee({
+      // Use atomic employee creation with subscription limit check
+      const employee = await (storage as any).createEmployeeWithLimitCheck({
         ...employeeData,
         tenantId: tenantId as string,
-      });
+      }, maxEmployees);
       
       res.json(employee);
     } catch (error) {
@@ -423,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Feedback routes
-  app.get("/api/feedback/:employeeId", isAuthenticated, async (req, res) => {
+  app.get("/api/feedback/:employeeId", isAuthenticated, validateParam('employeeId'), async (req, res) => {
     try {
       const { employeeId } = req.params;
       const feedbacks = await storage.getFeedbacksByEmployee(employeeId);
@@ -446,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Goals routes
-  app.get("/api/goals/:employeeId", isAuthenticated, async (req, res) => {
+  app.get("/api/goals/:employeeId", isAuthenticated, validateParam('employeeId'), async (req, res) => {
     try {
       const { employeeId } = req.params;
       const goals = await storage.getGoalsByEmployee(employeeId);
@@ -458,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get goals for specific employee (alternative endpoint)
-  app.get("/api/employee/:employeeId/goals", isAuthenticated, async (req, res) => {
+  app.get("/api/employee/:employeeId/goals", isAuthenticated, validateParam('employeeId'), async (req, res) => {
     try {
       const { employeeId } = req.params;
       const goals = await storage.getGoalsByEmployee(employeeId);
@@ -472,9 +494,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Performance Review routes
   
   // Get performance reviews for a tenant (for managers/admins)
-  app.get("/api/performance-reviews/:tenantId", isAuthenticated, async (req: any, res) => {
+  app.get("/api/performance-reviews/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
     try {
       const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
       const reviews = await storage.getPerformanceReviewsByTenant(tenantId);
       res.json(reviews);
     } catch (error) {
@@ -484,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get performance reviews for a specific employee
-  app.get("/api/employee/:employeeId/performance-reviews", isAuthenticated, async (req: any, res) => {
+  app.get("/api/employee/:employeeId/performance-reviews", isAuthenticated, validateParam('employeeId'), async (req: any, res) => {
     try {
       const { employeeId } = req.params;
       const reviews = await storage.getPerformanceReviewsByEmployee(employeeId);
@@ -496,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get a specific performance review
-  app.get("/api/performance-review/:reviewId", isAuthenticated, async (req: any, res) => {
+  app.get("/api/performance-review/:reviewId", isAuthenticated, validateParam('reviewId'), async (req: any, res) => {
     try {
       const { reviewId } = req.params;
       const review = await storage.getPerformanceReview(reviewId);
@@ -543,7 +573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update a performance review
-  app.put("/api/performance-review/:reviewId", isAuthenticated, async (req: any, res) => {
+  app.put("/api/performance-review/:reviewId", isAuthenticated, validateParam('reviewId'), async (req: any, res) => {
     try {
       const { reviewId } = req.params;
       const updateData = insertPerformanceReviewSchema.partial().parse(req.body);
@@ -556,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete a performance review
-  app.delete("/api/performance-review/:reviewId", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/performance-review/:reviewId", isAuthenticated, validateParam('reviewId'), async (req: any, res) => {
     try {
       const { reviewId } = req.params;
       await storage.deletePerformanceReview(reviewId);
@@ -568,9 +598,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Departments routes
-  app.get("/api/departments/:tenantId", isAuthenticated, async (req, res) => {
+  app.get("/api/departments/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
     try {
       const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
       const departments = await storage.getDepartmentsByTenant(tenantId);
       res.json(departments);
     } catch (error) {
@@ -583,6 +621,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/feedback/:feedbackUrl", async (req, res) => {
     try {
       const { feedbackUrl } = req.params;
+      
+      // Basic validation for feedback URL format (alphanumeric and dashes)
+      if (!feedbackUrl || !/^[a-zA-Z0-9-_]{8,}$/.test(feedbackUrl)) {
+        return res.status(400).json({ message: "Invalid feedback URL format" });
+      }
+      
       const employee = await storage.getEmployeeByFeedbackUrl(feedbackUrl);
       if (!employee) {
         return res.status(404).json({ message: "Feedback link not found" });
@@ -598,6 +642,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/feedback/:feedbackUrl/submit", async (req, res) => {
     try {
       const { feedbackUrl } = req.params;
+      
+      // Basic validation for feedback URL format
+      if (!feedbackUrl || !/^[a-zA-Z0-9-_]{8,}$/.test(feedbackUrl)) {
+        return res.status(400).json({ message: "Invalid feedback URL format" });
+      }
+      
       const employee = await storage.getEmployeeByFeedbackUrl(feedbackUrl);
       if (!employee) {
         return res.status(404).json({ message: "Feedback link not found" });
@@ -765,14 +815,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/notification-preferences', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Validate preferences data
+      const preferencesSchema = z.object({
+        emailNotifications: z.boolean().optional(),
+        pushNotifications: z.boolean().optional(),
+        feedbackNotifications: z.boolean().optional(),
+        goalReminders: z.boolean().optional(),
+        weeklyDigest: z.boolean().optional(),
+      });
+      
+      const validatedData = preferencesSchema.parse(req.body);
       const preferencesData = {
         userId,
-        ...req.body,
+        ...validatedData,
       };
       
       const preferences = await storage.upsertNotificationPreferences(preferencesData);
       res.json(preferences);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid preferences data", errors: error.errors });
+      }
       console.error("Error updating notification preferences:", error);
       res.status(500).json({ message: "Failed to update notification preferences" });
     }
@@ -826,6 +890,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { url } = req.body;
       if (!url) {
         return res.status(400).json({ message: 'URL is required' });
+      }
+      
+      // Validate URL format for security
+      if (!validateURL(url)) {
+        return res.status(400).json({ message: 'Invalid URL format' });
       }
       
       const qrCodeDataURL = await QRCode.toDataURL(url, {
