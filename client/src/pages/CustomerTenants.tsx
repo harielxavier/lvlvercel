@@ -906,80 +906,91 @@ export default function CustomerTenants() {
                             return (roleOrder[a.role as keyof typeof roleOrder] || 3) - (roleOrder[b.role as keyof typeof roleOrder] || 3);
                           })
                           .map((user) => (
-                            <div key={user.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                            <div key={user.id} className="p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors space-y-3">
+                              {/* User Info Row */}
+                              <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                                   <Users className="w-4 h-4 text-primary" />
                                 </div>
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                                  <button
-                                    onClick={() => copyToClipboard(user.email || '')}
-                                    className="flex items-center space-x-2 hover:text-primary transition-colors"
-                                    data-testid={`button-copy-email-${user.firstName?.toLowerCase()}`}
-                                  >
-                                    <Mail className="w-4 h-4" />
-                                    <span className="font-mono text-sm break-all">{user.email}</span>
-                                    <Copy className="w-3 h-3 opacity-50" />
-                                  </button>
-                                  <Badge className={getRoleColor(user.role || 'employee')}>
-                                    {getRoleDisplayName(user.role || 'employee')}
-                                  </Badge>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <button
+                                        onClick={() => copyToClipboard(user.email || '')}
+                                        className="flex items-center gap-2 hover:text-primary transition-colors group text-left w-full"
+                                        data-testid={`button-copy-email-${user.firstName?.toLowerCase()}`}
+                                      >
+                                        <Mail className="w-4 h-4 flex-shrink-0" />
+                                        <span className="font-mono text-sm truncate block min-w-0">{user.email}</span>
+                                        <Copy className="w-3 h-3 opacity-50 group-hover:opacity-100 flex-shrink-0" />
+                                      </button>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <Badge className={getRoleColor(user.role || 'employee')}>
+                                          {getRoleDisplayName(user.role || 'employee')}
+                                        </Badge>
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                          <Key className="w-3 h-3" />
+                                          <span>Vamos!!86</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                                  <Key className="w-3 h-3" />
-                                  <span>Vamos!!86</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => loginAsUserMutation.mutate(user.id)}
-                                    disabled={loginAsUserMutation.isPending}
-                                    data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
-                                  >
-                                    <LogIn className="w-3 h-3 mr-1" />
-                                    <span className="hidden sm:inline">Login</span>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setEditUserModal({ open: true, user })}
-                                    data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
-                                  >
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="text-red-600 hover:text-red-700"
-                                        data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
+                              
+                              {/* Actions Row */}
+                              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/50">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => loginAsUserMutation.mutate(user.id)}
+                                  disabled={loginAsUserMutation.isPending}
+                                  data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
+                                  className="flex items-center gap-1"
+                                >
+                                  <LogIn className="w-3 h-3" />
+                                  <span className="hidden xs:inline">Login</span>
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setEditUserModal({ open: true, user })}
+                                  data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Edit className="w-3 h-3" />
+                                  <span className="hidden xs:inline">Edit</span>
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-red-600 hover:text-red-700 flex items-center gap-1"
+                                      data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                      <span className="hidden xs:inline">Delete</span>
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => deleteUserMutation.mutate(user.id)}
+                                        className="bg-red-600 hover:bg-red-700"
                                       >
-                                        <Trash2 className="w-3 h-3" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete User</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Are you sure you want to delete {user.firstName} {user.lastName}? This action cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={() => deleteUserMutation.mutate(user.id)}
-                                          className="bg-red-600 hover:bg-red-700"
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </div>
                             </div>
                           ))}
@@ -991,13 +1002,15 @@ export default function CustomerTenants() {
                 {/* Platform Super Admins */}
                 {users.filter(user => user.role === 'platform_admin').length > 0 && (
                   <div className="border rounded-lg p-4 bg-purple-50/50">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Crown className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">Platform Super Admins</h3>
-                        <p className="text-sm text-muted-foreground">Platform-level users (no tenant)</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Crown className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">Platform Super Admins</h3>
+                          <p className="text-sm text-muted-foreground">Platform-level users (no tenant)</p>
+                        </div>
                       </div>
                     </div>
                     
@@ -1005,58 +1018,67 @@ export default function CustomerTenants() {
                       {users
                         .filter(user => user.role === 'platform_admin')
                         .map((user) => (
-                          <div key={user.id} className="flex items-center justify-between p-3 bg-purple-100/50 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                          <div key={user.id} className="p-4 bg-purple-100/50 rounded-lg space-y-3">
+                            {/* User Info Row */}
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Crown className="w-4 h-4 text-purple-600" />
                               </div>
-                              <div className="flex items-center space-x-3">
+                              <div className="flex-1 min-w-0">
                                 <button
                                   onClick={() => copyToClipboard(user.email || '')}
-                                  className="flex items-center space-x-2 hover:text-purple-600 transition-colors"
+                                  className="flex items-center gap-2 hover:text-purple-600 transition-colors group text-left w-full"
                                   data-testid={`button-copy-email-${user.firstName?.toLowerCase()}`}
                                 >
-                                  <Mail className="w-4 h-4" />
-                                  <span className="font-mono text-sm">{user.email}</span>
-                                  <Copy className="w-3 h-3 opacity-50" />
+                                  <Mail className="w-4 h-4 flex-shrink-0" />
+                                  <span className="font-mono text-sm truncate block min-w-0">{user.email}</span>
+                                  <Copy className="w-3 h-3 opacity-50 group-hover:opacity-100 flex-shrink-0" />
                                 </button>
-                                <Badge className="bg-purple-100 text-purple-800">
-                                  Platform Admin
-                                </Badge>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge className="bg-purple-100 text-purple-800">
+                                    Platform Admin
+                                  </Badge>
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Key className="w-3 h-3" />
+                                    <span>Vamos!!86</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <div className="flex items-center space-x-2 text-xs text-muted-foreground mr-3">
-                                <Key className="w-3 h-3" />
-                                <span>Vamos!!86</span>
-                              </div>
+                            
+                            {/* Actions Row */}
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-purple-200/50">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => loginAsUserMutation.mutate(user.id)}
                                 disabled={loginAsUserMutation.isPending}
                                 data-testid={`button-login-as-${user.firstName?.toLowerCase()}`}
+                                className="flex items-center gap-1"
                               >
-                                <LogIn className="w-3 h-3 mr-1" />
-                                Login
+                                <LogIn className="w-3 h-3" />
+                                <span className="hidden xs:inline">Login</span>
                               </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => setEditUserModal({ open: true, user })}
                                 data-testid={`button-edit-${user.firstName?.toLowerCase()}`}
+                                className="flex items-center gap-1"
                               >
                                 <Edit className="w-3 h-3" />
+                                <span className="hidden xs:inline">Edit</span>
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="text-red-600 hover:text-red-700"
+                                    className="text-red-600 hover:text-red-700 flex items-center gap-1"
                                     data-testid={`button-delete-${user.firstName?.toLowerCase()}`}
                                   >
                                     <Trash2 className="w-3 h-3" />
+                                    <span className="hidden xs:inline">Delete</span>
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
