@@ -22,9 +22,9 @@ export default function Performance() {
     enabled: !!user,
   });
 
-  const employee = performanceData?.employee;
-  const goals = performanceData?.goals || [];
-  const feedback = performanceData?.feedback || [];
+  const employee = (performanceData as any)?.employee || null;
+  const goals = (performanceData as any)?.goals || [];
+  const feedback = (performanceData as any)?.feedback || [];
   const performanceIsLoading = performanceLoading;
 
   useEffect(() => {

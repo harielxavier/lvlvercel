@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { MessageSquare, Plus, Send, Star, Filter, Users } from 'lucide-react';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Feedback() {
   const { user, isLoading, isAuthenticated } = useUserContext();
@@ -42,26 +43,11 @@ export default function Feedback() {
     );
   }
 
-  const feedbacks = [
-    {
-      id: 1,
-      from: "John Manager",
-      to: "Sarah Chen",
-      message: "Great work on the project delivery. Your attention to detail was exceptional.",
-      rating: 5,
-      category: "Project Management",
-      date: "2024-01-15"
-    },
-    {
-      id: 2,
-      from: "Mike Johnson",
-      to: "Alex Rodriguez",
-      message: "Excellent collaboration during the sprint. Communication was clear and timely.",
-      rating: 4,
-      category: "Teamwork",
-      date: "2024-01-14"
-    }
-  ];
+  // Get real feedback data from API
+  const { data: feedbacks = [], isLoading: feedbackLoading } = useQuery({
+    queryKey: ['/api/feedback', user?.employee?.id || user?.id],
+    enabled: !!user,
+  });
 
   return (
     <div className="flex h-screen bg-background">
@@ -210,13 +196,15 @@ export default function Feedback() {
                 <CardTitle>Recent Feedback</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {feedbacks.map((feedback) => (
+                {feedbackLoading ? (
+                  <div className="text-center py-4">Loading...</div>
+                ) : (feedbacks as any[]).map((feedback: any) => (
                   <div key={feedback.id} className="p-4 bg-muted/20 rounded-lg space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3">
                         <Avatar className="w-8 h-8">
                           <AvatarFallback className="text-xs">
-                            {feedback.from.split(' ').map(n => n[0]).join('')}
+                            {feedback.from.split(' ').map((n: string) => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                         <div>

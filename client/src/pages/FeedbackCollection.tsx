@@ -32,7 +32,7 @@ export default function FeedbackCollection() {
   // QR code generation mutation
   const generateQRMutation = useMutation({
     mutationFn: async (url: string) => {
-      return apiRequest('/api/generate-qr', 'POST', { url });
+      return apiRequest('POST', '/api/generate-qr', { url });
     },
     onSuccess: (data: any) => {
       setQrCodeData(data.qrCode);

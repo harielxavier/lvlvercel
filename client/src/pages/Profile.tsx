@@ -36,7 +36,7 @@ export default function Profile() {
 
   // Update preferences mutation
   const updatePreferencesMutation = useMutation({
-    mutationFn: (preferences: any) => apiRequest('/api/notification-preferences', 'PUT', preferences),
+    mutationFn: (preferences: any) => apiRequest('PUT', '/api/notification-preferences', preferences),
     onSuccess: () => {
       toast({
         title: '✅ Settings Saved',

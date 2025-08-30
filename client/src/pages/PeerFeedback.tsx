@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Users, Plus, Send, Star, MessageSquare } from 'lucide-react';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function PeerFeedback() {
   const { user, isLoading, isAuthenticated } = useUserContext();
@@ -42,32 +43,17 @@ export default function PeerFeedback() {
     );
   }
 
-  const colleagues = [
-    { name: "Sarah Chen", role: "Senior Developer", department: "Engineering" },
-    { name: "Mike Johnson", role: "Product Designer", department: "Design" },
-    { name: "Alex Rodriguez", role: "Marketing Specialist", department: "Marketing" },
-    { name: "Emma Williams", role: "Data Analyst", department: "Analytics" },
-    { name: "David Lee", role: "Project Manager", department: "Operations" }
-  ];
+  // Get colleagues from API
+  const { data: colleagues = [], isLoading: colleaguesLoading } = useQuery({
+    queryKey: ['/api/employees', user?.tenant?.id],
+    enabled: !!user?.tenant?.id,
+  });
 
-  const receivedFeedback = [
-    {
-      id: 1,
-      from: "Sarah Chen",
-      message: "Great collaboration on the recent project. Your attention to detail helped us deliver on time.",
-      rating: 5,
-      category: "Teamwork",
-      date: "2024-01-20"
-    },
-    {
-      id: 2,
-      from: "Mike Johnson",
-      message: "Excellent communication during our design reviews. Your feedback was constructive and helpful.",
-      rating: 4,
-      category: "Communication", 
-      date: "2024-01-18"
-    }
-  ];
+  // Get received feedback for current user  
+  const { data: receivedFeedback = [], isLoading: feedbackLoading } = useQuery({
+    queryKey: ['/api/feedback', user?.employee?.id || user?.id],
+    enabled: !!user,
+  });
 
   return (
     <div className="flex h-screen bg-background">
@@ -164,9 +150,11 @@ export default function PeerFeedback() {
                     <label className="text-sm font-medium mb-2 block">Select colleague</label>
                     <select className="w-full p-2 border rounded-lg bg-background">
                       <option>Choose a colleague...</option>
-                      {colleagues.map((colleague, index) => (
-                        <option key={index} value={colleague.name}>
-                          {colleague.name} - {colleague.role}
+                      {colleaguesLoading ? (
+                        <option disabled>Loading colleagues...</option>
+                      ) : (colleagues as any[]).map((colleague: any, index: number) => (
+                        <option key={index} value={`${colleague.firstName} ${colleague.lastName}`}>
+                          {colleague.firstName} {colleague.lastName} - {colleague.jobTitle || 'Team Member'}
                         </option>
                       ))}
                     </select>
@@ -218,17 +206,19 @@ export default function PeerFeedback() {
                 <CardTitle>Team Directory</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {colleagues.map((colleague, index) => (
+                {colleaguesLoading ? (
+                  <div className="text-center py-4">Loading team directory...</div>
+                ) : (colleagues as any[]).map((colleague: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <Avatar>
-                        <AvatarFallback>{colleague.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarFallback>{`${colleague.firstName} ${colleague.lastName}`.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{colleague.name}</p>
-                        <p className="text-sm text-muted-foreground">{colleague.role}</p>
+                        <p className="font-medium">{colleague.firstName} {colleague.lastName}</p>
+                        <p className="text-sm text-muted-foreground">{colleague.jobTitle || 'Team Member'}</p>
                         <Badge variant="outline" className="text-xs mt-1">
-                          {colleague.department}
+                          {colleague.department?.name || 'General'}
                         </Badge>
                       </div>
                     </div>
@@ -247,15 +237,17 @@ export default function PeerFeedback() {
               <CardTitle>Recent Feedback Received</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {receivedFeedback.map((feedback) => (
+              {feedbackLoading ? (
+                <div className="text-center py-4">Loading feedback...</div>
+              ) : (receivedFeedback as any[]).map((feedback: any) => (
                 <div key={feedback.id} className="p-4 bg-muted/20 rounded-lg space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3">
                       <Avatar>
-                        <AvatarFallback>{feedback.from.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarFallback>{(feedback.giverName || 'Anonymous').split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{feedback.from}</p>
+                        <p className="font-medium">{feedback.giverName || 'Anonymous'}</p>
                         <div className="flex items-center space-x-2 mt-1">
                           <div className="flex space-x-1">
                             {Array.from({ length: feedback.rating }).map((_, i) => (
@@ -263,15 +255,15 @@ export default function PeerFeedback() {
                             ))}
                           </div>
                           <Badge variant="outline" className="text-xs">
-                            {feedback.category}
+                            {feedback.relationship || 'Peer'}
                           </Badge>
                         </div>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">{feedback.date}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(feedback.createdAt).toLocaleDateString()}</span>
                   </div>
                   
-                  <p className="text-sm pl-12">{feedback.message}</p>
+                  <p className="text-sm pl-12">{feedback.comment}</p>
                 </div>
               ))}
             </CardContent>
