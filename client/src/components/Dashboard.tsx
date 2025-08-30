@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
+import { useLocation } from 'wouter';
 import FeedbackSystem from './FeedbackSystem';
 import OrganizationChart from './OrganizationChart';
 
@@ -29,6 +30,7 @@ interface DashboardProps {
 
 function Dashboard({ user }: DashboardProps) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   // Use different API endpoints based on user role
   const isPlatformAdmin = React.useMemo(() => user.role === 'platform_admin', [user.role]);
@@ -403,6 +405,7 @@ function Dashboard({ user }: DashboardProps) {
                     <Button 
                       className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
                       data-testid="button-add-employee"
+                      onClick={() => setLocation('/employees')}
                     >
                       <Plus className="w-5 h-5 mr-3" />
                       Add New Employee
@@ -411,6 +414,7 @@ function Dashboard({ user }: DashboardProps) {
                     <Button 
                       className="w-full justify-start bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
                       data-testid="button-schedule-1v1"
+                      onClick={() => setLocation('/meetings')}
                     >
                       <Calendar className="w-5 h-5 mr-3" />
                       Schedule 1v1
@@ -420,6 +424,7 @@ function Dashboard({ user }: DashboardProps) {
                   <Button 
                     className="w-full justify-start bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105"
                     data-testid="button-start-review"
+                    onClick={() => setLocation('/reviews')}
                   >
                     <FileText className="w-5 h-5 mr-3" />
                     Start Review Cycle
@@ -428,6 +433,7 @@ function Dashboard({ user }: DashboardProps) {
                   <Button 
                     className="w-full justify-start bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105"
                     data-testid="button-view-analytics"
+                    onClick={() => setLocation('/team-analytics')}
                   >
                     <BarChart3 className="w-5 h-5 mr-3" />
                     View Analytics
@@ -436,6 +442,7 @@ function Dashboard({ user }: DashboardProps) {
                   <Button 
                     className="w-full justify-start bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-105"
                     data-testid="button-manage-settings"
+                    onClick={() => setLocation('/profile')}
                   >
                     <Settings className="w-5 h-5 mr-3" />
                     Manage Settings
@@ -501,10 +508,10 @@ function Dashboard({ user }: DashboardProps) {
                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                   </div>
                 </div>
-              ) : recentActivity.length > 0 ? (
+              ) : (recentActivity as any[]).length > 0 ? (
                 // Real Employee Activity
                 <div className="space-y-4">
-                  {recentActivity.map((activity: any, index: number) => {
+                  {(recentActivity as any[]).map((activity: any, index: number) => {
                     const timeAgo = new Date(activity.createdAt).toLocaleDateString();
                     const fullName = `${activity.firstName} ${activity.lastName}`;
                     const initials = `${activity.firstName?.charAt(0) || ''}${activity.lastName?.charAt(0) || ''}`.toUpperCase();
@@ -562,7 +569,7 @@ function Dashboard({ user }: DashboardProps) {
         </div>
 
         {/* Organization Structure Preview */}
-        <OrganizationChart user={user} />
+        <OrganizationChart user={user} employees={[]} employeesLoading={false} />
       </div>
     </main>
   );
