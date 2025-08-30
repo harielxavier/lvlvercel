@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUserContext } from '@/context/UserContext';
+import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -54,8 +56,17 @@ const tenantSchema = z.object({
 });
 
 export default function CustomerTenants() {
+  const { user } = useUserContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
   
   // Modal states
   const [editUserModal, setEditUserModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
@@ -616,7 +627,9 @@ export default function CustomerTenants() {
   };
 
   return (
-    <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-customer-tenants">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 transition-all duration-300 ease-in-out" data-testid="page-customer-tenants">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40">
         <div className="px-8 py-4">
@@ -1078,6 +1091,7 @@ export default function CustomerTenants() {
         open={editTenantModal.open} 
         onClose={() => setEditTenantModal({ open: false, tenant: null })} 
       />
-    </main>
+      </main>
+    </div>
   );
 }
