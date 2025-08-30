@@ -344,7 +344,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
           
           {/* Tenant & Role Info */}
-          {!isCollapsed && user.tenant && (
+          {!isCollapsed && user && user.tenant && (
             <div className="mt-4 p-3 bg-sidebar-accent rounded-xl border border-sidebar-border">
               <div className="flex items-center justify-between">
                 <div>
@@ -352,7 +352,7 @@ export default function Sidebar({ user }: SidebarProps) {
                     {user.tenant.name}
                   </p>
                   <p className="text-xs text-muted-foreground capitalize" data-testid="text-user-role">
-                    {user.role.replace('_', ' ')}
+                    {user.role?.replace('_', ' ')}
                   </p>
                 </div>
                 <Badge 
@@ -411,38 +411,39 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-sidebar-border">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div 
-                className="flex items-center space-x-3 p-3 rounded-xl hover:bg-sidebar-accent cursor-pointer transition-colors"
-                data-testid="user-profile-section"
-              >
-                <Avatar className="w-10 h-10 border-2 border-sidebar-border">
-                  <AvatarImage 
-                    src={user.profileImageUrl} 
-                    alt={`${user.firstName} ${user.lastName}`}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user.firstName?.[0]}{user.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                {!isCollapsed && (
-                  <>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm" data-testid="text-user-name">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize" data-testid="text-user-role-profile">
-                        {user.role?.replace('_', ' ')}
-                      </p>
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                  </>
-                )}
-              </div>
-            </DropdownMenuTrigger>
+        {user && (
+          <div className="p-4 border-t border-sidebar-border">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div 
+                  className="flex items-center space-x-3 p-3 rounded-xl hover:bg-sidebar-accent cursor-pointer transition-colors"
+                  data-testid="user-profile-section"
+                >
+                  <Avatar className="w-10 h-10 border-2 border-sidebar-border">
+                    <AvatarImage 
+                      src={user.profileImageUrl || ''} 
+                      alt={`${user.firstName || ''} ${user.lastName || ''}`}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {user.firstName?.[0]}{user.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!isCollapsed && (
+                    <>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm" data-testid="text-user-name">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize" data-testid="text-user-role-profile">
+                          {user.role?.replace('_', ' ')}
+                        </p>
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </>
+                  )}
+                </div>
+              </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56" data-testid="user-dropdown-menu">
               <Link href="/profile">
                 <DropdownMenuItem className="cursor-pointer" data-testid="dropdown-profile">
@@ -462,6 +463,7 @@ export default function Sidebar({ user }: SidebarProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        )}
       </div>
     </aside>
     </>
