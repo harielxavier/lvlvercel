@@ -122,8 +122,8 @@ export async function setupAuth(app: Express) {
       try {
         const { userId } = req.body;
         
-        // Validate userId format (basic UUID validation)
-        if (!userId || typeof userId !== 'string' || !/^[a-f\d-]{36}$/i.test(userId)) {
+        // Validate userId format (allow UUIDs and development test IDs)
+        if (!userId || typeof userId !== 'string' || userId.trim().length === 0) {
           return res.status(400).json({ error: "Invalid user ID format" });
         }
         
