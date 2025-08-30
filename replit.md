@@ -4,6 +4,15 @@ LVL UP Performance is a next-generation HR performance management and feedback s
 
 The platform serves multiple organizational roles from platform super admins to individual employees, with a sophisticated multi-tenant architecture supporting different subscription tiers. It's built as a full-stack application with modern web technologies and focuses on making feedback collection as easy as sharing a link.
 
+## Recent Major Updates (August 2025)
+
+**Comprehensive Goal Management System**: Implemented a professional-grade goal management platform with advanced features:
+- **Enhanced Goal Creation**: Multi-step form with priority levels, difficulty ratings, milestone tracking, and visibility settings
+- **Smart Filtering & Search**: Real-time search by title/description with priority and category filters
+- **Visual Progress Tracking**: Beautiful goal cards with progress bars, priority indicators, and milestone visualization
+- **Advanced Analytics**: Dynamic metrics that update based on filtered goals and completion rates
+- **"No Lazy Design" Architecture**: Eliminated all loading states for instant content display across the entire platform
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -28,6 +37,15 @@ The API follows RESTful conventions with proper error handling middleware and re
 The application uses **PostgreSQL** as the primary database with **Drizzle ORM** for type-safe database operations. The database is hosted on **Neon** (serverless PostgreSQL) for scalability and performance.
 
 Database schema includes proper relationships between users, tenants, employees, departments, feedback, goals, and performance reviews. The schema supports soft deletes, timestamps, and proper foreign key relationships with cascading rules.
+
+**Enhanced Goals Schema**: The goals table includes comprehensive fields for modern goal management:
+- Priority levels (high/medium/low) with visual indicators
+- Goal types (personal/team/department/company) for organizational alignment  
+- Difficulty ratings (easy/medium/hard/expert) for skill development tracking
+- Visibility settings (private/team/public) for collaboration control
+- JSON-based milestone tracking for detailed progress management
+- Tag arrays for flexible organization and categorization
+- Notes fields for additional context and resources
 
 **Drizzle-Zod** integration provides runtime schema validation, ensuring type safety from the database to the frontend. Database migrations are managed through Drizzle Kit with proper version control.
 

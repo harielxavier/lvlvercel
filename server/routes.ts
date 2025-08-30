@@ -457,6 +457,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get goals for specific employee (alternative endpoint)
+  app.get("/api/employee/:employeeId/goals", isAuthenticated, async (req, res) => {
+    try {
+      const { employeeId } = req.params;
+      const goals = await storage.getGoalsByEmployee(employeeId);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching employee goals:", error);
+      res.status(500).json({ message: "Failed to fetch employee goals" });
+    }
+  });
+
   // Performance Review routes
   
   // Get performance reviews for a tenant (for managers/admins)
@@ -904,7 +916,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const goalData = insertGoalSchema.parse({
         ...req.body,
         employeeId,
-        targetDate: req.body.deadline ? new Date(req.body.deadline) : null
+        targetDate: req.body.targetDate ? new Date(req.body.targetDate) : (req.body.deadline ? new Date(req.body.deadline) : null)
       });
       const goal = await storage.createGoal(goalData);
       res.json(goal);

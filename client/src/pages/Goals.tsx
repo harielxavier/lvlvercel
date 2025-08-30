@@ -20,7 +20,19 @@ export default function Goals() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isNewGoalDialogOpen, setIsNewGoalDialogOpen] = useState(false);
-  const [newGoal, setNewGoal] = useState({
+  const [newGoal, setNewGoal] = useState<{
+    title: string;
+    description: string;
+    category: string;
+    priority: string;
+    goalType: string;
+    difficulty: string;
+    visibility: string;
+    targetDate: string;
+    tags: string[];
+    milestones: any[];
+    notes: string;
+  }>({
     title: '',
     description: '',
     category: '',
@@ -89,7 +101,7 @@ export default function Goals() {
     if (!currentMilestone.title) return;
     setNewGoal({
       ...newGoal,
-      milestones: [...(newGoal.milestones as any[] || []), { ...currentMilestone, id: Date.now() }]
+      milestones: [...newGoal.milestones, { ...currentMilestone, id: Date.now() }]
     });
     setCurrentMilestone({ title: '', description: '', targetDate: '' });
   };
@@ -97,7 +109,7 @@ export default function Goals() {
   const removeMilestone = (id: number) => {
     setNewGoal({
       ...newGoal,
-      milestones: (newGoal.milestones as any[] || []).filter((m: any) => m.id !== id)
+      milestones: newGoal.milestones.filter((m: any) => m.id !== id)
     });
   };
 
