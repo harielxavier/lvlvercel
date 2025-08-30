@@ -93,7 +93,7 @@ function Router() {
       <Route path="/dashboard" component={Home} />
       
       {/* Platform Admin Routes */}
-      <Route path="/tenants" component={CustomerTenants} />
+      <Route path="/customer-tenants" component={CustomerTenants} />
       <Route path="/analytics" component={PlatformAnalytics} />
       <Route path="/billing" component={BillingSubscriptions} />
       <Route path="/pricing" component={PricingManagement} />

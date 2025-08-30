@@ -65,7 +65,7 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
         {
           icon: Building2,
           label: 'Customer Tenants',
-          href: '/tenants'
+          href: '/customer-tenants'
         },
         {
           icon: CreditCard,
