@@ -15,6 +15,7 @@ import SystemSettings from "@/pages/SystemSettings";
 import SupportDashboard from "@/pages/SupportDashboard";
 import DiscountManagement from "@/pages/DiscountManagement";
 import ReferralDashboard from "@/pages/ReferralDashboard";
+import WebsiteCustomization from "@/pages/WebsiteCustomization";
 import OrganizationChart from "@/pages/OrganizationChart";
 import EmployeeManagement from "@/pages/EmployeeManagement";
 import AdvancedEmployees from "@/pages/AdvancedEmployees";
@@ -111,6 +112,7 @@ function Router() {
       <Route path="/feedback-analytics" component={FeedbackAnalytics} />
       <Route path="/settings" component={Settings} />
       <Route path="/integrations" component={Integrations} />
+      <Route path="/website-customization" component={WebsiteCustomization} />
       
       {/* Manager Routes */}
       <Route path="/team" component={Team} />

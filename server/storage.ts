@@ -23,6 +23,7 @@ import {
   discountCodeUsages,
   referrals,
   referralRewards,
+  websiteSettings,
   type User,
   type UpsertUser,
   type Tenant,
@@ -71,6 +72,8 @@ import {
   type InsertReferralReward,
   type InsertDepartment,
   type InsertJobPosition,
+  type WebsiteSettings,
+  type InsertWebsiteSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, lt } from "drizzle-orm";
@@ -227,6 +230,11 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   markPasswordResetTokenUsed(token: string): Promise<void>;
   deleteExpiredPasswordResetTokens(): Promise<void>;
+  
+  // Website customization operations
+  getWebsiteSettings(tenantId: string): Promise<WebsiteSettings | undefined>;
+  upsertWebsiteSettings(settings: InsertWebsiteSettings): Promise<WebsiteSettings>;
+  updateWebsiteSettings(tenantId: string, data: Partial<InsertWebsiteSettings>): Promise<WebsiteSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1560,6 +1568,52 @@ export class DatabaseStorage implements IStorage {
       totalRewards: rewards.reduce((sum, r) => sum + r.rewardValue, 0),
       availableRewards: rewards.filter(r => !r.appliedAt).reduce((sum, r) => sum + r.rewardValue, 0),
     };
+  }
+
+  // Website customization operations
+  async getWebsiteSettings(tenantId: string): Promise<WebsiteSettings | undefined> {
+    const [settings] = await db
+      .select()
+      .from(websiteSettings)
+      .where(eq(websiteSettings.tenantId, tenantId));
+    return settings;
+  }
+
+  async upsertWebsiteSettings(settingsData: InsertWebsiteSettings): Promise<WebsiteSettings> {
+    const [settings] = await db
+      .insert(websiteSettings)
+      .values({
+        ...settingsData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: websiteSettings.tenantId,
+        set: {
+          ...settingsData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return settings;
+  }
+
+  async updateWebsiteSettings(tenantId: string, data: Partial<InsertWebsiteSettings>): Promise<WebsiteSettings> {
+    const [settings] = await db
+      .update(websiteSettings)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(websiteSettings.tenantId, tenantId))
+      .returning();
+    
+    if (!settings) {
+      // If no settings exist, create them
+      return this.upsertWebsiteSettings({ 
+        tenantId,
+        ...data 
+      } as InsertWebsiteSettings);
+    }
+    
+    return settings;
   }
 }
 

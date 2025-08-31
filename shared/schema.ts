@@ -209,6 +209,29 @@ export const notificationPreferences = pgTable("notification_preferences", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Website customization settings per tenant
+export const websiteSettings = pgTable("website_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().unique().references(() => tenants.id),
+  companyName: varchar("company_name"),
+  logoUrl: varchar("logo_url"),
+  faviconUrl: varchar("favicon_url"),
+  primaryColor: varchar("primary_color").default('#6366f1'),
+  secondaryColor: varchar("secondary_color").default('#8b5cf6'),
+  accentColor: varchar("accent_color").default('#06b6d4'),
+  font: varchar("font").default('system'),
+  customCss: text("custom_css"),
+  footerText: text("footer_text"),
+  welcomeMessage: text("welcome_message"),
+  dashboardTitle: varchar("dashboard_title"),
+  loginPageTitle: varchar("login_page_title"),
+  customDomainEnabled: boolean("custom_domain_enabled").default(false),
+  customDomain: varchar("custom_domain"),
+  sslEnabled: boolean("ssl_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Pricing tiers table (for dynamic pricing management)
 export const pricingTiers = pgTable("pricing_tiers", {
   id: varchar("id").primaryKey(), // e.g., 'forming', 'storming', etc.
@@ -736,3 +759,13 @@ export type InsertDiscountCode = z.infer<typeof insertDiscountCodeSchema>;
 export type InsertDiscountCodeUsage = z.infer<typeof insertDiscountCodeUsageSchema>;
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
 export type InsertReferralReward = z.infer<typeof insertReferralRewardSchema>;
+
+// Website settings types and validation
+export const insertWebsiteSettingsSchema = createInsertSchema(websiteSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWebsiteSettings = z.infer<typeof insertWebsiteSettingsSchema>;
+export type WebsiteSettings = typeof websiteSettings.$inferSelect;

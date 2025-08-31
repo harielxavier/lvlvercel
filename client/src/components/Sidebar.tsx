@@ -33,7 +33,8 @@ import {
   X,
   DollarSign,
   Tag,
-  Gift
+  Gift,
+  Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -142,6 +143,11 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           label: 'Integration Setup',
           href: '/integrations',
           notification: true
+        },
+        {
+          icon: Palette,
+          label: 'Website Customization',
+          href: '/website-customization'
         }
       ];
 
