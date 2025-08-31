@@ -2112,9 +2112,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { tenantId } = req.params;
       
       // Validate tenant access
-      const validationResult = await validateTenantAccess(req, tenantId);
-      if (!validationResult.hasAccess) {
-        return res.status(403).json({ message: validationResult.message });
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      
+      const validationResult = await validateTenantAccess(userId, tenantId, storage);
+      if (!validationResult.valid) {
+        return res.status(403).json({ message: validationResult.error });
       }
 
       const settings = await storage.getWebsiteSettings(tenantId);
@@ -2161,14 +2167,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { tenantId } = req.params;
       
       // Validate tenant access
-      const validationResult = await validateTenantAccess(req, tenantId);
-      if (!validationResult.hasAccess) {
-        return res.status(403).json({ message: validationResult.message });
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      
+      const validationResult = await validateTenantAccess(userId, tenantId, storage);
+      if (!validationResult.valid) {
+        return res.status(403).json({ message: validationResult.error });
       }
 
       // Only allow tenant admins and platform admins to modify website settings
-      const user = req.user as any;
-      const currentUser = await storage.getUser(user?.claims?.sub);
+      const currentUser = await storage.getUser(userId);
       if (currentUser?.role !== 'tenant_admin' && currentUser?.role !== 'platform_admin') {
         return res.status(403).json({ message: "Only administrators can modify website settings" });
       }
