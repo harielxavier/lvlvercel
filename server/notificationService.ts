@@ -64,7 +64,10 @@ export class NotificationService {
         metadata,
       };
 
-      await storage.createNotification(notificationData);
+      const savedNotification = await storage.createNotification(notificationData);
+
+      // Send real-time notification via WebSocket
+      const broadcastSuccess = this.sendRealTimeNotification(userId, savedNotification);
 
       // Send email notification if enabled and user preference allows
       if (this.shouldSendEmail(type, preferences)) {
@@ -76,7 +79,12 @@ export class NotificationService {
         await this.sendSMS(user, message);
       }
 
-      console.log(`✅ Notification sent to ${user.email}: ${title}`);
+      const deliveryMethods = [];
+      if (broadcastSuccess) deliveryMethods.push('real-time');
+      if (this.shouldSendEmail(type, preferences)) deliveryMethods.push('email');
+      if (this.shouldSendSMS(type, preferences)) deliveryMethods.push('sms');
+
+      console.log(`✅ Notification sent to ${user.email} via [${deliveryMethods.join(', ')}]: ${title}`);
     } catch (error) {
       console.error('❌ Failed to send notification:', error);
     }
@@ -185,11 +193,37 @@ export class NotificationService {
       html: this.generateEmailHTML(user, title, message, metadata),
     };
 
-    // Simulate email sending (replace with actual email service)
-    console.log(`📧 Email sent to ${emailConfig.to}: ${emailConfig.subject}`);
-    
-    // TODO: Integrate with actual email service like SendGrid
-    // await sendGridClient.send(emailConfig);
+    try {
+      // Check if Mailgun is configured
+      if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN) {
+        console.log(`📧 Email simulated (Mailgun not configured) to ${emailConfig.to}: ${emailConfig.subject}`);
+        return;
+      }
+
+      // Import Mailgun (only when needed)
+      const formData = require('form-data');
+      const Mailgun = require('mailgun.js');
+      const mailgun = new Mailgun(formData);
+      const mg = mailgun.client({
+        username: 'api',
+        key: process.env.MAILGUN_API_KEY,
+      });
+
+      // Send email via Mailgun
+      const emailData = {
+        from: emailConfig.from,
+        to: emailConfig.to,
+        subject: emailConfig.subject,
+        html: emailConfig.html,
+      };
+
+      await mg.messages.create(process.env.MAILGUN_DOMAIN, emailData);
+      console.log(`📧 Email sent via Mailgun to ${emailConfig.to}: ${emailConfig.subject}`);
+    } catch (error) {
+      console.error('❌ Failed to send email via Mailgun:', error);
+      // Fallback to console logging
+      console.log(`📧 Email fallback (simulated) to ${emailConfig.to}: ${emailConfig.subject}`);
+    }
   }
 
   private async sendSMS(user: User, message: string): Promise<void> {
@@ -202,6 +236,22 @@ export class NotificationService {
     //   to: user.phoneNumber,
     //   from: process.env.TWILIO_PHONE_NUMBER
     // });
+  }
+
+  private sendRealTimeNotification(userId: string, notification: any): boolean {
+    // Use the global broadcast function set up by WebSocket server
+    if (typeof (global as any).broadcastNotification === 'function') {
+      return (global as any).broadcastNotification(userId, {
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        metadata: notification.metadata,
+        createdAt: notification.createdAt,
+        isRead: false
+      });
+    }
+    return false;
   }
 
   private generateEmailHTML(user: User, title: string, message: string, metadata?: any): string {

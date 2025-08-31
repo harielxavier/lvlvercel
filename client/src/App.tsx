@@ -17,6 +17,7 @@ import DiscountManagement from "@/pages/DiscountManagement";
 import ReferralDashboard from "@/pages/ReferralDashboard";
 import OrganizationChart from "@/pages/OrganizationChart";
 import EmployeeManagement from "@/pages/EmployeeManagement";
+import AdvancedEmployees from "@/pages/AdvancedEmployees";
 import Performance from "@/pages/Performance";
 import FeedbackAnalytics from "@/pages/FeedbackAnalytics";
 import Settings from "@/pages/Settings";
@@ -105,7 +106,7 @@ function Router() {
       
       {/* Tenant Admin Routes */}
       <Route path="/org-chart" component={OrganizationChart} />
-      <Route path="/employees" component={EmployeeManagement} />
+      <Route path="/employees" component={AdvancedEmployees} />
       <Route path="/performance" component={Performance} />
       <Route path="/feedback-analytics" component={FeedbackAnalytics} />
       <Route path="/settings" component={Settings} />

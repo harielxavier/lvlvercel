@@ -67,6 +67,8 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: userRoleEnum("role").default('employee'),
   tenantId: varchar("tenant_id").references(() => tenants.id),
+  phoneNumber: varchar("phone_number"),
+  timezone: varchar("timezone").default('UTC'),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -119,12 +121,24 @@ export const employees = pgTable("employees", {
   qrCodeData: text("qr_code_data"),
   hireDate: timestamp("hire_date"),
   status: varchar("status").default('active'), // active, inactive, terminated
+  // Enhanced profile fields
+  bio: text("bio"),
+  skills: text("skills").array(),
+  workLocation: varchar("work_location"), // remote, office, hybrid
+  emergencyContact: jsonb("emergency_contact"),
+  personalGoals: text("personal_goals"),
+  achievements: jsonb("achievements"),
+  salaryGrade: varchar("salary_grade"),
+  performanceRating: decimal("performance_rating", { precision: 3, scale: 2 }),
+  tags: text("tags").array(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("employees_user_id_idx").on(table.userId),
   index("employees_tenant_id_idx").on(table.tenantId),
   index("employees_feedback_url_idx").on(table.feedbackUrl),
+  index("employees_department_id_idx").on(table.departmentId),
+  index("employees_manager_id_idx").on(table.managerId),
 ]);
 
 // Feedback submissions table
@@ -546,6 +560,18 @@ export const insertTenantSchema = createInsertSchema(tenants).omit({
   updatedAt: true,
 });
 
+export const insertDepartmentSchema = createInsertSchema(departments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertJobPositionSchema = createInsertSchema(jobPositions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertEmployeeSchema = createInsertSchema(employees).omit({
   id: true,
   createdAt: true,
@@ -676,6 +702,8 @@ export type SystemSetting = typeof systemSettings.$inferSelect;
 
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
+export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
+export type InsertJobPosition = z.infer<typeof insertJobPositionSchema>;
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
 export type InsertGoal = z.infer<typeof insertGoalSchema>;
 export type InsertPerformanceReview = z.infer<typeof insertPerformanceReviewSchema>;

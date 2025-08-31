@@ -23,6 +23,7 @@ import { isUnauthorizedError } from '@/lib/authUtils';
 import { useLocation } from 'wouter';
 import FeedbackSystem from './FeedbackSystem';
 import OrganizationChart from './OrganizationChart';
+import NotificationCenter from './NotificationCenter';
 
 interface DashboardProps {
   user: any;
@@ -77,12 +78,7 @@ function Dashboard({ user }: DashboardProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM9 7H4l5-5v5zM9 17v5l-5-5h5zM15 7V2l5 5h-5z"></path>
                 </svg>
               </Button>
-              <Button variant="ghost" size="sm" className="relative" data-testid="button-notifications">
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-destructive rounded-full flex items-center justify-center">
-                  <span className="text-[10px] sm:text-xs text-destructive-foreground font-medium">3</span>
-                </div>
-              </Button>
+              <NotificationCenter />
             </div>
           </div>
         </div>

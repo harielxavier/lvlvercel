@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import QRCode from 'qrcode';
 import { notificationService } from './notificationService';
@@ -8,9 +9,77 @@ import { validateParam, validateTenantAccess, validateUUID, validateURL } from "
 import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, insertGoalSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
 
+// WebSocket connection management
+const wsConnections = new Map<string, WebSocket>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Create HTTP server
+  const httpServer = createServer(app);
+
+  // Setup WebSocket server on /ws path
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  wss.on('connection', (ws: WebSocket, req) => {
+    console.log('🔌 WebSocket connection established');
+    
+    ws.on('message', async (message: string) => {
+      try {
+        const data = JSON.parse(message);
+        
+        // Handle authentication for WebSocket
+        if (data.type === 'auth' && data.userId) {
+          wsConnections.set(data.userId, ws);
+          ws.send(JSON.stringify({ 
+            type: 'auth_success', 
+            message: 'Connected successfully' 
+          }));
+          console.log(`✅ User ${data.userId} authenticated via WebSocket`);
+        }
+        
+        // Handle real-time notifications
+        if (data.type === 'ping') {
+          ws.send(JSON.stringify({ type: 'pong' }));
+        }
+        
+      } catch (error) {
+        console.error('❌ WebSocket message error:', error);
+        ws.send(JSON.stringify({ 
+          type: 'error', 
+          message: 'Invalid message format' 
+        }));
+      }
+    });
+
+    ws.on('close', () => {
+      // Remove connection from map when client disconnects
+      wsConnections.forEach((connection, userId) => {
+        if (connection === ws) {
+          wsConnections.delete(userId);
+          console.log(`🔌 User ${userId} disconnected from WebSocket`);
+        }
+      });
+    });
+
+    ws.on('error', (error) => {
+      console.error('❌ WebSocket error:', error);
+    });
+  });
+
+  // Export WebSocket broadcast function to notification service
+  (global as any).broadcastNotification = (userId: string, notification: any) => {
+    const connection = wsConnections.get(userId);
+    if (connection && connection.readyState === WebSocket.OPEN) {
+      connection.send(JSON.stringify({
+        type: 'notification',
+        data: notification
+      }));
+      return true;
+    }
+    return false;
+  };
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -850,6 +919,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Department management routes
+  app.get("/api/departments/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
+    try {
+      const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
+      const departments = await storage.getDepartmentsByTenant(tenantId);
+      res.json(departments);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      res.status(500).json({ message: "Failed to fetch departments" });
+    }
+  });
+
+  app.post("/api/departments", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      const currentUser = await storage.getUser(userId);
+      
+      // Check permissions
+      if (!currentUser || !['tenant_admin', 'manager'].includes(currentUser.role || '')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const departmentData = req.body;
+      const department = await storage.createDepartment(departmentData);
+      res.json(department);
+    } catch (error) {
+      console.error("Error creating department:", error);
+      res.status(500).json({ message: "Failed to create department" });
+    }
+  });
+
+  // Job position management routes
+  app.get("/api/job-positions/:tenantId", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
+    try {
+      const { tenantId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
+      const jobPositions = await storage.getJobPositionsByTenant(tenantId);
+      res.json(jobPositions);
+    } catch (error) {
+      console.error("Error fetching job positions:", error);
+      res.status(500).json({ message: "Failed to fetch job positions" });
+    }
+  });
+
+  app.post("/api/job-positions", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      const currentUser = await storage.getUser(userId);
+      
+      // Check permissions
+      if (!currentUser || !['tenant_admin', 'manager'].includes(currentUser.role || '')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const jobPositionData = req.body;
+      const jobPosition = await storage.createJobPosition(jobPositionData);
+      res.json(jobPosition);
+    } catch (error) {
+      console.error("Error creating job position:", error);
+      res.status(500).json({ message: "Failed to create job position" });
+    }
+  });
+
+  // Bulk employee operations
+  app.post("/api/employees/bulk-assign-department", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      const currentUser = await storage.getUser(userId);
+      
+      // Check permissions
+      if (!currentUser || !['tenant_admin', 'manager'].includes(currentUser.role || '')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { employeeIds, departmentId } = req.body;
+      const updatedEmployees = await storage.bulkAssignDepartment(employeeIds, departmentId);
+      res.json(updatedEmployees);
+    } catch (error) {
+      console.error("Error in bulk department assignment:", error);
+      res.status(500).json({ message: "Failed to assign department" });
+    }
+  });
+
+  app.post("/api/employees/bulk-assign-manager", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Invalid user session" });
+      }
+      const currentUser = await storage.getUser(userId);
+      
+      // Check permissions
+      if (!currentUser || !['tenant_admin', 'manager'].includes(currentUser.role || '')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { employeeIds, managerId } = req.body;
+      const updatedEmployees = await storage.bulkAssignManager(employeeIds, managerId);
+      res.json(updatedEmployees);
+    } catch (error) {
+      console.error("Error in bulk manager assignment:", error);
+      res.status(500).json({ message: "Failed to assign manager" });
+    }
+  });
+
+  // Employee search and hierarchy
+  app.get("/api/employees/:tenantId/search", isAuthenticated, validateParam('tenantId'), async (req: any, res) => {
+    try {
+      const { tenantId } = req.params;
+      const { query, departmentId, status, managerId } = req.query;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate tenant access
+      const { valid, error } = await validateTenantAccess(userId, tenantId, storage);
+      if (!valid) {
+        return res.status(403).json({ message: error });
+      }
+      
+      const filters = { departmentId, status, managerId };
+      const employees = await storage.searchEmployees(tenantId, query || '', filters);
+      res.json(employees);
+    } catch (error) {
+      console.error("Error searching employees:", error);
+      res.status(500).json({ message: "Failed to search employees" });
+    }
+  });
+
+  app.get("/api/employees/:employeeId/hierarchy", isAuthenticated, validateParam('employeeId'), async (req: any, res) => {
+    try {
+      const { employeeId } = req.params;
+      const hierarchy = await storage.getEmployeeHierarchy(employeeId);
+      res.json(hierarchy);
+    } catch (error) {
+      console.error("Error fetching employee hierarchy:", error);
+      res.status(500).json({ message: "Failed to fetch employee hierarchy" });
+    }
+  });
+
   // Get performance reviews for a specific employee
   app.get("/api/employee/:employeeId/performance-reviews", isAuthenticated, validateParam('employeeId'), async (req: any, res) => {
     try {
@@ -1837,6 +2072,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
   return httpServer;
 }

@@ -17,12 +17,11 @@ const envSchema = z.object({
   REPLIT_AUTH_CLIENT_ID: z.string().optional(),
   REPLIT_AUTH_CALLBACK_URL: z.string().url().optional(),
   
-  // Optional service configurations
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().transform(Number).pipe(z.number()).optional(),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
+  // Email service configuration (Mailgun)
+  MAILGUN_API_KEY: z.string().optional(),
+  MAILGUN_DOMAIN: z.string().optional(),
   
+  // SMS service configuration (optional - not used)
   TWILIO_ACCOUNT_SID: z.string().optional(),
   TWILIO_AUTH_TOKEN: z.string().optional(),
   TWILIO_PHONE_NUMBER: z.string().optional(),
@@ -41,8 +40,8 @@ function loadConfig() {
       }
       
       // Warn about missing optional services
-      if (!env.SMTP_HOST) {
-        console.warn('[CONFIG] SMTP not configured - email notifications disabled');
+      if (!env.MAILGUN_API_KEY || !env.MAILGUN_DOMAIN) {
+        console.warn('[CONFIG] Mailgun not configured - email notifications will be simulated');
       }
       
       if (!env.TWILIO_ACCOUNT_SID) {
@@ -75,7 +74,7 @@ export const isTest = () => config.NODE_ENV === 'test';
 
 // Service availability checks
 export const services = {
-  email: Boolean(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS),
+  email: Boolean(config.MAILGUN_API_KEY && config.MAILGUN_DOMAIN),
   sms: Boolean(config.TWILIO_ACCOUNT_SID && config.TWILIO_AUTH_TOKEN && config.TWILIO_PHONE_NUMBER),
   auth: Boolean(config.REPLIT_AUTH_ISSUER && config.REPLIT_AUTH_CLIENT_ID),
 };

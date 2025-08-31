@@ -69,6 +69,8 @@ import {
   type InsertReferral,
   type ReferralReward,
   type InsertReferralReward,
+  type InsertDepartment,
+  type InsertJobPosition,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, lt } from "drizzle-orm";
@@ -94,12 +96,30 @@ export interface IStorage {
   getEmployeeByUserId(userId: string): Promise<Employee | undefined>;
   getEmployeeByFeedbackUrl(feedbackUrl: string): Promise<Employee | undefined>;
   getEmployeesByTenant(tenantId: string): Promise<Employee[]>;
+  getEmployeesByDepartment(departmentId: string): Promise<Employee[]>;
+  getEmployeesByManager(managerId: string): Promise<Employee[]>;
   createEmployee(employee: InsertEmployee): Promise<Employee>;
   updateEmployee(id: string, data: Partial<InsertEmployee>): Promise<Employee>;
+  bulkUpdateEmployees(updates: {id: string, data: Partial<InsertEmployee>}[]): Promise<Employee[]>;
+  bulkAssignDepartment(employeeIds: string[], departmentId: string): Promise<Employee[]>;
+  bulkAssignManager(employeeIds: string[], managerId: string): Promise<Employee[]>;
+  getEmployeeHierarchy(employeeId: string): Promise<any>;
+  searchEmployees(tenantId: string, query: string, filters?: any): Promise<Employee[]>;
   createEmployeeWithLimitCheck(employee: InsertEmployee, maxEmployees: number): Promise<Employee>;
   
   // Department operations
   getDepartmentsByTenant(tenantId: string): Promise<Department[]>;
+  createDepartment(department: InsertDepartment): Promise<Department>;
+  updateDepartment(id: string, data: Partial<InsertDepartment>): Promise<Department>;
+  deleteDepartment(id: string): Promise<void>;
+  getDepartment(id: string): Promise<Department | undefined>;
+  
+  // Job Position operations
+  getJobPositionsByTenant(tenantId: string): Promise<JobPosition[]>;
+  createJobPosition(jobPosition: InsertJobPosition): Promise<JobPosition>;
+  updateJobPosition(id: string, data: Partial<InsertJobPosition>): Promise<JobPosition>;
+  deleteJobPosition(id: string): Promise<void>;
+  getJobPosition(id: string): Promise<JobPosition | undefined>;
   
   // Feedback operations
   createFeedback(feedback: InsertFeedback): Promise<Feedback>;
@@ -412,9 +432,213 @@ export class DatabaseStorage implements IStorage {
     return employee;
   }
 
+  async getEmployeesByDepartment(departmentId: string): Promise<Employee[]> {
+    return await db
+      .select()
+      .from(employees)
+      .where(eq(employees.departmentId, departmentId))
+      .orderBy(desc(employees.createdAt));
+  }
+
+  async getEmployeesByManager(managerId: string): Promise<Employee[]> {
+    return await db
+      .select()
+      .from(employees)
+      .where(eq(employees.managerId, managerId))
+      .orderBy(desc(employees.createdAt));
+  }
+
+  async bulkUpdateEmployees(updates: {id: string, data: Partial<InsertEmployee>}[]): Promise<Employee[]> {
+    const results = [];
+    for (const update of updates) {
+      const [employee] = await db
+        .update(employees)
+        .set({ ...update.data, updatedAt: new Date() })
+        .where(eq(employees.id, update.id))
+        .returning();
+      results.push(employee);
+    }
+    return results;
+  }
+
+  async bulkAssignDepartment(employeeIds: string[], departmentId: string): Promise<Employee[]> {
+    const results = [];
+    for (const employeeId of employeeIds) {
+      const [employee] = await db
+        .update(employees)
+        .set({ departmentId, updatedAt: new Date() })
+        .where(eq(employees.id, employeeId))
+        .returning();
+      results.push(employee);
+    }
+    return results;
+  }
+
+  async bulkAssignManager(employeeIds: string[], managerId: string): Promise<Employee[]> {
+    const results = [];
+    for (const employeeId of employeeIds) {
+      const [employee] = await db
+        .update(employees)
+        .set({ managerId, updatedAt: new Date() })
+        .where(eq(employees.id, employeeId))
+        .returning();
+      results.push(employee);
+    }
+    return results;
+  }
+
+  async getEmployeeHierarchy(employeeId: string): Promise<any> {
+    // Get the employee and their manager chain
+    const employee = await this.getEmployee(employeeId);
+    if (!employee) return null;
+
+    // Get direct reports
+    const directReports = await this.getEmployeesByManager(employeeId);
+    
+    // Get manager details if exists
+    let manager = null;
+    if (employee.managerId) {
+      manager = await this.getEmployee(employee.managerId);
+    }
+
+    return {
+      employee,
+      manager,
+      directReports,
+      totalDirectReports: directReports.length
+    };
+  }
+
+  async searchEmployees(tenantId: string, query: string, filters?: any): Promise<Employee[]> {
+    let baseQuery = db
+      .select({
+        id: employees.id,
+        userId: employees.userId,
+        tenantId: employees.tenantId,
+        employeeNumber: employees.employeeNumber,
+        jobPositionId: employees.jobPositionId,
+        departmentId: employees.departmentId,
+        managerId: employees.managerId,
+        feedbackUrl: employees.feedbackUrl,
+        qrCodeData: employees.qrCodeData,
+        hireDate: employees.hireDate,
+        status: employees.status,
+        bio: employees.bio,
+        skills: employees.skills,
+        workLocation: employees.workLocation,
+        emergencyContact: employees.emergencyContact,
+        personalGoals: employees.personalGoals,
+        achievements: employees.achievements,
+        salaryGrade: employees.salaryGrade,
+        performanceRating: employees.performanceRating,
+        tags: employees.tags,
+        createdAt: employees.createdAt,
+        updatedAt: employees.updatedAt,
+        // User information
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        role: users.role,
+        profileImageUrl: users.profileImageUrl
+      })
+      .from(employees)
+      .innerJoin(users, eq(employees.userId, users.id))
+      .where(eq(employees.tenantId, tenantId));
+
+    // Add search filter if provided
+    if (query) {
+      baseQuery = baseQuery.where(
+        sql`LOWER(${users.firstName}) LIKE LOWER(${'%' + query + '%'}) OR 
+            LOWER(${users.lastName}) LIKE LOWER(${'%' + query + '%'}) OR 
+            LOWER(${users.email}) LIKE LOWER(${'%' + query + '%'}) OR 
+            LOWER(${employees.employeeNumber}) LIKE LOWER(${'%' + query + '%'})`
+      );
+    }
+
+    // Add additional filters
+    if (filters?.departmentId) {
+      baseQuery = baseQuery.where(eq(employees.departmentId, filters.departmentId));
+    }
+    if (filters?.status) {
+      baseQuery = baseQuery.where(eq(employees.status, filters.status));
+    }
+    if (filters?.managerId) {
+      baseQuery = baseQuery.where(eq(employees.managerId, filters.managerId));
+    }
+
+    return await baseQuery.orderBy(desc(employees.createdAt));
+  }
+
   // Department operations
   async getDepartmentsByTenant(tenantId: string): Promise<Department[]> {
     return await db.select().from(departments).where(eq(departments.tenantId, tenantId));
+  }
+
+  async createDepartment(departmentData: InsertDepartment): Promise<Department> {
+    const [department] = await db
+      .insert(departments)
+      .values(departmentData)
+      .returning();
+    return department;
+  }
+
+  async updateDepartment(id: string, data: Partial<InsertDepartment>): Promise<Department> {
+    const [department] = await db
+      .update(departments)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(departments.id, id))
+      .returning();
+    return department;
+  }
+
+  async deleteDepartment(id: string): Promise<void> {
+    await db
+      .delete(departments)
+      .where(eq(departments.id, id));
+  }
+
+  async getDepartment(id: string): Promise<Department | undefined> {
+    const [department] = await db
+      .select()
+      .from(departments)
+      .where(eq(departments.id, id));
+    return department;
+  }
+
+  // Job Position operations
+  async getJobPositionsByTenant(tenantId: string): Promise<JobPosition[]> {
+    return await db.select().from(jobPositions).where(eq(jobPositions.tenantId, tenantId));
+  }
+
+  async createJobPosition(jobPositionData: InsertJobPosition): Promise<JobPosition> {
+    const [jobPosition] = await db
+      .insert(jobPositions)
+      .values(jobPositionData)
+      .returning();
+    return jobPosition;
+  }
+
+  async updateJobPosition(id: string, data: Partial<InsertJobPosition>): Promise<JobPosition> {
+    const [jobPosition] = await db
+      .update(jobPositions)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(jobPositions.id, id))
+      .returning();
+    return jobPosition;
+  }
+
+  async deleteJobPosition(id: string): Promise<void> {
+    await db
+      .delete(jobPositions)
+      .where(eq(jobPositions.id, id));
+  }
+
+  async getJobPosition(id: string): Promise<JobPosition | undefined> {
+    const [jobPosition] = await db
+      .select()
+      .from(jobPositions)
+      .where(eq(jobPositions.id, id));
+    return jobPosition;
   }
 
   // Feedback operations
