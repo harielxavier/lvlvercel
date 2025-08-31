@@ -10,10 +10,103 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, Star, AlertCircle, Flag, Lightbulb, Users, Building, Eye, EyeOff, Hash, Filter, Search, BookOpen, Zap } from 'lucide-react';
+import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, Star, AlertCircle, Flag, Lightbulb, Users, Building, Eye, EyeOff, Hash, Filter, Search, BookOpen, Zap, Grid3X3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+
+// Calendar View Component
+function CalendarView({ goals }: { goals: any[] }) {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
+  // Get goals for selected date
+  const goalsForDate = goals.filter(goal => {
+    if (!selectedDate || !goal.targetDate) return false;
+    const goalDate = new Date(goal.targetDate);
+    return goalDate.toDateString() === selectedDate.toDateString();
+  });
+  
+  // Get dates that have goals
+  const datesWithGoals = goals
+    .filter(goal => goal.targetDate)
+    .map(goal => new Date(goal.targetDate))
+    .filter(date => !isNaN(date.getTime()));
+  
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-1">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle>Goal Calendar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              modifiers={{
+                hasGoals: datesWithGoals
+              }}
+              modifiersStyles={{
+                hasGoals: { 
+                  backgroundColor: 'rgb(59 130 246)', 
+                  color: 'white',
+                  fontWeight: 'bold'
+                }
+              }}
+              className="rounded-md border"
+            />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="lg:col-span-2">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle>
+              Goals for {selectedDate?.toLocaleDateString() || 'Selected Date'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {goalsForDate.length > 0 ? (
+              <div className="space-y-4">
+                {goalsForDate.map((goal: any) => (
+                  <div key={goal.id} className="p-4 border rounded-lg hover:shadow-sm transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">{goal.title}</h3>
+                      <Badge className={
+                        goal.priority === 'high' ? 'bg-red-100 text-red-700' :
+                        goal.priority === 'medium' ? 'bg-orange-100 text-orange-700' :
+                        'bg-green-100 text-green-700'
+                      }>
+                        {goal.priority}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{goal.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Progress value={goal.progress || 0} className="w-20" />
+                        <span className="text-sm">{goal.progress || 0}%</span>
+                      </div>
+                      <Badge variant="outline">{goal.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No goals scheduled for this date</p>
+                <p className="text-sm">Select a date with goals or create a new one</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 export default function Goals() {
   const { user, isLoading, isAuthenticated } = useUserContext();
@@ -49,6 +142,7 @@ export default function Goals() {
   const [filterPriority, setFilterPriority] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
   
   // Get real goals data from API
   const { data: goals = [], isLoading: goalsLoading } = useQuery({
@@ -196,10 +290,26 @@ export default function Goals() {
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <Button variant="outline">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  View Calendar
-                </Button>
+                <div className="flex items-center bg-muted p-1 rounded-lg">
+                  <Button 
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="h-8"
+                  >
+                    <Grid3X3 className="w-4 h-4 mr-1" />
+                    Grid
+                  </Button>
+                  <Button 
+                    variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('calendar')}
+                    className="h-8"
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Calendar
+                  </Button>
+                </div>
                 <Dialog open={isNewGoalDialogOpen} onOpenChange={setIsNewGoalDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg" data-testid="button-new-goal">
@@ -578,6 +688,8 @@ export default function Goals() {
                   )}
                 </CardContent>
               </Card>
+            ) : viewMode === 'calendar' ? (
+              <CalendarView goals={filteredGoals} />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredGoals.map((goal: any) => (
