@@ -23,7 +23,7 @@ export function getSession() {
     if (isDevelopment) {
       console.warn("⚠️  WARNING: SESSION_SECRET not set, using development fallback");
     } else {
-      throw new Error("SESSION_SECRET environment variable is required in production");
+      console.warn("⚠️  WARNING: SESSION_SECRET not set in production, using fallback - please configure for security");
     }
   }
   

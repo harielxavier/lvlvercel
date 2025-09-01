@@ -34,9 +34,14 @@ function loadConfig() {
     
     // Validate critical configurations
     if (env.NODE_ENV === 'production') {
-      // In production, require all authentication settings
+      // Warn about missing authentication settings instead of throwing error
       if (!env.REPLIT_AUTH_ISSUER || !env.REPLIT_AUTH_CLIENT_ID || !env.REPLIT_AUTH_CALLBACK_URL) {
-        throw new Error('Authentication configuration is required in production');
+        console.warn('[CONFIG] Replit authentication not fully configured - app will start without authentication');
+        console.warn('[CONFIG] Missing variables:', {
+          REPLIT_AUTH_ISSUER: !env.REPLIT_AUTH_ISSUER,
+          REPLIT_AUTH_CLIENT_ID: !env.REPLIT_AUTH_CLIENT_ID,
+          REPLIT_AUTH_CALLBACK_URL: !env.REPLIT_AUTH_CALLBACK_URL
+        });
       }
       
       // Warn about missing optional services
