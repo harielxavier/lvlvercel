@@ -21,242 +21,139 @@ import {
   Infinity,
   Rocket,
   Eye,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-transparent via-purple-500/10 to-transparent rounded-full animate-spin-slow"></div>
-      </div>
-
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="relative z-50 border-b border-white/10 bg-black/20 backdrop-blur-xl sticky top-0">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="relative group">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                <Shield className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">LVL UP Performance</h1>
-                <p className="text-xs text-gray-400">Next-Gen HR Platform</p>
-              </div>
+              <span className="text-xl font-bold text-gray-900">LVL UP Performance</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105">Features</a>
-              <a href="#pricing" className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105">Pricing</a>
-              <a href="#testimonials" className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105">Reviews</a>
+              <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
+              <a href="#pricing" className="text-gray-600 hover:text-gray-900">Pricing</a>
+              <a href="#testimonials" className="text-gray-600 hover:text-gray-900">Reviews</a>
               <Button 
                 onClick={() => window.location.href = '/api/login'} 
-                variant="outline" 
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Sign In
               </Button>
               <Button 
                 onClick={() => window.location.href = '/api/login'} 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Start Free Trial
-                <Sparkles className="w-4 h-4 ml-2" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section - Ultra Modern */}
-      <section className="relative pt-32 pb-32">
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="flex items-center justify-center mb-8">
-            <Badge className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white border-white/20 backdrop-blur-sm px-6 py-2 text-sm animate-pulse">
-              <Rocket className="w-4 h-4 mr-2" />
-              Trusted by 50,000+ HR professionals worldwide
-            </Badge>
-          </div>
-          
-          <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tight">
-            <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
-              Revolutionary
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-pulse">
-              HR Performance
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-              Intelligence
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Transform every employee into a <span className="text-blue-400 font-semibold">high performer</span> with our 
-            <span className="text-purple-400 font-semibold"> AI-powered</span> performance ecosystem. 
-            Real-time insights that make traditional reviews obsolete.
-          </p>
-          
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-16">
-            <Button 
-              size="lg" 
-              className="group bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white text-lg px-12 py-6 rounded-2xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-500 hover:scale-105 animate-pulse"
-              onClick={() => window.location.href = '/api/login'}
-            >
-              <Sparkles className="w-6 h-6 mr-3 group-hover:animate-spin" />
-              Start Your 14-Day Revolution
-              <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="text-white border-white/30 hover:bg-white/10 backdrop-blur-sm text-lg px-12 py-6 rounded-2xl group transition-all duration-300 hover:scale-105"
-            >
-              <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
-              Watch AI in Action
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-400 mb-16">
-            <div className="flex items-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-              No credit card required
+      {/* Hero Section */}
+      <section className="bg-white pt-16 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8">
+              Protect Your Team's Performance
+              <br />
+              <span className="text-blue-600">with AI-Powered HR Intelligence</span>
+            </h1>
+            
+            <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
+              LVL UP Performance safeguards your workforce with real-time performance monitoring, 
+              360-degree feedback systems, and advanced threat detection for disengaged employees.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
+                onClick={() => window.location.href = '/api/login'}
+              >
+                Start Free 14-Day Trial
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch Demo
+              </Button>
             </div>
-            <div className="flex items-center">
-              <Zap className="w-5 h-5 mr-2 text-yellow-400" />
-              5-minute setup
-            </div>
-            <div className="flex items-center">
-              <Shield className="w-5 h-5 mr-2 text-blue-400" />
-              Enterprise security
-            </div>
-          </div>
-          
-          {/* Floating Stats Cards */}
-          <div className="relative max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <Card className="bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl hover:bg-black/30 transition-all duration-300 hover:scale-105 group">
-                <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">89%</div>
-                  <div className="text-sm text-gray-300">Productivity Boost</div>
-                </div>
-              </Card>
-              <Card className="bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl hover:bg-black/30 transition-all duration-300 hover:scale-105 group">
-                <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">94%</div>
-                  <div className="text-sm text-gray-300">Employee Satisfaction</div>
-                </div>
-              </Card>
-              <Card className="bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl hover:bg-black/30 transition-all duration-300 hover:scale-105 group">
-                <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">3x</div>
-                  <div className="text-sm text-gray-300">Faster Promotions</div>
-                </div>
-              </Card>
-              <Card className="bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl hover:bg-black/30 transition-all duration-300 hover:scale-105 group">
-                <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform">24/7</div>
-                  <div className="text-sm text-gray-300">AI-Powered Support</div>
-                </div>
-              </Card>
+            
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-500">
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                No credit card required
+              </div>
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 mr-2 text-blue-500" />
+                Enterprise-grade security
+              </div>
+              <div className="flex items-center">
+                <Users className="w-4 h-4 mr-2 text-purple-500" />
+                24/7 expert support
+              </div>
             </div>
           </div>
         </div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-1/4 left-10 w-20 h-20 bg-blue-500/10 rounded-full animate-bounce delay-1000"></div>
-        <div className="absolute bottom-1/4 right-10 w-16 h-16 bg-purple-500/10 rounded-full animate-bounce delay-2000"></div>
-        <div className="absolute top-1/2 left-1/4 w-12 h-12 bg-cyan-500/10 rounded-full animate-pulse delay-500"></div>
       </section>
 
-      {/* Problem Section - Ultra Modern */}
-      <section className="relative py-32 bg-gradient-to-b from-slate-900 to-black">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-black mb-8 leading-tight">
-              <span className="bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                Performance Crisis
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Destroying Teams
-              </span>
+      {/* Problem Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+              Your Team's Performance is Under Attack
             </h2>
-            <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              Every second your team operates without intelligent performance management, 
-              you're hemorrhaging <span className="text-red-400 font-bold">talent</span>, 
-              <span className="text-orange-400 font-bold">productivity</span>, and 
-              <span className="text-yellow-400 font-bold">competitive edge</span>.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Every day without proper performance management, your organization loses talent, 
+              productivity, and competitive advantage. Don't let these threats destroy your team.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            <Card className="relative group bg-gradient-to-br from-red-900/20 to-red-800/20 border border-red-500/30 backdrop-blur-xl p-8 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-pulse">
-                  <TrendingUp className="w-10 h-10 text-white transform rotate-180" />
-                </div>
-                <h3 className="text-3xl font-bold text-red-300 mb-4">73%</h3>
-                <p className="text-lg font-semibold text-white mb-2">Disengaged Employees</p>
-                <p className="text-red-200 text-sm">Lack of feedback kills motivation and destroys productivity</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-white p-8 text-center border border-gray-200 shadow-sm">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-8 h-8 text-red-600 transform rotate-180" />
               </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">73%</h3>
+              <p className="text-lg font-semibold text-gray-900 mb-2">Disengaged Employees</p>
+              <p className="text-gray-600">Lack of feedback and recognition leads to decreased motivation and productivity</p>
             </Card>
             
-            <Card className="relative group bg-gradient-to-br from-orange-900/20 to-orange-800/20 border border-orange-500/30 backdrop-blur-xl p-8 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-pulse">
-                  <Clock className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-3xl font-bold text-orange-300 mb-4">5.4 Hours</h3>
-                <p className="text-lg font-semibold text-white mb-2">Wasted Weekly</p>
-                <p className="text-orange-200 text-sm">Manual tracking processes drain management efficiency</p>
+            <Card className="bg-white p-8 text-center border border-gray-200 shadow-sm">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Clock className="w-8 h-8 text-orange-600" />
               </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">5.4 Hours</h3>
+              <p className="text-lg font-semibold text-gray-900 mb-2">Wasted Weekly</p>
+              <p className="text-gray-600">Manual performance tracking processes drain valuable management time</p>
             </Card>
             
-            <Card className="relative group bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border border-yellow-500/30 backdrop-blur-xl p-8 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-pulse">
-                  <Users className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-3xl font-bold text-yellow-300 mb-4">$15,000</h3>
-                <p className="text-lg font-semibold text-white mb-2">Replacement Cost</p>
-                <p className="text-yellow-200 text-sm">Each talented employee you lose costs you dearly</p>
+            <Card className="bg-white p-8 text-center border border-gray-200 shadow-sm">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="w-8 h-8 text-yellow-600" />
               </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">$15,000</h3>
+              <p className="text-lg font-semibold text-gray-900 mb-2">Replacement Cost</p>
+              <p className="text-gray-600">Average cost to replace each employee who leaves due to poor management</p>
             </Card>
-          </div>
-          
-          <div className="text-center">
-            <p className="text-2xl text-gray-200 mb-12 max-w-4xl mx-auto">
-              <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent font-bold">
-                Stop the bleeding.
-              </span>
-              <br />
-              LVL UP provides <span className="text-blue-400 font-semibold">AI-powered protection</span> for your most valuable asset: your people.
-            </p>
-            <Button 
-              size="lg" 
-              className="group bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 hover:from-red-700 hover:via-orange-700 hover:to-yellow-700 text-white text-xl px-16 py-8 rounded-2xl shadow-2xl hover:shadow-red-500/25 transition-all duration-500 hover:scale-110"
-              onClick={() => window.location.href = '/api/login'}
-            >
-              <Shield className="w-6 h-6 mr-3 group-hover:animate-pulse" />
-              Stop the Performance Crisis Now
-              <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
-            </Button>
           </div>
         </div>
-        
-        {/* Floating danger elements */}
-        <div className="absolute top-20 left-20 w-16 h-16 bg-red-500/20 rounded-full animate-ping"></div>
-        <div className="absolute bottom-20 right-20 w-20 h-20 bg-orange-500/20 rounded-full animate-ping delay-1000"></div>
       </section>
 
       {/* Solution Features - Guardio Style */}
@@ -384,320 +281,315 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section - Ultra Modern */}
-      <section className="relative py-32 bg-gradient-to-br from-black via-slate-900 to-purple-900" id="testimonials">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-24">
-            <h2 className="text-5xl md:text-6xl font-black mb-8">
-              <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-                Legendary Results
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                From Real Leaders
-              </span>
+      {/* Features Section */}
+      <section className="bg-white py-20" id="features">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+              Comprehensive Performance Protection
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Join thousands of industry pioneers who've revolutionized their performance culture
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Advanced threat detection and monitoring tools designed to protect your team's performance
             </p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-            <Card className="group relative bg-gradient-to-br from-blue-900/30 to-blue-800/30 border border-blue-500/30 backdrop-blur-xl p-8 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center mb-6">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 text-yellow-400 fill-current mr-1" />
-                  ))}
-                </div>
-                <p className="text-lg text-blue-100 mb-8 leading-relaxed font-medium">
-                  "LVL UP Performance is pure magic. Our engagement scores exploded by <span className="text-yellow-400 font-bold">89%</span> in 4 months. 
-                  This isn't just software—it's a performance revolution."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mr-4">
-                    <span className="text-white font-bold text-lg">SK</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white">Sarah Kim</h4>
-                    <p className="text-blue-300">Chief People Officer, TechNova</p>
-                    <p className="text-blue-400 text-sm">50,000+ employees</p>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                <Shield className="w-6 h-6 text-blue-600" />
               </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Real-time Performance Monitoring</h3>
+              <p className="text-gray-600">Monitor employee engagement and productivity in real-time with advanced analytics and alerts</p>
             </Card>
             
-            <Card className="group relative bg-gradient-to-br from-green-900/30 to-emerald-800/30 border border-green-500/30 backdrop-blur-xl p-8 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center mb-6">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 text-yellow-400 fill-current mr-1" />
-                  ))}
-                </div>
-                <p className="text-lg text-green-100 mb-8 leading-relaxed font-medium">
-                  "The AI insights are absolutely mind-blowing. We're identifying future leaders <span className="text-yellow-400 font-bold">6 months</span> before 
-                  anyone else notices. It's like having a crystal ball."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mr-4">
-                    <span className="text-white font-bold text-lg">MJ</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white">Michael Johnson</h4>
-                    <p className="text-green-300">CEO & Founder, InnovateCorp</p>
-                    <p className="text-green-400 text-sm">Series C Unicorn</p>
-                  </div>
-                </div>
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+                <Target className="w-6 h-6 text-green-600" />
               </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Goal Tracking & Management</h3>
+              <p className="text-gray-600">Set, track, and achieve goals with intelligent milestone management and progress tracking</p>
             </Card>
             
-            <Card className="group relative bg-gradient-to-br from-purple-900/30 to-pink-800/30 border border-purple-500/30 backdrop-blur-xl p-8 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center mb-6">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 text-yellow-400 fill-current mr-1" />
-                  ))}
-                </div>
-                <p className="text-lg text-purple-100 mb-8 leading-relaxed font-medium">
-                  "Setup took <span className="text-yellow-400 font-bold">3 minutes</span>. Results were instant. 
-                  Our productivity metrics hit records we didn't think were possible. Game-changing."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mr-4">
-                    <span className="text-white font-bold text-lg">AL</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white">Anna Lee</h4>
-                    <p className="text-purple-300">VP of Operations, HyperScale</p>
-                    <p className="text-purple-400 text-sm">Fortune 500</p>
-                  </div>
-                </div>
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
+                <Brain className="w-6 h-6 text-purple-600" />
               </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">AI-Powered Insights</h3>
+              <p className="text-gray-600">Advanced behavioral intelligence to identify performance patterns and predict outcomes</p>
             </Card>
-          </div>
-          
-          <div className="text-center">
-            <Button 
-              size="lg" 
-              className="group bg-gradient-to-r from-yellow-600 via-orange-600 to-red-600 hover:from-yellow-700 hover:via-orange-700 hover:to-red-700 text-white text-xl px-16 py-8 rounded-2xl shadow-2xl hover:shadow-yellow-500/25 transition-all duration-500 hover:scale-110"
-              onClick={() => window.location.href = '/api/login'}
-            >
-              <Sparkles className="w-6 h-6 mr-3 group-hover:animate-spin" />
-              Join 50,000+ Revolutionary Teams
-              <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
-            </Button>
+            
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
+                <MessageSquare className="w-6 h-6 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">360° Feedback System</h3>
+              <p className="text-gray-600">Comprehensive feedback collection from all stakeholders with anonymous reporting options</p>
+            </Card>
+            
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
+                <BarChart3 className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Advanced Analytics</h3>
+              <p className="text-gray-600">Detailed performance analytics and reporting with customizable dashboards</p>
+            </Card>
+            
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-6">
+                <Users className="w-6 h-6 text-cyan-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Team Collaboration</h3>
+              <p className="text-gray-600">Enhanced team collaboration tools with peer recognition and cross-functional feedback</p>
+            </Card>
           </div>
         </div>
-        
-        {/* Testimonial floating elements */}
-        <div className="absolute top-32 left-32 w-8 h-8 bg-yellow-500/30 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-32 right-32 w-12 h-12 bg-green-500/30 rounded-full animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 right-20 w-6 h-6 bg-purple-500/30 rounded-full animate-ping delay-500"></div>
       </section>
 
-      {/* Pricing Section - Ultra Modern with Correct Pricing */}
-      <section className="relative py-32 bg-gradient-to-br from-black via-slate-900 to-purple-900" id="pricing">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-black mb-8">
-              <span className="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Choose Your
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                Performance Tier
-              </span>
+      {/* Pricing Section */}
+      <section className="bg-gray-50 py-20" id="pricing">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+              Choose Your Protection Plan
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Start your 14-day revolution. No credit card required. Scale with confidence.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Start your free trial today. No credit card required. Cancel anytime.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-6 gap-6 max-w-7xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {/* MJ Scott */}
-            <Card className="relative group bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-600/30 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <Crown className="w-8 h-8 text-slate-400" />
-                  <Badge className="bg-slate-700 text-slate-200 text-xs">VIP</Badge>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">MJ Scott</h3>
-                <div className="mb-6">
-                  <div className="text-3xl font-black text-slate-300 mb-1">$9.99</div>
-                  <div className="text-sm text-slate-400">/month • Up to 5 employees</div>
-                </div>
-                <ul className="space-y-3 text-sm text-slate-300 mb-8">
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Basic performance reviews</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Simple goal tracking</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Email notifications</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Basic reporting</li>
-                </ul>
-                <Button className="w-full bg-slate-700 hover:bg-slate-600 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+            <Card className="bg-white border border-gray-200 shadow-sm p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">MJ Scott</h3>
+                <Badge className="bg-blue-100 text-blue-800">Entry</Badge>
               </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">$9.99</div>
+                <div className="text-gray-600">/month • Up to 5 employees</div>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Basic performance reviews</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Simple goal tracking</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Email notifications</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Basic reporting</li>
+              </ul>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
             </Card>
 
             {/* Forming */}
-            <Card className="relative group bg-gradient-to-br from-blue-800/50 to-blue-900/50 border border-blue-500/30 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <Target className="w-8 h-8 text-blue-400" />
-                  <Badge className="bg-blue-600 text-white text-xs">Growing</Badge>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Forming</h3>
-                <div className="mb-6">
-                  <div className="text-3xl font-black text-blue-300 mb-1">$24.99</div>
-                  <div className="text-sm text-blue-200">/month • Up to 25 employees</div>
-                </div>
-                <ul className="space-y-3 text-sm text-blue-100 mb-8">
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Comprehensive reviews</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />360-degree feedback</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Team analytics</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />SMS notifications</li>
-                </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+            <Card className="bg-white border-2 border-blue-200 shadow-lg p-8 relative">
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <Badge className="bg-blue-600 text-white px-4 py-1">Most Popular</Badge>
               </div>
+              <div className="flex items-center justify-between mb-6 mt-4">
+                <h3 className="text-2xl font-bold text-gray-900">Forming</h3>
+                <Badge className="bg-green-100 text-green-800">Best Value</Badge>
+              </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">$24.99</div>
+                <div className="text-gray-600">/month • Up to 25 employees</div>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Comprehensive reviews</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />360-degree feedback</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Team analytics</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />SMS notifications</li>
+              </ul>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
             </Card>
 
             {/* Storming */}
-            <Card className="relative group bg-gradient-to-br from-purple-800/50 to-purple-900/50 border border-purple-500/30 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <Layers className="w-8 h-8 text-purple-400" />
-                  <Badge className="bg-purple-600 text-white text-xs">Popular</Badge>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Storming</h3>
-                <div className="mb-6">
-                  <div className="text-3xl font-black text-purple-300 mb-1">$49.99</div>
-                  <div className="text-sm text-purple-200">/month • Up to 100 employees</div>
-                </div>
-                <ul className="space-y-3 text-sm text-purple-100 mb-8">
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Department management</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Advanced reporting</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />API access</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Priority support</li>
-                </ul>
-                <Button className="w-full bg-purple-600 hover:bg-purple-500 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+            <Card className="bg-white border border-gray-200 shadow-sm p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Storming</h3>
+                <Badge className="bg-purple-100 text-purple-800">Professional</Badge>
               </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">$49.99</div>
+                <div className="text-gray-600">/month • Up to 100 employees</div>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Department management</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Advanced reporting</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />API access</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Priority support</li>
+              </ul>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
             </Card>
 
             {/* Norming */}
-            <Card className="relative group bg-gradient-to-br from-green-800/50 to-emerald-900/50 border border-green-500/30 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <Brain className="w-8 h-8 text-green-400" />
-                  <Badge className="bg-green-600 text-white text-xs">AI</Badge>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Norming</h3>
-                <div className="mb-6">
-                  <div className="text-3xl font-black text-green-300 mb-1">$99.99</div>
-                  <div className="text-sm text-green-200">/month • Up to 500 employees</div>
-                </div>
-                <ul className="space-y-3 text-sm text-green-100 mb-8">
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />AI behavioral insights</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Custom workflows</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />White-label options</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Account manager</li>
-                </ul>
-                <Button className="w-full bg-green-600 hover:bg-green-500 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+            <Card className="bg-white border border-gray-200 shadow-sm p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Norming</h3>
+                <Badge className="bg-orange-100 text-orange-800">AI Powered</Badge>
               </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">$99.99</div>
+                <div className="text-gray-600">/month • Up to 500 employees</div>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />AI behavioral insights</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Custom workflows</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />White-label options</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Account manager</li>
+              </ul>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
             </Card>
 
             {/* Performing */}
-            <Card className="relative group bg-gradient-to-br from-orange-800/50 to-red-900/50 border border-orange-500/30 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <Rocket className="w-8 h-8 text-orange-400" />
-                  <Badge className="bg-orange-600 text-white text-xs">Enterprise</Badge>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">Performing</h3>
-                <div className="mb-6">
-                  <div className="text-3xl font-black text-orange-300 mb-1">$199.99</div>
-                  <div className="text-sm text-orange-200">/month • Unlimited employees</div>
-                </div>
-                <ul className="space-y-3 text-sm text-orange-100 mb-8">
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Enterprise integrations</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Advanced security</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Dedicated infrastructure</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Dedicated support</li>
-                </ul>
-                <Button className="w-full bg-orange-600 hover:bg-orange-500 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+            <Card className="bg-white border border-gray-200 shadow-sm p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Performing</h3>
+                <Badge className="bg-red-100 text-red-800">Enterprise</Badge>
               </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">$199.99</div>
+                <div className="text-gray-600">/month • Unlimited employees</div>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Enterprise integrations</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Advanced security</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Dedicated infrastructure</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Dedicated support</li>
+              </ul>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
             </Card>
 
             {/* AppSumo */}
-            <Card className="relative group bg-gradient-to-br from-yellow-800/50 to-amber-900/50 border border-yellow-500/30 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <Infinity className="w-8 h-8 text-yellow-400" />
-                  <Badge className="bg-yellow-600 text-black text-xs font-bold">Lifetime</Badge>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">AppSumo</h3>
-                <div className="mb-6">
-                  <div className="text-3xl font-black text-yellow-300 mb-1">$199</div>
-                  <div className="text-sm text-yellow-200">one-time • Unlimited employees</div>
-                </div>
-                <ul className="space-y-3 text-sm text-yellow-100 mb-8">
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Lifetime access</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Core features</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Team collaboration</li>
-                  <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />Email support</li>
-                </ul>
-                <Button className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold" onClick={() => window.location.href = '/api/login'}>Get Lifetime Deal</Button>
+            <Card className="bg-white border border-gray-200 shadow-sm p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">AppSumo</h3>
+                <Badge className="bg-yellow-100 text-yellow-800">Lifetime</Badge>
               </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">$199</div>
+                <div className="text-gray-600">one-time • Limited features</div>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Lifetime access</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Core features</li>
+                <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Team collaboration</li>
+                <li className="flex items-center"><X className="w-5 h-5 text-red-500 mr-3" />No AI insights</li>
+              </ul>
+              <Button className="w-full bg-yellow-600 hover:bg-yellow-700 text-white" onClick={() => window.location.href = '/api/login'}>Get Lifetime Deal</Button>
             </Card>
           </div>
           
-          <div className="text-center">
-            <div className="inline-flex items-center gap-8 p-6 bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl mb-8">
-              <div className="flex items-center text-green-400">
-                <CheckCircle className="w-5 h-5 mr-2" />
-                <span className="text-sm">14-day free trial</span>
-              </div>
-              <div className="flex items-center text-blue-400">
-                <Shield className="w-5 h-5 mr-2" />
-                <span className="text-sm">No credit card required</span>
-              </div>
-              <div className="flex items-center text-purple-400">
-                <Zap className="w-5 h-5 mr-2" />
-                <span className="text-sm">Cancel anytime</span>
-              </div>
-            </div>
-            <p className="text-gray-400 text-sm">All plans include AI-powered insights • 24/7 expert support • Enterprise security</p>
+          <div className="text-center mt-16">
+            <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
+              All plans include a 14-day free trial. No credit card required. 
+              Cancel anytime with no questions asked.
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-12 py-4"
+              onClick={() => window.location.href = '/api/login'}
+            >
+              Start Your Free Trial
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
           </div>
         </div>
-        
-        {/* Pricing floating elements */}
-        <div className="absolute top-20 left-20 w-24 h-24 bg-green-500/10 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-purple-500/10 rounded-full animate-pulse delay-1000"></div>
       </section>
 
-      {/* Final CTA - Guardio Style */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to Transform Your Team's Performance?
+      {/* Testimonials Section */}
+      <section className="bg-white py-20" id="testimonials">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+              Trusted by Performance Leaders
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              See how teams worldwide have transformed their performance management
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-6">
+                "LVL UP Performance transformed our team engagement by 89%. The AI insights 
+                helped us identify rising stars before anyone else noticed."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-white font-bold">SK</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Sarah Kim</h4>
+                  <p className="text-gray-600 text-sm">Chief People Officer, TechNova</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-6">
+                "Setup took 3 minutes. Results were instant. Our productivity metrics hit 
+                records we didn't think were possible. Absolutely game-changing."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-white font-bold">MJ</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Michael Johnson</h4>
+                  <p className="text-gray-600 text-sm">CEO, InnovateCorp</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-6">
+                "The behavioral intelligence is incredible. We're identifying future leaders 
+                6 months before traditional methods. It's like having a crystal ball."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-white font-bold">AL</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Anna Lee</h4>
+                  <p className="text-gray-600 text-sm">VP Operations, HyperScale</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+      
+      {/* Final CTA */}
+      <section className="bg-blue-600 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Ready to Protect Your Team's Performance?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join thousands of organizations already using LVL UP Performance
+          <p className="text-xl text-blue-100 mb-8">
+            Join thousands of organizations already protecting their workforce with LVL UP Performance
           </p>
           <Button 
             size="lg" 
             className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-4"
             onClick={() => window.location.href = '/api/login'}
           >
-            Start Your Free Trial Now
+            Start Free Trial - No Credit Card Required
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
-          <p className="text-sm mt-4 opacity-75">Setup takes less than 5 minutes</p>
+          <p className="text-blue-100 text-sm mt-4">Setup takes less than 5 minutes</p>
         </div>
       </section>
 
