@@ -16,8 +16,8 @@ export default function AIInsights() {
   const [analyzingEmployee, setAnalyzingEmployee] = useState<string | null>(null);
 
   // Check if user has AI access (premium tiers)
-  const hasAIAccess = user?.employee?.tenant?.subscriptionPlan && 
-    ['norming', 'performing', 'appsumo'].includes(user.employee.tenant.subscriptionPlan.toLowerCase());
+  const hasAIAccess = user?.employee?.tenant?.subscriptionTier && 
+    ['norming', 'performing', 'appsumo'].includes(user.employee.tenant.subscriptionTier.toLowerCase());
 
   // Get rising star candidates
   const { data: risingStars = [], isLoading: risingStarsLoading } = useQuery({

@@ -2196,10 +2196,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Check if user has access to AI features (premium tiers only)
   const hasAIAccess = (user: any): boolean => {
-    if (!user?.employee?.tenant?.subscriptionPlan) return false;
-    const plan = user.employee.tenant.subscriptionPlan;
+    if (!user?.employee?.tenant?.subscriptionTier) return false;
+    const tier = user.employee.tenant.subscriptionTier;
     // AI features available for Norming, Performing, AppSumo tiers
-    return ['norming', 'performing', 'appsumo'].includes(plan.toLowerCase());
+    return ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase());
   };
 
   // Generate behavioral analysis for an employee (premium feature)
