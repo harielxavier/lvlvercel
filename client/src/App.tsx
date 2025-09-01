@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { UserContextProvider } from "@/context/UserContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Home from "@/pages/Home";
+import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 import CustomerTenants from "@/pages/CustomerTenants";
 import PlatformAnalytics from "@/pages/PlatformAnalytics";
@@ -75,8 +76,14 @@ function Router() {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Show landing page or redirect to login if not authenticated
   if (!isAuthenticated) {
+    // Show landing page for root route, redirect for all other routes
+    if (location === '/') {
+      return <Landing />;
+    }
+    
+    // Redirect to login for protected routes
     window.location.href = '/api/login';
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
