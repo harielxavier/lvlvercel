@@ -1,0 +1,38 @@
+[8/30/25, 9:15:31 PM] Knights Support Chat: Behavioral Intelligence & Rising Star Detection
+ 1.⁠ ⁠"Collaboration Impact Score"
+Track how feedback mentions collaboration keywords vs. conflict indicators. Rising stars get praised for "team player," "helpful," while problematic individuals get feedback mentioning "difficult," "unresponsive." Auto-flag patterns without explicit toxicity detection.
+
+ 2.⁠ ⁠"Response Quality Analytics"
+Monitor feedback response rates and sentiment. Rising stars consistently receive more voluntary feedback; problematic individuals either get minimal feedback or responses with subtle negative sentiment patterns. Track who people choose to give feedback to.
+
+ 3.⁠ ⁠"Peer Nomination Patterns"
+Add "Would you want to work with this person again?" and "Who made your project successful?" in project retrospectives. Rising stars get consistently nominated; problematic individuals get conspicuously overlooked or negative sentiment.
+
+ 4.⁠ ⁠"Goal Achievement Accelerators"
+Track who helps others achieve their goals through cross-references in goal comments/updates. Rising stars get mentioned in others' goal successes; problematic individuals rarely get credited for helping others succeed.
+
+ 5.⁠ ⁠"Meeting Contribution Scoring"
+Post-meeting micro-surveys: "Who contributed most valuable insights?" "Who helped move discussions forward?" Built into the meetings feature - patterns emerge showing who consistently adds value vs. who doesn't.
+
+ 6.⁠ ⁠"Knowledge Sharing Index"
+Track who gets tagged in knowledge-sharing activities, internal questions, or mentioned as "go-to person" in feedback. Rising stars become knowledge hubs; problematic individuals are rarely sought for expertise.
+
+ 7.⁠ ⁠"Emotional Intelligence Indicators"
+Analyze feedback language for empathy markers ("understands," "supportive," "listens") vs. concerning patterns ("dismissive," "interrupts," "confusing"). Use sentiment analysis on feedback received.
+
+ 8.⁠ ⁠"Initiative Recognition Engine"
+Track who gets credited for starting improvements, suggesting solutions, or volunteering for challenges in feedback and goal descriptions. Rising stars consistently show initiative; others don't.
+
+ 9.⁠ ⁠"Cross-Department Bridge Score"
+Monitor inter-departmental collaboration mentions in feedback and goals. Rising stars get praised for breaking down silos; problematic individuals may create departmental tensions mentioned in feedback.
+
+10.⁠ ⁠"Leadership Readiness Pipeline"
+Combine multiple signals: mentoring others (mentioned in feedback), conflict resolution (helping others achieve goals), and cultural ambassadorship (positive sentiment in 360 reviews). Auto-surface leadership candidates.
+
+🛡️ Anti-Abuse Mechanisms
+Rate limiting: Max feedback submissions per person per week
+Reciprocity requirements: Must give feedback to receive detailed analytics
+Anonymous validation: Cross-reference anonymous feedback with named feedback patterns
+Temporal patterns: Flag sudden negative feedback spikes that might indicate coordinated attacks
+Balanced perspective: Require specific examples and constructive elements in all feedback
+[8/30/25, 9:16:15 PM] Knights Support Chat: I want to make sure we promote usage of the app, root out toxic avengers, we encourage collaboration. This will help drive utilization

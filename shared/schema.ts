@@ -472,6 +472,44 @@ export const notifications = pgTable("notifications", {
   readAt: timestamp("read_at"),
 });
 
+// AI Behavioral Intelligence Tables
+export const behavioralAnalysis = pgTable("behavioral_analysis", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  employeeId: varchar("employee_id").notNull().references(() => employees.id),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  analysisType: varchar("analysis_type").notNull(), // 'collaboration', 'sentiment', 'leadership'
+  scores: jsonb("scores").notNull(), // Flexible JSON for different analysis types
+  insights: jsonb("insights").notNull(), // Key findings and recommendations
+  dataSourceIds: text("data_source_ids").array(), // IDs of feedback/goals used
+  confidenceLevel: integer("confidence_level").notNull(), // 0-100
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("behavioral_analysis_employee_idx").on(table.employeeId),
+  index("behavioral_analysis_tenant_idx").on(table.tenantId),
+  index("behavioral_analysis_type_idx").on(table.analysisType),
+]);
+
+export const risingStarCandidates = pgTable("rising_star_candidates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  employeeId: varchar("employee_id").notNull().references(() => employees.id),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  overallScore: integer("overall_score").notNull(), // 0-100
+  leadershipReadiness: integer("leadership_readiness").notNull(),
+  collaborationScore: integer("collaboration_score").notNull(),
+  initiativeScore: integer("initiative_score").notNull(),
+  knowledgeSharingIndex: integer("knowledge_sharing_index").notNull(),
+  crossDepartmentImpact: integer("cross_department_impact").notNull(),
+  recommendedActions: text("recommended_actions").array(),
+  lastAnalyzedAt: timestamp("last_analyzed_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("rising_star_employee_idx").on(table.employeeId),
+  index("rising_star_tenant_idx").on(table.tenantId),
+  index("rising_star_score_idx").on(table.overallScore),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   tenant: one(tenants, {
@@ -630,6 +668,18 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   readAt: true,
 });
 
+export const insertBehavioralAnalysisSchema = createInsertSchema(behavioralAnalysis).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRisingStarCandidateSchema = createInsertSchema(risingStarCandidates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertPricingTierSchema = createInsertSchema(pricingTiers).omit({
   createdAt: true,
   updatedAt: true,
@@ -732,6 +782,10 @@ export type InsertGoal = z.infer<typeof insertGoalSchema>;
 export type InsertPerformanceReview = z.infer<typeof insertPerformanceReviewSchema>;
 export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type BehavioralAnalysis = typeof behavioralAnalysis.$inferSelect;
+export type InsertBehavioralAnalysis = z.infer<typeof insertBehavioralAnalysisSchema>;
+export type RisingStarCandidate = typeof risingStarCandidates.$inferSelect;
+export type InsertRisingStarCandidate = z.infer<typeof insertRisingStarCandidateSchema>;
 export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
 export type InsertBillingAuditLog = z.infer<typeof insertBillingAuditLogSchema>;
 export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;

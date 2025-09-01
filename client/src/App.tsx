@@ -34,6 +34,7 @@ import PeerFeedback from "@/pages/PeerFeedback";
 import Profile from "@/pages/Profile";
 import PublicFeedbackForm from "@/pages/PublicFeedbackForm";
 import PricingManagement from "@/pages/PricingManagement";
+import AIInsights from "@/pages/AIInsights";
 import { useLocation } from "wouter";
 
 function Router() {
@@ -113,6 +114,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/integrations" component={Integrations} />
       <Route path="/website-customization" component={WebsiteCustomization} />
+      <Route path="/ai-insights" component={AIInsights} />
       
       {/* Manager Routes */}
       <Route path="/team" component={Team} />
