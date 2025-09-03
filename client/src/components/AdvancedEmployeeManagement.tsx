@@ -78,20 +78,20 @@ export default function AdvancedEmployeeManagement({ user }: AdvancedEmployeeMan
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('employees');
 
-  // Fetch data
+  // Fetch data - platform admins use different endpoint
   const { data: employees = [], isLoading: employeesLoading } = useQuery<Employee[]>({
-    queryKey: ['/api/employees', user?.tenantId],
-    enabled: !!user?.tenantId,
+    queryKey: user?.role === 'platform_admin' ? ['/api/platform/users'] : ['/api/employees', user?.tenantId],
+    enabled: user?.role === 'platform_admin' || !!user?.tenantId,
   });
 
   const { data: departments = [] } = useQuery<Department[]>({
     queryKey: ['/api/departments', user?.tenantId],
-    enabled: !!user?.tenantId,
+    enabled: user?.role !== 'platform_admin' && !!user?.tenantId,
   });
 
   const { data: jobPositions = [] } = useQuery<JobPosition[]>({
     queryKey: ['/api/job-positions', user?.tenantId],
-    enabled: !!user?.tenantId,
+    enabled: user?.role !== 'platform_admin' && !!user?.tenantId,
   });
 
   // Filtered employees
