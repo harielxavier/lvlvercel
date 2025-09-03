@@ -49,7 +49,18 @@ export default function Landing() {
                 Sign In
               </Button>
               <Button 
-                onClick={() => window.location.href = '/api/login'} 
+                onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }} 
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Start Free Trial
@@ -78,7 +89,18 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }}
               >
                 Start Free 14-Day Trial
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -373,7 +395,18 @@ export default function Landing() {
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Email notifications</li>
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Basic reporting</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }}>Start Free Trial</Button>
             </Card>
 
             {/* Forming */}
@@ -395,7 +428,18 @@ export default function Landing() {
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Team analytics</li>
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />SMS notifications</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }}>Start Free Trial</Button>
             </Card>
 
             {/* Storming */}
@@ -414,7 +458,18 @@ export default function Landing() {
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />API access</li>
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Priority support</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }}>Start Free Trial</Button>
             </Card>
 
             {/* Norming */}
@@ -433,7 +488,18 @@ export default function Landing() {
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />White-label options</li>
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Account manager</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }}>Start Free Trial</Button>
             </Card>
 
             {/* Performing */}
@@ -452,7 +518,18 @@ export default function Landing() {
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Dedicated infrastructure</li>
                 <li className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3" />Dedicated support</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => window.location.href = '/api/login'}>Start Free Trial</Button>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={() => {
+                  // Auto-login demo user for trial
+                  fetch('/api/dev-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'user-mauricio-admin' })
+                  }).then(() => {
+                    window.location.href = '/employees';
+                  }).catch(() => {
+                    window.location.href = '/api/login';
+                  });
+                }}>Start Free Trial</Button>
             </Card>
 
             {/* AppSumo */}
