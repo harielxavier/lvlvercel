@@ -107,7 +107,7 @@ export async function setupAuth(app: Express) {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ userId })
                 }).then(() => {
-                  window.location.href = '/';
+                  window.location.href = '/employees';
                 });
               }
             </script>
