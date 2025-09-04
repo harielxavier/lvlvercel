@@ -36,20 +36,22 @@ import Profile from "@/pages/Profile";
 import PublicFeedbackForm from "@/pages/PublicFeedbackForm";
 import PricingManagement from "@/pages/PricingManagement";
 import AIInsights from "@/pages/AIInsights";
+import TrialDemo from "@/pages/TrialDemo";
 import { useLocation } from "wouter";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
-  // Check if this is a public route (feedback form)
-  const isPublicRoute = location.startsWith('/feedback/');
+  // Check if this is a public route (feedback form or trial demo)
+  const isPublicRoute = location.startsWith('/feedback/') || location === '/trial-demo';
 
   // Handle public routes without authentication
   if (isPublicRoute) {
     return (
       <Switch>
         <Route path="/feedback/:feedbackUrl" component={PublicFeedbackForm} />
+        <Route path="/trial-demo" component={TrialDemo} />
         <Route component={NotFound} />
       </Switch>
     );
