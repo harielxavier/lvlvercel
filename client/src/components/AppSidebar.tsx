@@ -244,7 +244,9 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
   }
 }
 
-function getTierDisplayName(tier: string): string {
+function getTierDisplayName(tier: string | null | undefined): string {
+  if (!tier) return 'Basic';
+  
   switch (tier.toLowerCase()) {
     case 'mj_scott': return 'MJ Scott';
     case 'forming': return 'Forming';
