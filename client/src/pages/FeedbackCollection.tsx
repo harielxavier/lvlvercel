@@ -1,6 +1,6 @@
 import { useUserContext } from '@/context/UserContext';
 import { useToast } from '@/hooks/use-toast';
-import Sidebar from '@/components/Sidebar';
+import AppLayout from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -127,9 +127,8 @@ export default function FeedbackCollection() {
   const recentFeedback = feedbackArray.slice(0, 5) || [];
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar user={user} />
-      <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-feedback-collection">
+    <AppLayout user={user}>
+      <main className="flex-1 min-h-screen transition-all duration-300 ease-in-out" data-testid="page-feedback-collection">
         <header className="glass-morphism border-b sticky top-0 z-40">
           <div className="px-8 py-4">
             <div className="flex items-center justify-between">
@@ -326,6 +325,6 @@ export default function FeedbackCollection() {
           </Card>
         </div>
       </main>
-    </div>
+    </AppLayout>
   );
 }

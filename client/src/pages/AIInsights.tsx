@@ -1,4 +1,5 @@
 import { useUserContext } from '@/context/UserContext';
+import AppLayout from '@/components/AppLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -99,7 +100,8 @@ export default function AIInsights() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <AppLayout user={user}>
+      <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -324,6 +326,7 @@ export default function AIInsights() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
