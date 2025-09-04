@@ -166,7 +166,7 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: Brain,
           label: 'AI Insights',
           href: '/ai-insights',
-          badge: tier && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase()) ? 'Premium' : 'Upgrade'
+          badge: tier && typeof tier === 'string' && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase()) ? 'Premium' : 'Upgrade'
         }
       ];
 
@@ -207,7 +207,7 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: Brain,
           label: 'AI Insights',
           href: '/ai-insights',
-          badge: tier && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase()) ? 'Premium' : 'Upgrade'
+          badge: tier && typeof tier === 'string' && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase()) ? 'Premium' : 'Upgrade'
         }
       ];
 
@@ -245,7 +245,7 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
 }
 
 function getTierDisplayName(tier: string | null | undefined): string {
-  if (!tier) return 'Basic';
+  if (!tier || typeof tier !== 'string') return 'Basic';
   
   switch (tier.toLowerCase()) {
     case 'mj_scott': return 'MJ Scott';
@@ -266,7 +266,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const tier = user?.employee?.tenant?.subscriptionTier;
   const menuItems = getMenuItemsForRole(role, tier);
   
-  const isPremiumTier = tier && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase());
+  const isPremiumTier = tier && typeof tier === 'string' && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase());
 
   return (
     <Sidebar 
