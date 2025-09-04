@@ -23,7 +23,7 @@ export function getSession() {
     if (isDevelopment) {
       console.warn("⚠️  WARNING: SESSION_SECRET not set, using development fallback");
     } else {
-      console.warn("⚠️  WARNING: SESSION_SECRET not set in production, using fallback - please configure for security");
+      throw new Error("SESSION_SECRET environment variable is required in production");
     }
   }
   
@@ -107,7 +107,7 @@ export async function setupAuth(app: Express) {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ userId })
                 }).then(() => {
-                  window.location.href = '/employees';
+                  window.location.href = '/';
                 });
               }
             </script>

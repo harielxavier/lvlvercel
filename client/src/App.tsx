@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { UserContextProvider } from "@/context/UserContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Home from "@/pages/Home";
-import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 import CustomerTenants from "@/pages/CustomerTenants";
 import PlatformAnalytics from "@/pages/PlatformAnalytics";
@@ -42,15 +41,14 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
-  // Check if this is a public route (feedback form or employees trial)
-  const isPublicRoute = location.startsWith('/feedback/') || location === '/employees';
+  // Check if this is a public route (feedback form)
+  const isPublicRoute = location.startsWith('/feedback/');
 
   // Handle public routes without authentication
   if (isPublicRoute) {
     return (
       <Switch>
         <Route path="/feedback/:feedbackUrl" component={PublicFeedbackForm} />
-        <Route path="/employees" component={AdvancedEmployees} />
         <Route component={NotFound} />
       </Switch>
     );
@@ -77,14 +75,8 @@ function Router() {
     );
   }
 
-  // Show landing page or redirect to login if not authenticated
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    // Show landing page for root route, redirect for all other routes
-    if (location === '/') {
-      return <Landing />;
-    }
-    
-    // Redirect to login for protected routes
     window.location.href = '/api/login';
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
