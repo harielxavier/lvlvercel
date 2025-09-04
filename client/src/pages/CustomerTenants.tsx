@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUserContext } from '@/context/UserContext';
-import AppLayout from '@/components/AppLayout';
+import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -756,8 +756,9 @@ export default function CustomerTenants() {
   };
 
   return (
-    <AppLayout user={user}>
-      <main className="flex-1 min-h-screen transition-all duration-300 ease-in-out overflow-auto p-4 md:p-8" data-testid="page-customer-tenants">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 lg:ml-80 transition-all duration-300 ease-in-out overflow-auto" data-testid="page-customer-tenants">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40 backdrop-blur-xl">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
@@ -1306,6 +1307,6 @@ export default function CustomerTenants() {
         onClose={() => setEditTenantModal({ open: false, tenant: null })} 
       />
       </main>
-    </AppLayout>
+    </div>
   );
 }

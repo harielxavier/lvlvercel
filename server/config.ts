@@ -34,6 +34,11 @@ function loadConfig() {
     
     // Validate critical configurations
     if (env.NODE_ENV === 'production') {
+      // In production, require all authentication settings
+      if (!env.REPLIT_AUTH_ISSUER || !env.REPLIT_AUTH_CLIENT_ID || !env.REPLIT_AUTH_CALLBACK_URL) {
+        throw new Error('Authentication configuration is required in production');
+      }
+      
       // Warn about missing optional services
       if (!env.MAILGUN_API_KEY || !env.MAILGUN_DOMAIN) {
         console.warn('[CONFIG] Mailgun not configured - email notifications will be simulated');
@@ -42,9 +47,6 @@ function loadConfig() {
       if (!env.TWILIO_ACCOUNT_SID) {
         console.warn('[CONFIG] Twilio not configured - SMS notifications disabled');
       }
-      
-      // Note: Replit Auth configuration is handled automatically by the platform
-      console.log('[CONFIG] Using Replit Auth - authentication handled by platform');
     }
     
     return env;

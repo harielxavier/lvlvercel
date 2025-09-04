@@ -1,6 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
 import AdvancedEmployeeManagement from "@/components/AdvancedEmployeeManagement";
-import AppLayout from "@/components/AppLayout";
 
 export default function AdvancedEmployees() {
   const { user } = useAuth();
@@ -13,9 +12,5 @@ export default function AdvancedEmployees() {
     );
   }
 
-  return (
-    <AppLayout user={user}>
-      <AdvancedEmployeeManagement user={user} />
-    </AppLayout>
-  );
+  return <AdvancedEmployeeManagement user={user} />;
 }

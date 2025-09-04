@@ -1,6 +1,6 @@
 import { useUserContext } from '@/context/UserContext';
 import { useQuery } from '@tanstack/react-query';
-import AppLayout from '@/components/AppLayout';
+import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -157,8 +157,9 @@ export default function BillingSubscriptions() {
   }
 
   return (
-    <AppLayout user={user}>
-      <main className="flex-1 min-h-screen transition-all duration-300 ease-in-out p-4 md:p-8" data-testid="page-billing-subscriptions">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-billing-subscriptions">
       {/* Header */}
       <header className="glass-morphism border-b sticky top-0 z-40">
         <div className="px-8 py-4">
@@ -521,6 +522,6 @@ export default function BillingSubscriptions() {
         )}
       </div>
       </main>
-    </AppLayout>
+    </div>
   );
 }

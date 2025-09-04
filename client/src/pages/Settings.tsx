@@ -1,7 +1,7 @@
 import { useUserContext } from '@/context/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
-import AppLayout from '@/components/AppLayout';
+import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,8 +45,9 @@ export default function Settings() {
   }
 
   return (
-    <AppLayout user={user}>
-      <main className="flex-1 min-h-screen transition-all duration-300 ease-in-out p-4 md:p-8" data-testid="page-settings">
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
+      <main className="flex-1 ml-80 transition-all duration-300 ease-in-out" data-testid="page-settings">
         <header className="glass-morphism border-b sticky top-0 z-40">
           <div className="px-8 py-4">
             <div className="flex items-center justify-between">
@@ -198,6 +199,6 @@ export default function Settings() {
           </Tabs>
         </div>
       </main>
-    </AppLayout>
+    </div>
   );
 }

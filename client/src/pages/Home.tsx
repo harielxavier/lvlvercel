@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useUserContext } from '@/context/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
-import AppLayout from '@/components/AppLayout';
+import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
 
 export default function Home() {
@@ -46,8 +46,9 @@ export default function Home() {
   }
 
   return (
-    <AppLayout user={user}>
+    <div className="flex h-screen bg-background">
+      <Sidebar user={user} />
       <Dashboard user={user} />
-    </AppLayout>
+    </div>
   );
 }
