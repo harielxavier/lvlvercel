@@ -42,14 +42,15 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
-  // Check if this is a public route (feedback form)
-  const isPublicRoute = location.startsWith('/feedback/');
+  // Check if this is a public route (feedback form or employees trial)
+  const isPublicRoute = location.startsWith('/feedback/') || location === '/employees';
 
   // Handle public routes without authentication
   if (isPublicRoute) {
     return (
       <Switch>
         <Route path="/feedback/:feedbackUrl" component={PublicFeedbackForm} />
+        <Route path="/employees" component={AdvancedEmployees} />
         <Route component={NotFound} />
       </Switch>
     );
