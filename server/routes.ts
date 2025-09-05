@@ -2097,7 +2097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Import the tier info function
       const { getTierInfo } = await import('./subscriptionFeatures');
-      const tierInfo = getTierInfo(tenant.subscriptionTier);
+      const tierInfo = getTierInfo(tenant.subscriptionTier || 'forming');
       
       res.json(tierInfo);
     } catch (error) {

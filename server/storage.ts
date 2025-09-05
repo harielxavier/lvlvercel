@@ -518,7 +518,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchEmployees(tenantId: string, query: string, filters?: any): Promise<Employee[]> {
-    let baseQuery = db
+    // Build where conditions
+    const conditions = [eq(employees.tenantId, tenantId)];
+
+    // Add search filter if provided
+    if (query) {
+      conditions.push(
+        sql`LOWER(${users.firstName}) LIKE LOWER(${'%' + query + '%'}) OR
+            LOWER(${users.lastName}) LIKE LOWER(${'%' + query + '%'}) OR
+            LOWER(${users.email}) LIKE LOWER(${'%' + query + '%'}) OR
+            LOWER(${employees.employeeNumber}) LIKE LOWER(${'%' + query + '%'})`
+      );
+    }
+
+    // Add additional filters
+    if (filters?.departmentId) {
+      conditions.push(eq(employees.departmentId, filters.departmentId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(employees.status, filters.status));
+    }
+    if (filters?.managerId) {
+      conditions.push(eq(employees.managerId, filters.managerId));
+    }
+
+    const baseQuery = db
       .select({
         id: employees.id,
         userId: employees.userId,
@@ -547,32 +571,14 @@ export class DatabaseStorage implements IStorage {
         lastName: users.lastName,
         email: users.email,
         role: users.role,
-        profileImageUrl: users.profileImageUrl
+        profileImageUrl: users.profileImageUrl,
+        // Add missing fields to match Employee type
+        phoneNumber: users.phoneNumber,
+        timezone: users.timezone
       })
       .from(employees)
       .innerJoin(users, eq(employees.userId, users.id))
-      .where(eq(employees.tenantId, tenantId));
-
-    // Add search filter if provided
-    if (query) {
-      baseQuery = baseQuery.where(
-        sql`LOWER(${users.firstName}) LIKE LOWER(${'%' + query + '%'}) OR 
-            LOWER(${users.lastName}) LIKE LOWER(${'%' + query + '%'}) OR 
-            LOWER(${users.email}) LIKE LOWER(${'%' + query + '%'}) OR 
-            LOWER(${employees.employeeNumber}) LIKE LOWER(${'%' + query + '%'})`
-      );
-    }
-
-    // Add additional filters
-    if (filters?.departmentId) {
-      baseQuery = baseQuery.where(eq(employees.departmentId, filters.departmentId));
-    }
-    if (filters?.status) {
-      baseQuery = baseQuery.where(eq(employees.status, filters.status));
-    }
-    if (filters?.managerId) {
-      baseQuery = baseQuery.where(eq(employees.managerId, filters.managerId));
-    }
+      .where(and(...conditions));
 
     return await baseQuery.orderBy(desc(employees.createdAt));
   }
@@ -826,6 +832,8 @@ export class DatabaseStorage implements IStorage {
         profileImageUrl: users.profileImageUrl,
         role: users.role,
         tenantId: users.tenantId,
+        phoneNumber: users.phoneNumber,
+        timezone: users.timezone,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         tenantName: tenants.name,
@@ -833,7 +841,7 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .leftJoin(tenants, eq(users.tenantId, tenants.id))
       .orderBy(tenants.name, users.role, users.firstName);
-    
+
     return result;
   }
   
@@ -1199,7 +1207,7 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(knowledgeBase)
-        .where(and(eq(knowledgeBase.isPublished, true), eq(knowledgeBase.category, category)))
+        .where(and(eq(knowledgeBase.isPublished, true), eq(knowledgeBase.category, category as any)))
         .orderBy(desc(knowledgeBase.viewCount));
     }
     
@@ -1404,12 +1412,12 @@ export class DatabaseStorage implements IStorage {
       return { valid: false, reason: 'Discount code has expired' };
     }
 
-    if (discount.maxUsageTotal !== -1 && discount.currentUsageCount >= discount.maxUsageTotal) {
+    if (discount.maxUsageTotal !== -1 && (discount.currentUsageCount || 0) >= (discount.maxUsageTotal || 0)) {
       return { valid: false, reason: 'Discount code usage limit reached' };
     }
 
     // Check per-user usage limit if user is provided
-    if (userId && discount.maxUsagePerUser > 0) {
+    if (userId && (discount.maxUsagePerUser || 0) > 0) {
       const userUsageCount = await db
         .select({ count: count() })
         .from(discountCodeUsages)
@@ -1418,7 +1426,7 @@ export class DatabaseStorage implements IStorage {
           eq(discountCodeUsages.userId, userId)
         ));
       
-      if (userUsageCount[0].count >= discount.maxUsagePerUser) {
+      if (userUsageCount[0].count >= (discount.maxUsagePerUser || 0)) {
         return { valid: false, reason: 'Personal usage limit reached for this code' };
       }
     }

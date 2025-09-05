@@ -1,5 +1,5 @@
 // Define subscription tiers since they may not be in shared schema yet
-export type SubscriptionTier = 'mj_scott' | 'forming' | 'storming' | 'norming' | 'performing' | 'appsumo';
+export type SubscriptionTier = 'mj_scott' | 'forming' | 'storming' | 'norming' | 'performing' | 'appsumo' | 'platform' | 'custom';
 
 // Define feature flags for each subscription tier
 export interface TierFeatures {
@@ -345,6 +345,108 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     
     // Support Level
     supportLevel: 'email'
+  },
+
+  platform: {
+    // Core Features - Platform admin has everything
+    basicEmployeeManagement: true,
+    basicDashboard: true,
+    employeeProfiles: true,
+
+    // Employee Management
+    maxEmployees: null, // unlimited
+    bulkEmployeeOperations: true,
+    advancedEmployeeSearch: true,
+    departmentManagement: true,
+    jobPositionManagement: true,
+    employeeHierarchy: true,
+
+    // Performance & Reviews
+    performanceReviews: true,
+    advancedPerformanceMetrics: true,
+    customPerformanceCriteria: true,
+
+    // Feedback System
+    basicFeedback: true,
+    qrCodeFeedback: true,
+    advancedFeedbackAnalytics: true,
+    realTimeFeedbackAlerts: true,
+
+    // Goals & Development
+    goalSetting: true,
+    advancedGoalTracking: true,
+    developmentPlans: true,
+    skillAssessments: true,
+
+    // Analytics & Reporting
+    basicReporting: true,
+    advancedAnalytics: true,
+    customReports: true,
+    dataExport: true,
+
+    // Customization
+    customBranding: true,
+    customFields: true,
+    workflowCustomization: true,
+
+    // Integration & API
+    apiAccess: true,
+    webhooks: true,
+    ssoIntegration: true,
+
+    // Support Level
+    supportLevel: 'dedicated'
+  },
+
+  custom: {
+    // Core Features - Custom enterprise has everything
+    basicEmployeeManagement: true,
+    basicDashboard: true,
+    employeeProfiles: true,
+
+    // Employee Management
+    maxEmployees: null, // unlimited
+    bulkEmployeeOperations: true,
+    advancedEmployeeSearch: true,
+    departmentManagement: true,
+    jobPositionManagement: true,
+    employeeHierarchy: true,
+
+    // Performance & Reviews
+    performanceReviews: true,
+    advancedPerformanceMetrics: true,
+    customPerformanceCriteria: true,
+
+    // Feedback System
+    basicFeedback: true,
+    qrCodeFeedback: true,
+    advancedFeedbackAnalytics: true,
+    realTimeFeedbackAlerts: true,
+
+    // Goals & Development
+    goalSetting: true,
+    advancedGoalTracking: true,
+    developmentPlans: true,
+    skillAssessments: true,
+
+    // Analytics & Reporting
+    basicReporting: true,
+    advancedAnalytics: true,
+    customReports: true,
+    dataExport: true,
+
+    // Customization
+    customBranding: true,
+    customFields: true,
+    workflowCustomization: true,
+
+    // Integration & API
+    apiAccess: true,
+    webhooks: true,
+    ssoIntegration: true,
+
+    // Support Level
+    supportLevel: 'dedicated'
   }
 };
 
@@ -369,7 +471,9 @@ export function getTierInfo(tier: SubscriptionTier) {
     storming: 'Storming',
     norming: 'Norming',
     performing: 'Performing',
-    appsumo: 'AppSumo Lifetime'
+    appsumo: 'AppSumo Lifetime',
+    platform: 'Platform Admin',
+    custom: 'Custom Enterprise'
   };
   
   const pricing: Record<SubscriptionTier, { monthly: number; yearly: number }> = {
@@ -378,7 +482,9 @@ export function getTierInfo(tier: SubscriptionTier) {
     storming: { monthly: 10, yearly: 8 },
     norming: { monthly: 15, yearly: 12 },
     performing: { monthly: 25, yearly: 20 },
-    appsumo: { monthly: 0, yearly: 0 } // Lifetime deal
+    appsumo: { monthly: 0, yearly: 0 }, // Lifetime deal
+    platform: { monthly: 0, yearly: 0 }, // Platform admin
+    custom: { monthly: 0, yearly: 0 } // Custom pricing
   };
   
   return {
