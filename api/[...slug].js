@@ -1,80 +1,39 @@
-const express = require("express");
+// Simple serverless function for Vercel
+module.exports = (req, res) => {
+  // Log environment status
+  console.log("Function invoked:", req.url);
+  console.log("Has DATABASE_URL:", !!process.env.DATABASE_URL);
+  console.log("Has SESSION_SECRET:", !!process.env.SESSION_SECRET);
 
-// Check for required environment variables early
-if (!process.env.DATABASE_URL) {
-  console.error("CRITICAL: DATABASE_URL is not set in environment variables");
-}
-
-if (!process.env.SESSION_SECRET) {
-  console.error("CRITICAL: SESSION_SECRET is not set in environment variables");
-}
-
-// Create Express app for serverless function
-const app = express();
-
-// Middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// CORS middleware
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  // CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   
+  // Handle OPTIONS requests
   if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
+    return res.status(200).end();
   }
-});
 
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({ 
-    status: "ok",
-    environment: {
-      hasDatabase: !!process.env.DATABASE_URL,
-      hasSession: !!process.env.SESSION_SECRET,
-      nodeEnv: process.env.NODE_ENV
-    }
-  });
-});
-
-// Initialize routes with error handling
-try {
-  // Import and register routes synchronously
-  const { registerRoutes } = require("../server/routes");
-  registerRoutes(app);
-} catch (error) {
-  console.error("Failed to initialize routes:", error);
-  
-  // Fallback error handler for all routes
-  app.use((req, res) => {
-    console.error("Route initialization failed, path:", req.path);
-    console.error("Error details:", error);
-    
-    res.status(500).json({ 
-      error: "Server initialization failed",
-      details: error instanceof Error ? error.message : "Unknown error",
-      path: req.path,
-      env: {
+  // Health check endpoint
+  if (req.url === "/api/health" || req.url === "/health") {
+    return res.status(200).json({ 
+      status: "ok",
+      message: "API is running",
+      environment: {
         hasDatabase: !!process.env.DATABASE_URL,
-        hasSession: !!process.env.SESSION_SECRET
-      }
+        hasSession: !!process.env.SESSION_SECRET,
+        nodeEnv: process.env.NODE_ENV || "production"
+      },
+      timestamp: new Date().toISOString()
     });
-  });
-}
+  }
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("API Error:", err);
-  console.error("Stack:", err.stack);
-  res.status(500).json({ 
-    error: "Internal server error",
-    message: err.message || "Unknown error occurred"
+  // Default response for other endpoints
+  res.status(200).json({
+    message: "API endpoint working",
+    path: req.url,
+    method: req.method,
+    environment: process.env.NODE_ENV || "production"
   });
-});
-
-// Export the handler for Vercel
-module.exports = app;
+};
