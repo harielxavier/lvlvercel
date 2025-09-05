@@ -76,11 +76,13 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = config.PORT;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "localhost", () => {
     log(`serving on port ${port}`);
+    log(`🚀 Frontend: http://localhost:${port}`);
+    log(`🔌 Backend API: http://localhost:${port}/api`);
+    log(`📡 WebSocket: ws://localhost:${port}/ws`);
   });
 })();
+
+// Export the Express app for Vercel serverless functions
+export default app;

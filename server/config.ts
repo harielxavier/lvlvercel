@@ -1,5 +1,11 @@
 // Configuration module for centralized environment variable management
 import { z } from 'zod';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file in development
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 // Schema for environment configuration validation
 const envSchema = z.object({
