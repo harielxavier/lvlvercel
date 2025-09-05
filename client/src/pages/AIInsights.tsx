@@ -20,13 +20,13 @@ export default function AIInsights() {
     ['norming', 'performing', 'appsumo'].includes(user.employee.tenant.subscriptionTier.toLowerCase());
 
   // Get rising star candidates
-  const { data: risingStars = [], isLoading: risingStarsLoading } = useQuery({
+  const { data: risingStars = [], isLoading: risingStarsLoading } = useQuery<any[]>({
     queryKey: ['/api/ai/rising-stars'],
     enabled: !!user?.employee?.tenantId && isAuthenticated && hasAIAccess,
   });
 
   // Get employees for analysis
-  const { data: employees = [], isLoading: employeesLoading } = useQuery({
+  const { data: employees = [], isLoading: employeesLoading } = useQuery<any[]>({
     queryKey: ['/api/employees', user?.employee?.tenantId],
     enabled: !!user?.employee?.tenantId && isAuthenticated,
   });

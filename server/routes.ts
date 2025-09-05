@@ -2097,7 +2097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Import the tier info function
       const { getTierInfo } = await import('./subscriptionFeatures');
-      const tierInfo = getTierInfo(tenant.subscriptionTier);
+      const tierInfo = getTierInfo((tenant.subscriptionTier as any) || 'forming');
       
       res.json(tierInfo);
     } catch (error) {
@@ -2229,7 +2229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Import AI service
-      const { generateBehavioralInsights } = await import('../ai/claude');
+      const { generateBehavioralInsights } = await import('./ai/claude');
       
       // Generate comprehensive behavioral analysis
       const insights = await generateBehavioralInsights(
@@ -2306,7 +2306,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const tenantId = currentUser?.employee?.tenantId;
+      if (!currentUser) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
+      const employee = await storage.getEmployeeByUserId(currentUser.id);
+      const tenantId = employee?.tenantId;
       if (!tenantId) {
         return res.status(400).json({ message: "No tenant found" });
       }
@@ -2317,14 +2322,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const risingStarsWithDetails = await Promise.all(
         risingStars.map(async (star) => {
           const employee = await storage.getEmployee(star.employeeId);
+          if (!employee) return { ...star, employee: null };
+          
+          const user = await storage.getUser(employee.userId);
+          const department = employee.departmentId ? await storage.getDepartment(employee.departmentId) : null;
+          
           return {
             ...star,
-            employee: employee ? {
-              firstName: employee.firstName,
-              lastName: employee.lastName,
-              jobTitle: employee.jobTitle,
-              department: employee.department
-            } : null
+            employee: {
+              firstName: user?.firstName || 'Unknown',
+              lastName: user?.lastName || '',
+              jobTitle: user?.firstName || 'No Title', // Using firstName as placeholder since jobTitle doesn't exist in schema
+              department: department?.name || 'No Department'
+            }
           };
         })
       );

@@ -71,7 +71,11 @@ Respond with JSON:
       messages: [{ role: 'user', content: prompt }],
     });
 
-    return JSON.parse(response.content[0].text);
+    const content = response.content[0];
+    if ('text' in content) {
+      return JSON.parse(content.text);
+    }
+    throw new Error('Invalid response format from Claude');
   } catch (error) {
     console.error("Claude collaboration analysis error:", error);
     throw new Error("Failed to analyze collaboration patterns");
@@ -111,7 +115,11 @@ Respond with JSON:
       messages: [{ role: 'user', content: prompt }],
     });
 
-    return JSON.parse(response.content[0].text);
+    const content = response.content[0];
+    if ('text' in content) {
+      return JSON.parse(content.text);
+    }
+    throw new Error('Invalid response format from Claude');
   } catch (error) {
     console.error("Claude sentiment analysis error:", error);
     throw new Error("Failed to analyze feedback sentiment");
@@ -160,7 +168,11 @@ Respond with JSON:
       messages: [{ role: 'user', content: prompt }],
     });
 
-    return JSON.parse(response.content[0].text);
+    const content = response.content[0];
+    if ('text' in content) {
+      return JSON.parse(content.text);
+    }
+    throw new Error('Invalid response format from Claude');
   } catch (error) {
     console.error("Claude leadership analysis error:", error);
     throw new Error("Failed to analyze leadership readiness");
@@ -209,6 +221,6 @@ Provide a 2-3 sentence professional summary focusing on strengths and growth opp
     collaboration,
     sentiment,
     leadership,
-    overallAssessment: assessmentResponse.content[0].text
+    overallAssessment: 'text' in assessmentResponse.content[0] ? assessmentResponse.content[0].text : 'Analysis complete'
   };
 }
