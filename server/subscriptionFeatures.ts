@@ -373,10 +373,9 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     realTimeFeedbackAlerts: true,
 
     // Goals & Development
-    goalSetting: true,
-    advancedGoalTracking: true,
-    developmentPlans: true,
-    skillAssessments: true,
+    goalTracking: true,
+    advancedGoalAnalytics: true,
+    personalDevelopmentPlans: true,
 
     // Analytics & Reporting
     basicReporting: true,
@@ -384,10 +383,9 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     customReports: true,
     dataExport: true,
 
-    // Customization
-    customBranding: true,
-    customFields: true,
-    workflowCustomization: true,
+    // Team Collaboration
+    teamCollaboration: true,
+    crossDepartmentVisibility: true,
 
     // Integration & API
     apiAccess: true,
@@ -424,10 +422,9 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     realTimeFeedbackAlerts: true,
 
     // Goals & Development
-    goalSetting: true,
-    advancedGoalTracking: true,
-    developmentPlans: true,
-    skillAssessments: true,
+    goalTracking: true,
+    advancedGoalAnalytics: true,
+    personalDevelopmentPlans: true,
 
     // Analytics & Reporting
     basicReporting: true,
@@ -435,10 +432,9 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     customReports: true,
     dataExport: true,
 
-    // Customization
-    customBranding: true,
-    customFields: true,
-    workflowCustomization: true,
+    // Team Collaboration
+    teamCollaboration: true,
+    crossDepartmentVisibility: true,
 
     // Integration & API
     apiAccess: true,
