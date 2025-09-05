@@ -33,19 +33,20 @@ const envSchema = z.object({
   TWILIO_PHONE_NUMBER: z.string().optional(),
 });
 
+// Type for the configuration
+type Config = z.infer<typeof envSchema>;
+
 // Configuration validation and parsing
-function loadConfig() {
+function loadConfig(): Config {
   try {
     const env = envSchema.parse(process.env);
     
-    // Validate critical configurations
+    // Log warnings for missing optional services in production
     if (env.NODE_ENV === 'production') {
-      // In production, require all authentication settings
       if (!env.REPLIT_AUTH_ISSUER || !env.REPLIT_AUTH_CLIENT_ID || !env.REPLIT_AUTH_CALLBACK_URL) {
         console.warn('Authentication configuration is missing in production');
       }
       
-      // Warn about missing optional services
       if (!env.MAILGUN_API_KEY || !env.MAILGUN_DOMAIN) {
         console.warn('Email service (Mailgun) is not configured');
       }
@@ -57,45 +58,31 @@ function loadConfig() {
     
     return env;
   } catch (error) {
+    console.error('Configuration validation failed');
+    
     if (error instanceof z.ZodError) {
-      console.error('Configuration validation failed:');
+      console.error('Configuration errors:');
       error.errors.forEach(err => {
         console.error(`- ${err.path.join('.')}: ${err.message}`);
       });
-      // In serverless, we can't exit the process
-      // Return a minimal config object to prevent crashes
-      return {
-        NODE_ENV: 'production',
-        PORT: '5000',
-        DATABASE_URL: process.env.DATABASE_URL || '',
-        SESSION_SECRET: process.env.SESSION_SECRET || 'temporary-secret-for-error-handling',
-        REPLIT_AUTH_ISSUER: undefined,
-        REPLIT_AUTH_CLIENT_ID: undefined,
-        REPLIT_AUTH_CALLBACK_URL: undefined,
-        MAILGUN_API_KEY: undefined,
-        MAILGUN_DOMAIN: undefined,
-        TWILIO_ACCOUNT_SID: undefined,
-        TWILIO_AUTH_TOKEN: undefined,
-        TWILIO_PHONE_NUMBER: undefined,
-      } as z.infer<typeof envSchema>;
     }
     
-    console.error('Configuration loading failed:', error);
-    // Return minimal config
+    // Return a minimal valid config to prevent crashes
+    // This allows the server to start and show proper error messages
     return {
-      NODE_ENV: 'production',
-      PORT: '5000',
+      NODE_ENV: (process.env.NODE_ENV as any) || 'production',
+      PORT: parseInt(process.env.PORT || '5000'),
       DATABASE_URL: process.env.DATABASE_URL || '',
-      SESSION_SECRET: process.env.SESSION_SECRET || 'temporary-secret-for-error-handling',
-      REPLIT_AUTH_ISSUER: undefined,
-      REPLIT_AUTH_CLIENT_ID: undefined,
-      REPLIT_AUTH_CALLBACK_URL: undefined,
-      MAILGUN_API_KEY: undefined,
-      MAILGUN_DOMAIN: undefined,
-      TWILIO_ACCOUNT_SID: undefined,
-      TWILIO_AUTH_TOKEN: undefined,
-      TWILIO_PHONE_NUMBER: undefined,
-    } as z.infer<typeof envSchema>;
+      SESSION_SECRET: process.env.SESSION_SECRET || 'temporary-secret-please-configure-properly',
+      REPLIT_AUTH_ISSUER: process.env.REPLIT_AUTH_ISSUER,
+      REPLIT_AUTH_CLIENT_ID: process.env.REPLIT_AUTH_CLIENT_ID,
+      REPLIT_AUTH_CALLBACK_URL: process.env.REPLIT_AUTH_CALLBACK_URL,
+      MAILGUN_API_KEY: process.env.MAILGUN_API_KEY,
+      MAILGUN_DOMAIN: process.env.MAILGUN_DOMAIN,
+      TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
+      TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
+      TWILIO_PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER,
+    };
   }
 }
 

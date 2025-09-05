@@ -1,5 +1,14 @@
 import express, { type Request, Response, NextFunction } from "express";
 
+// Check for required environment variables early
+if (!process.env.DATABASE_URL) {
+  console.error("CRITICAL: DATABASE_URL is not set in environment variables");
+}
+
+if (!process.env.SESSION_SECRET) {
+  console.error("CRITICAL: SESSION_SECRET is not set in environment variables");
+}
+
 // Create Express app for serverless function
 const app = express();
 
@@ -20,47 +29,51 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Lazy load routes to avoid initialization errors
-let routesInitialized = false;
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  if (!routesInitialized) {
-    try {
-      // Check for required environment variables
-      if (!process.env.DATABASE_URL) {
-        console.error("DATABASE_URL is not set in environment variables");
-        return res.status(500).json({ 
-          error: "Server configuration error", 
-          details: "Database connection not configured"
-        });
-      }
-      
-      if (!process.env.SESSION_SECRET) {
-        console.error("SESSION_SECRET is not set in environment variables");
-        return res.status(500).json({ 
-          error: "Server configuration error", 
-          details: "Session configuration missing"
-        });
-      }
-
-      // Dynamically import and initialize routes
-      const { registerRoutes } = await import("../server/routes");
-      registerRoutes(app);
-      routesInitialized = true;
-    } catch (error) {
-      console.error("Failed to initialize routes:", error);
-      return res.status(500).json({ 
-        error: "Failed to initialize server", 
-        details: error instanceof Error ? error.message : "Unknown error"
-      });
+// Health check endpoint
+app.get("/api/health", (req: Request, res: Response) => {
+  res.json({ 
+    status: "ok",
+    environment: {
+      hasDatabase: !!process.env.DATABASE_URL,
+      hasSession: !!process.env.SESSION_SECRET,
+      nodeEnv: process.env.NODE_ENV
     }
-  }
-  next();
+  });
 });
+
+// Initialize routes with error handling
+try {
+  // Import and register routes synchronously
+  const { registerRoutes } = require("../server/routes");
+  registerRoutes(app);
+} catch (error) {
+  console.error("Failed to initialize routes:", error);
+  
+  // Fallback error handler for all routes
+  app.use((req: Request, res: Response) => {
+    console.error("Route initialization failed, path:", req.path);
+    console.error("Error details:", error);
+    
+    res.status(500).json({ 
+      error: "Server initialization failed",
+      details: error instanceof Error ? error.message : "Unknown error",
+      path: req.path,
+      env: {
+        hasDatabase: !!process.env.DATABASE_URL,
+        hasSession: !!process.env.SESSION_SECRET
+      }
+    });
+  });
+}
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("API Error:", err);
-  res.status(500).json({ error: "Internal server error" });
+  console.error("Stack:", err.stack);
+  res.status(500).json({ 
+    error: "Internal server error",
+    message: err.message || "Unknown error occurred"
+  });
 });
 
 // Export the handler for Vercel
