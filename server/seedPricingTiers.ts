@@ -1,4 +1,4 @@
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 
 // Define the initial pricing tiers based on existing subscription tiers
 const initialPricingTiers = [

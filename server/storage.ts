@@ -75,7 +75,7 @@ import {
   type WebsiteSettings,
   type InsertWebsiteSettings,
 } from "@shared/schema";
-import { db } from "./db";
+import { db } from "./db.js";
 import { eq, and, desc, count, sql, lt } from "drizzle-orm";
 import { randomUUID } from "crypto";
 

@@ -1,4 +1,4 @@
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 
 // Define the default system settings
 const defaultSystemSettings = [

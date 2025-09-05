@@ -1,4 +1,4 @@
-import { storage } from './storage';
+import { storage } from './storage.js';
 import type { InsertNotification, NotificationPreferences, User } from '@shared/schema';
 
 interface EmailConfig {

@@ -1,12 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import QRCode from 'qrcode';
-import { notificationService } from './notificationService';
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { requireFeature, addTierInfo } from "./middleware/featureGuard";
-import { validateParam, validateTenantAccess, validateUUID, validateURL } from "./validation";
+import { notificationService } from './notificationService.js';
+import { setupAuth, isAuthenticated } from "./replitAuth.js";
+import { requireFeature, addTierInfo } from "./middleware/featureGuard.js";
+import { validateParam, validateTenantAccess, validateUUID, validateURL } from "./validation.js";
 import { insertEmployeeSchema, insertFeedbackSchema, insertTenantSchema, insertPerformanceReviewSchema, insertGoalSchema, type User, type UpsertUser } from "@shared/schema";
 import { z } from "zod";
 

@@ -2,7 +2,7 @@ import passport from "passport";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 
 // Development authentication - simplified for testing multi-tenant functionality
 const isDevelopment = process.env.NODE_ENV === "development";

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { validateFeatureAccess, type TierFeatures } from '../subscriptionFeatures';
+import { validateFeatureAccess, type TierFeatures } from '../subscriptionFeatures.js';
 
 // Middleware to guard API endpoints based on subscription tier features
 export function requireFeature(feature: keyof TierFeatures) {
