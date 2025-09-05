@@ -81,3 +81,6 @@ vite.config.ts.*
 .cache/
 .upm/
 .vercel
+
+# Local Netlify folder
+.netlify
