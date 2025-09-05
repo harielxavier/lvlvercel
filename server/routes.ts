@@ -2332,7 +2332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             employee: {
               firstName: user?.firstName || 'Unknown',
               lastName: user?.lastName || '',
-              jobTitle: user?.firstName || 'No Title', // Using firstName as placeholder since jobTitle doesn't exist in schema
+              jobTitle: employee.jobPositionId ? 'Employee' : 'No Title', // Fixed: Use employee role instead of firstName
               department: department?.name || 'No Department'
             }
           };
