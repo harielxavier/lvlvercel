@@ -71,6 +71,118 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Login page endpoint
+app.get("/api/login", async (req, res) => {
+  // Mock users for development/demo
+  const mockUsers = [
+    { id: '1', email: 'admin@lvlup.com', firstName: 'Admin', lastName: 'User', role: 'platform_admin' },
+    { id: '2', email: 'manager@company.com', firstName: 'John', lastName: 'Manager', role: 'tenant_admin' },
+    { id: '3', email: 'employee@company.com', firstName: 'Jane', lastName: 'Employee', role: 'employee' },
+    { id: '4', email: 'hr@company.com', firstName: 'HR', lastName: 'Manager', role: 'manager' }
+  ];
+  
+  const loginHtml = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>LVL UP Performance - Login</title>
+        <style>
+          body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            max-width: 800px; 
+            margin: 2rem auto; 
+            padding: 0 1rem; 
+            background: #f9fafb;
+          }
+          .login-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          }
+          h1 { color: #111827; margin-bottom: 2rem; }
+          .user-card { 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+            padding: 1rem; 
+            margin: 0.5rem 0; 
+            cursor: pointer;
+            transition: all 0.2s;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+          }
+          .user-card:hover { 
+            background-color: #f3f4f6; 
+            border-color: #d1d5db;
+          }
+          .role-badge { 
+            display: inline-block; 
+            padding: 0.25rem 0.5rem; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            margin-left: 0.5rem; 
+          }
+          .platform-admin { background-color: #dc2626; color: white; }
+          .tenant-admin { background-color: #2563eb; color: white; }
+          .manager { background-color: #16a34a; color: white; }
+          .employee { background-color: #6b7280; color: white; }
+        </style>
+      </head>
+      <body>
+        <div class="login-container">
+          <h1>🚀 LVL UP Performance - Login</h1>
+          <p style="color: #6b7280; margin-bottom: 2rem;">Select a user to login (Development Mode)</p>
+          ${mockUsers.map(user => `
+            <a href="/api/auth/dev-login?userId=${user.id}" class="user-card">
+              <strong>${user.firstName} ${user.lastName}</strong>
+              <span class="role-badge ${user.role}">${user.role.replace('_', ' ').toUpperCase()}</span>
+              <br>
+              <small style="color: #6b7280;">${user.email}</small>
+            </a>
+          `).join('')}
+        </div>
+      </body>
+    </html>
+  `;
+  
+  res.send(loginHtml);
+});
+
+// Dev login endpoint
+app.get("/api/auth/dev-login", (req, res) => {
+  const { userId } = req.query;
+  
+  // Mock users
+  const mockUsers = {
+    '1': { id: '1', email: 'admin@lvlup.com', firstName: 'Admin', lastName: 'User', role: 'platform_admin' },
+    '2': { id: '2', email: 'manager@company.com', firstName: 'John', lastName: 'Manager', role: 'tenant_admin', tenantId: 'tenant1' },
+    '3': { id: '3', email: 'employee@company.com', firstName: 'Jane', lastName: 'Employee', role: 'employee', tenantId: 'tenant1' },
+    '4': { id: '4', email: 'hr@company.com', firstName: 'HR', lastName: 'Manager', role: 'manager', tenantId: 'tenant1' }
+  };
+  
+  const user = mockUsers[userId];
+  
+  if (!user) {
+    return res.redirect('/api/login');
+  }
+  
+  // Set session
+  if (req.session) {
+    req.session.user = user;
+    req.session.save((err) => {
+      if (err) {
+        return res.redirect('/api/login');
+      }
+      res.redirect('/');
+    });
+  } else {
+    // If no session support, redirect to home anyway
+    res.redirect('/');
+  }
+});
+
 // Auth endpoints
 app.get("/api/auth/user", (req, res) => {
   if (req.session && req.session.user) {
@@ -107,10 +219,12 @@ app.get("/api/logout", (req, res) => {
         });
       }
       res.clearCookie('connect.sid');
-      res.json({ success: true, message: "Successfully logged out" });
+      // Redirect to login page instead of returning JSON
+      res.redirect('/api/login');
     });
   } else {
-    res.json({ success: true, message: "No active session" });
+    // Redirect to login page even if no session
+    res.redirect('/api/login');
   }
 });
 
@@ -124,10 +238,11 @@ app.post("/api/logout", (req, res) => {
         });
       }
       res.clearCookie('connect.sid');
-      res.json({ success: true, message: "Successfully logged out" });
+      // For POST requests, return JSON (for API calls)
+      res.json({ success: true, message: "Successfully logged out", redirect: "/api/login" });
     });
   } else {
-    res.json({ success: true, message: "No active session" });
+    res.json({ success: true, message: "No active session", redirect: "/api/login" });
   }
 });
 
