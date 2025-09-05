@@ -1,6 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "../server/routes";
-import { config } from "../server/config";
 
 // Create Express app for serverless function
 const app = express();
@@ -22,8 +20,42 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// Register API routes
-registerRoutes(app);
+// Lazy load routes to avoid initialization errors
+let routesInitialized = false;
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  if (!routesInitialized) {
+    try {
+      // Check for required environment variables
+      if (!process.env.DATABASE_URL) {
+        console.error("DATABASE_URL is not set in environment variables");
+        return res.status(500).json({ 
+          error: "Server configuration error", 
+          details: "Database connection not configured"
+        });
+      }
+      
+      if (!process.env.SESSION_SECRET) {
+        console.error("SESSION_SECRET is not set in environment variables");
+        return res.status(500).json({ 
+          error: "Server configuration error", 
+          details: "Session configuration missing"
+        });
+      }
+
+      // Dynamically import and initialize routes
+      const { registerRoutes } = await import("../server/routes");
+      registerRoutes(app);
+      routesInitialized = true;
+    } catch (error) {
+      console.error("Failed to initialize routes:", error);
+      return res.status(500).json({ 
+        error: "Failed to initialize server", 
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  }
+  next();
+});
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

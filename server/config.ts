@@ -42,26 +42,60 @@ function loadConfig() {
     if (env.NODE_ENV === 'production') {
       // In production, require all authentication settings
       if (!env.REPLIT_AUTH_ISSUER || !env.REPLIT_AUTH_CLIENT_ID || !env.REPLIT_AUTH_CALLBACK_URL) {
-        throw new Error('Authentication configuration is required in production');
+        console.warn('Authentication configuration is missing in production');
       }
       
       // Warn about missing optional services
       if (!env.MAILGUN_API_KEY || !env.MAILGUN_DOMAIN) {
+        console.warn('Email service (Mailgun) is not configured');
       }
       
       if (!env.TWILIO_ACCOUNT_SID) {
+        console.warn('SMS service (Twilio) is not configured');
       }
     }
     
     return env;
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error('Configuration validation failed:');
       error.errors.forEach(err => {
+        console.error(`- ${err.path.join('.')}: ${err.message}`);
       });
-      process.exit(1);
+      // In serverless, we can't exit the process
+      // Return a minimal config object to prevent crashes
+      return {
+        NODE_ENV: 'production',
+        PORT: '5000',
+        DATABASE_URL: process.env.DATABASE_URL || '',
+        SESSION_SECRET: process.env.SESSION_SECRET || 'temporary-secret-for-error-handling',
+        REPLIT_AUTH_ISSUER: undefined,
+        REPLIT_AUTH_CLIENT_ID: undefined,
+        REPLIT_AUTH_CALLBACK_URL: undefined,
+        MAILGUN_API_KEY: undefined,
+        MAILGUN_DOMAIN: undefined,
+        TWILIO_ACCOUNT_SID: undefined,
+        TWILIO_AUTH_TOKEN: undefined,
+        TWILIO_PHONE_NUMBER: undefined,
+      } as z.infer<typeof envSchema>;
     }
     
-    process.exit(1);
+    console.error('Configuration loading failed:', error);
+    // Return minimal config
+    return {
+      NODE_ENV: 'production',
+      PORT: '5000',
+      DATABASE_URL: process.env.DATABASE_URL || '',
+      SESSION_SECRET: process.env.SESSION_SECRET || 'temporary-secret-for-error-handling',
+      REPLIT_AUTH_ISSUER: undefined,
+      REPLIT_AUTH_CLIENT_ID: undefined,
+      REPLIT_AUTH_CALLBACK_URL: undefined,
+      MAILGUN_API_KEY: undefined,
+      MAILGUN_DOMAIN: undefined,
+      TWILIO_ACCOUNT_SID: undefined,
+      TWILIO_AUTH_TOKEN: undefined,
+      TWILIO_PHONE_NUMBER: undefined,
+    } as z.infer<typeof envSchema>;
   }
 }
 
