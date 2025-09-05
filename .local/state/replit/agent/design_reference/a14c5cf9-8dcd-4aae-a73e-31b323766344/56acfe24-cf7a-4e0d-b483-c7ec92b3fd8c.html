@@ -1,0 +1,765 @@
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LVL UP Performance - HR & Feedback SaaS Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                    chart: {
+                        "1": "var(--chart-1)",
+                        "2": "var(--chart-2)",
+                        "3": "var(--chart-3)",
+                        "4": "var(--chart-4)",
+                        "5": "var(--chart-5)",
+                    }
+                },
+                fontFamily: {
+                    sans: ["var(--font-sans)"],
+                    serif: ["var(--font-serif)"],
+                    mono: ["var(--font-mono)"],
+                }
+            },
+        }
+    };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --card: hsl(20, 14%, 8%);
+            --ring: hsl(9, 75%, 61%);
+            --input: hsl(20, 14%, 18%);
+            --muted: hsl(20, 14%, 15%);
+            --accent: hsl(25, 45%, 20%);
+            --border: hsl(20, 14%, 15%);
+            --chart-1: hsl(203.8863, 88.2845%, 53.1373%);
+            --chart-2: hsl(159.7826, 100%, 36.0784%);
+            --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
+            --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
+            --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
+            --popover: hsl(20, 14%, 4%);
+            --primary: hsl(9, 75%, 61%);
+            --sidebar: hsl(20, 14%, 8%);
+            --secondary: hsl(30, 15%, 52%);
+            --background: hsl(20, 14%, 4%);
+            --foreground: hsl(45, 25%, 91%);
+            --destructive: hsl(356.3033, 90.5579%, 54.3137%);
+            --sidebar-ring: hsl(9, 75%, 61%);
+            --sidebar-accent: hsl(25, 45%, 20%);
+            --sidebar-border: hsl(20, 14%, 15%);
+            --card-foreground: hsl(45, 25%, 85%);
+            --sidebar-primary: hsl(9, 75%, 61%);
+            --muted-foreground: hsl(45, 15%, 46%);
+            --accent-foreground: hsl(45, 25%, 85%);
+            --popover-foreground: hsl(45, 25%, 91%);
+            --primary-foreground: hsl(0, 0%, 100%);
+            --sidebar-foreground: hsl(45, 25%, 85%);
+            --secondary-foreground: hsl(0, 0%, 100%);
+            --destructive-foreground: hsl(0, 0%, 100%);
+            --sidebar-accent-foreground: hsl(45, 25%, 85%);
+            --sidebar-primary-foreground: hsl(0, 0%, 100%);
+            --radius: 0.4rem;
+            --font-sans: 'Inter', sans-serif;
+            --font-serif: 'Inter', sans-serif;
+            --font-mono: Menlo, monospace;
+        }
+
+        * {
+            border-color: var(--border);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--background);
+            color: var(--foreground);
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .gradient-border {
+            background: linear-gradient(var(--background), var(--background)) padding-box,
+                        linear-gradient(45deg, var(--primary), var(--chart-1)) border-box;
+            border: 1px solid transparent;
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .performance-score {
+            background: conic-gradient(from 0deg, var(--chart-1) 0deg, var(--primary) 280deg, var(--muted) 280deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-background">
+    <!-- Navigation -->
+    <nav class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-primary to-chart-1 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold text-foreground">LVL UP</span>
+                        <span class="text-sm text-muted-foreground">Performance</span>
+                    </div>
+                    <!-- @COMPONENT: BreadcrumbNavigation -->
+                    <div class="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
+                        <span>/</span>
+                        <span>Dashboard</span>
+                    </div>
+                    <!-- @END_COMPONENT: BreadcrumbNavigation -->
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- @COMPONENT: NotificationBell -->
+                    <button class="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full"></span>
+                    </button>
+                    <!-- @END_COMPONENT: NotificationBell -->
+
+                    <!-- @COMPONENT: UserProfileDropdown -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Professional headshot photo of smiling business woman at office -->
+                        <img src="https://pixabay.com/get/g44709aefbedaa468e7181257a128627ae87500d1b896fe06bb342835b308b411cfeabf709a6d30c89b21ad9763d26dc72728eb01d1d0a2727bdb30a8c5499643_1280.jpg" 
+                             alt="Profile" class="w-8 h-8 rounded-full object-cover">
+                        <div class="hidden md:block">
+                            <p class="text-sm font-medium text-foreground" data-bind="user.name">Sarah Johnson</p>
+                            <p class="text-xs text-muted-foreground" data-bind="user.role">Product Manager</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-xs text-muted-foreground"></i>
+                    </div>
+                    <!-- @END_COMPONENT: UserProfileDropdown -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <!-- @COMPONENT: DashboardHeader -->
+        <div class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground mb-2">Performance Dashboard</h1>
+                    <p class="text-muted-foreground">Track your performance, gather feedback, and grow your career</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
+                    <button class="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors">
+                        <i class="fas fa-qrcode mr-2"></i>
+                        My QR Code
+                    </button>
+                    <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-share-alt mr-2"></i>
+                        Share Feedback Link
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: DashboardHeader -->
+
+        <!-- Performance Score Section -->
+        <!-- @COMPONENT: PerformanceScoreCard -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-1">
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold text-foreground mb-4">Performance Score</h3>
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <div class="w-32 h-32 rounded-full performance-score flex items-center justify-center">
+                                <div class="w-24 h-24 bg-background rounded-full flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-primary" data-bind="performanceScore">87</div>
+                                        <div class="text-xs text-muted-foreground">/ 100</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center space-x-2 text-sm">
+                            <i class="fas fa-arrow-up text-chart-2"></i>
+                            <span class="text-chart-2 font-medium">+5 this week</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Performance Trends</h3>
+                    <div class="h-48 flex items-end justify-between space-x-2">
+                        <!-- @MOCK: Performance chart bars -->
+                        <div class="flex-1 bg-chart-1 rounded-t-sm" style="height: 60%"></div>
+                        <div class="flex-1 bg-chart-1 rounded-t-sm" style="height: 75%"></div>
+                        <div class="flex-1 bg-chart-1 rounded-t-sm" style="height: 65%"></div>
+                        <div class="flex-1 bg-chart-2 rounded-t-sm" style="height: 80%"></div>
+                        <div class="flex-1 bg-chart-2 rounded-t-sm" style="height: 85%"></div>
+                        <div class="flex-1 bg-primary rounded-t-sm" style="height: 87%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-muted-foreground mt-2">
+                        <span>Jul</span>
+                        <span>Aug</span>
+                        <span>Sep</span>
+                        <span>Oct</span>
+                        <span>Nov</span>
+                        <span>Dec</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: PerformanceScoreCard -->
+
+        <!-- Feedback Collection Section -->
+        <!-- @COMPONENT: FeedbackCollectionSection -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-card rounded-xl p-6 border border-border">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-foreground">Your Feedback Profile</h3>
+                    <button class="text-primary hover:text-primary/80">
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div class="p-4 bg-muted rounded-lg">
+                        <div class="flex items-center space-x-3 mb-3">
+                            <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-link text-primary text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Feedback URL</p>
+                                <p class="text-sm text-muted-foreground">Share this link to collect feedback</p>
+                            </div>
+                        </div>
+                        <div class="bg-background p-3 rounded border border-border">
+                            <code class="text-sm text-chart-1" data-bind="feedbackUrl">feedback.company.com/sarah-j-x7k9</code>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-muted rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-chart-2/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-qrcode text-chart-2 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-foreground">QR Code</p>
+                                    <p class="text-sm text-muted-foreground">For easy mobile access</p>
+                                </div>
+                            </div>
+                            <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+                                <!-- @MOCK: QR Code placeholder -->
+                                <div class="w-12 h-12 bg-black/90 rounded-sm relative">
+                                    <div class="absolute inset-1 grid grid-cols-4 gap-0.5">
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                        <div class="bg-black"></div>
+                                        <div class="bg-white rounded-sm"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-card rounded-xl p-6 border border-border">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Feedback Statistics</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-chart-1 rounded-full"></div>
+                            <span class="text-foreground">Total Feedback</span>
+                        </div>
+                        <span class="font-semibold text-foreground" data-bind="totalFeedback">42</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-chart-2 rounded-full"></div>
+                            <span class="text-foreground">This Month</span>
+                        </div>
+                        <span class="font-semibold text-foreground" data-bind="monthlyFeedback">8</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-primary rounded-full"></div>
+                            <span class="text-foreground">Avg Rating</span>
+                        </div>
+                        <span class="font-semibold text-foreground" data-bind="avgRating">4.6 ⭐</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-chart-3 rounded-full"></div>
+                            <span class="text-foreground">Response Rate</span>
+                        </div>
+                        <span class="font-semibold text-foreground" data-bind="responseRate">78%</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-border">
+                    <button class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Request Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FeedbackCollectionSection -->
+
+        <!-- Recent Feedback Section -->
+        <!-- @COMPONENT: RecentFeedbackSection -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-foreground">Recent Feedback</h2>
+                <button class="text-primary hover:text-primary/80 text-sm font-medium">
+                    View All
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <!-- @MAP: recentFeedback.map(feedback => ( -->
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <!-- Professional headshot of smiling businessman -->
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400" 
+                                 alt="Feedback giver" class="w-10 h-10 rounded-full object-cover" data-mock="true">
+                            <div>
+                                <p class="font-medium text-foreground" data-bind="feedback.giver.name">Mark Rodriguez</p>
+                                <p class="text-xs text-muted-foreground" data-bind="feedback.giver.role">Client</p>
+                            </div>
+                        </div>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground mb-3" data-bind="feedback.message" data-mock="true">
+                        "Excellent project delivery and communication throughout. Sarah really understood our needs and delivered beyond expectations."
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                        <span data-bind="feedback.category">Project Management</span>
+                        <span data-bind="feedback.date">2 hours ago</span>
+                    </div>
+                </div>
+
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <!-- Professional headshot of smiling businesswoman -->
+                            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400" 
+                                 alt="Feedback giver" class="w-10 h-10 rounded-full object-cover" data-mock="true">
+                            <div>
+                                <p class="font-medium text-foreground" data-bind="feedback.giver.name">Lisa Chen</p>
+                                <p class="text-xs text-muted-foreground" data-bind="feedback.giver.role">Team Lead</p>
+                            </div>
+                        </div>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="far fa-star text-xs"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground mb-3" data-bind="feedback.message" data-mock="true">
+                        "Great team collaboration and always willing to help colleagues. Your technical expertise really shines through."
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                        <span data-bind="feedback.category">Teamwork</span>
+                        <span data-bind="feedback.date">1 day ago</span>
+                    </div>
+                </div>
+
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <!-- Professional headshot of smiling businessman with glasses -->
+                            <img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400" 
+                                 alt="Feedback giver" class="w-10 h-10 rounded-full object-cover" data-mock="true">
+                            <div>
+                                <p class="font-medium text-foreground" data-bind="feedback.giver.name">David Kim</p>
+                                <p class="text-xs text-muted-foreground" data-bind="feedback.giver.role">Manager</p>
+                            </div>
+                        </div>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                            <i class="fas fa-star text-xs"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground mb-3" data-bind="feedback.message" data-mock="true">
+                        "Consistently exceeds expectations and shows strong leadership potential. Very impressed with the quarterly results."
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-muted-foreground">
+                        <span data-bind="feedback.category">Leadership</span>
+                        <span data-bind="feedback.date">3 days ago</span>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+        </div>
+        <!-- @END_COMPONENT: RecentFeedbackSection -->
+
+        <!-- Skills & Competencies Section -->
+        <!-- @COMPONENT: SkillsCompetenciesSection -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-card rounded-xl p-6 border border-border">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Top Skills</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-foreground">Project Management</span>
+                            <span class="text-muted-foreground">92%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                            <div class="bg-gradient-to-r from-chart-1 to-primary h-2 rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-foreground">Communication</span>
+                            <span class="text-muted-foreground">88%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                            <div class="bg-gradient-to-r from-chart-2 to-chart-1 h-2 rounded-full" style="width: 88%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-foreground">Leadership</span>
+                            <span class="text-muted-foreground">85%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                            <div class="bg-gradient-to-r from-primary to-chart-3 h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-foreground">Problem Solving</span>
+                            <span class="text-muted-foreground">82%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-2">
+                            <div class="bg-gradient-to-r from-chart-3 to-chart-4 h-2 rounded-full" style="width: 82%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-card rounded-xl p-6 border border-border">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Growth Areas</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-chart-3/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-chart-3 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Data Analysis</p>
+                                <p class="text-xs text-muted-foreground">Suggested improvement area</p>
+                            </div>
+                        </div>
+                        <button class="text-primary hover:text-primary/80 text-sm">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-chart-4/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-chart-4 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Public Speaking</p>
+                                <p class="text-xs text-muted-foreground">Based on recent feedback</p>
+                            </div>
+                        </div>
+                        <button class="text-primary hover:text-primary/80 text-sm">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-chart-5/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-code text-chart-5 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Technical Skills</p>
+                                <p class="text-xs text-muted-foreground">Trending in your field</p>
+                            </div>
+                        </div>
+                        <button class="text-primary hover:text-primary/80 text-sm">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SkillsCompetenciesSection -->
+    </div>
+
+    <!-- Feedback Collection Modal (Hidden by default) -->
+    <!-- @COMPONENT: FeedbackModal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-card rounded-xl border border-border max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-foreground">Give Feedback</h3>
+                    <button onclick="closeFeedbackModal()" class="text-muted-foreground hover:text-foreground">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <!-- Professional office employee headshot -->
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400" 
+                             alt="Employee" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover">
+                        <h4 class="text-lg font-medium text-foreground">John Smith</h4>
+                        <p class="text-sm text-muted-foreground">Senior Developer</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">How do you know John?</label>
+                        <select class="w-full p-3 bg-input border border-border rounded-lg text-foreground">
+                            <option>Select relationship</option>
+                            <option>Client</option>
+                            <option>Colleague</option>
+                            <option>Manager</option>
+                            <option>Team Member</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Overall Rating</label>
+                        <div class="flex space-x-2 justify-center">
+                            <button class="text-2xl text-muted-foreground hover:text-yellow-400 transition-colors">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button class="text-2xl text-muted-foreground hover:text-yellow-400 transition-colors">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button class="text-2xl text-muted-foreground hover:text-yellow-400 transition-colors">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button class="text-2xl text-muted-foreground hover:text-yellow-400 transition-colors">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button class="text-2xl text-muted-foreground hover:text-yellow-400 transition-colors">
+                                <i class="far fa-star"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Your Feedback</label>
+                        <textarea class="w-full p-3 bg-input border border-border rounded-lg text-foreground h-24 resize-none" 
+                                  placeholder="Share your experience working with John..."></textarea>
+                    </div>
+
+                    <button class="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        Submit Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: FeedbackModal -->
+
+    <!-- Mobile-First Responsive Footer -->
+    <footer class="mt-16 border-t border-border bg-card/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-primary to-chart-1 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold text-foreground">LVL UP Performance</span>
+                    </div>
+                    <p class="text-muted-foreground text-sm mb-4">
+                        The next-generation HR performance system that makes feedback collection effortless and performance tracking continuous.
+                    </p>
+                    <div class="flex space-x-4">
+                        <button class="text-muted-foreground hover:text-primary transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button class="text-muted-foreground hover:text-primary transition-colors">
+                            <i class="fab fa-linkedin"></i>
+                        </button>
+                        <button class="text-muted-foreground hover:text-primary transition-colors">
+                            <i class="fab fa-github"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-foreground mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-primary transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">API</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Integrations</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-foreground mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-primary transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Contact</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Status</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-border text-center text-sm text-muted-foreground">
+                <p>&copy; 2024 LVL UP Performance. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        // Mock interactive elements for demonstration
+        (function() {
+            // Performance score animation
+            const performanceScore = document.querySelector('[data-bind="performanceScore"]');
+            if (performanceScore) {
+                let currentScore = 0;
+                const targetScore = 87;
+                const animation = setInterval(() => {
+                    if (currentScore < targetScore) {
+                        currentScore += 2;
+                        performanceScore.textContent = currentScore;
+                    } else {
+                        clearInterval(animation);
+                    }
+                }, 50);
+            }
+
+            // Star rating interaction
+            const stars = document.querySelectorAll('#feedbackModal .fa-star');
+            stars.forEach((star, index) => {
+                star.addEventListener('click', function() {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.classList.remove('far');
+                            s.classList.add('fas', 'text-yellow-400');
+                        } else {
+                            s.classList.remove('fas', 'text-yellow-400');
+                            s.classList.add('far');
+                        }
+                    });
+                });
+            });
+
+            // Mobile menu toggle (if needed)
+            const mobileMenuButton = document.querySelector('[data-mobile-menu-button]');
+            const mobileMenu = document.querySelector('[data-mobile-menu]');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        })();
+
+        // Modal functions
+        function openFeedbackModal() {
+            document.getElementById('feedbackModal').classList.remove('hidden');
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
+        }
+
+        // Close modal on background click
+        document.getElementById('feedbackModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFeedbackModal();
+            }
+        });
+    </script>
+</body>
+</html>

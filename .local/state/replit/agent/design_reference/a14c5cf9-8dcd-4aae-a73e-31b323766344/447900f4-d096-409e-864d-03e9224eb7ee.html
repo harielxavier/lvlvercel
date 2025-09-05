@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LVL UP Performance - Tenant Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/heroicons@2.0.18/24/outline/index.js"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                    chart: {
+                        "1": "var(--chart-1)",
+                        "2": "var(--chart-2)",
+                        "3": "var(--chart-3)",
+                        "4": "var(--chart-4)",
+                        "5": "var(--chart-5)",
+                    }
+                },
+                fontFamily: {
+                    sans: ["var(--font-sans)"],
+                    serif: ["var(--font-serif)"],
+                    mono: ["var(--font-mono)"],
+                },
+                backdropBlur: {
+                    xs: '2px',
+                }
+            }
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(210, 40%, 98%);
+            --foreground: hsl(222, 84%, 5%);
+            --card: hsl(0, 0%, 100%);
+            --card-foreground: hsl(222, 84%, 5%);
+            --popover: hsl(0, 0%, 100%);
+            --popover-foreground: hsl(222, 84%, 5%);
+            --primary: hsl(221, 83%, 53%);
+            --primary-foreground: hsl(210, 40%, 98%);
+            --secondary: hsl(210, 40%, 96%);
+            --secondary-foreground: hsl(222, 47%, 11%);
+            --muted: hsl(210, 40%, 96%);
+            --muted-foreground: hsl(215, 16%, 47%);
+            --accent: hsl(210, 40%, 96%);
+            --accent-foreground: hsl(222, 47%, 11%);
+            --destructive: hsl(0, 84%, 60%);
+            --destructive-foreground: hsl(210, 40%, 98%);
+            --border: hsl(214, 32%, 91%);
+            --input: hsl(214, 32%, 91%);
+            --ring: hsl(221, 83%, 53%);
+            --radius: 0.75rem;
+            --font-sans: 'Inter', sans-serif;
+            --font-serif: 'Inter', sans-serif;
+            --font-mono: 'Inter', monospace;
+            --chart-1: hsl(221, 83%, 53%);
+            --chart-2: hsl(210, 98%, 78%);
+            --chart-3: hsl(200, 100%, 67%);
+            --chart-4: hsl(280, 87%, 65%);
+            --chart-5: hsl(340, 82%, 52%);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, hsl(210, 40%, 98%) 0%, hsl(220, 60%, 99%) 100%);
+            min-height: 100vh;
+        }
+
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
+        }
+
+        .sidebar-collapsed {
+            transform: translateX(-216px);
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            transform: translateX(2px);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border-right: 3px solid hsl(221, 83%, 53%);
+        }
+
+        .performance-ring {
+            background: conic-gradient(from 0deg, hsl(221, 83%, 53%) 0%, hsl(221, 83%, 53%) 87%, hsl(214, 32%, 91%) 87%, hsl(214, 32%, 91%) 100%);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(280, 87%, 65%) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-80 glass-morphism transform transition-transform duration-300 ease-in-out z-50 border-r">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-6 border-b border-white/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-sm">LVL UP</h3>
+                            <p class="text-xs text-muted-foreground">Performance</p>
+                        </div>
+                    </div>
+                    <button id="sidebarToggle" class="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Tenant & Role Info -->
+                <div class="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-sm text-blue-900">TechCorp Solutions</p>
+                            <p class="text-xs text-blue-700">Tenant Admin</p>
+                        </div>
+                        <div class="px-2 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium rounded-full">
+                            Storming
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1">
+                <div class="sidebar-item active flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    </svg>
+                    <span class="font-medium">Dashboard</span>
+                    <div class="ml-auto w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    <span class="font-medium">Organization Chart</span>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                    <span class="font-medium">Employee Management</span>
+                    <span class="ml-auto px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">127</span>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="font-medium">Performance Management</span>
+                    <span class="ml-auto px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">New</span>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8m10 0H7"></path>
+                    </svg>
+                    <span class="font-medium">Feedback Analytics</span>
+                    <span class="ml-auto px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">847</span>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    <span class="font-medium">Billing & Subscription</span>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="font-medium">Company Settings</span>
+                </div>
+
+                <div class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-xl cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="font-medium">Integration Setup</span>
+                    <span class="ml-auto w-2 h-2 bg-yellow-500 rounded-full"></span>
+                </div>
+            </nav>
+
+            <!-- User Profile -->
+            <div class="p-4 border-t border-white/20">
+                <div class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/20 cursor-pointer transition-colors">
+                    <!-- Professional headshot of a business executive in modern office setting -->
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="User avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white">
+                    <div class="flex-1">
+                        <p class="font-medium text-sm">Sarah Johnson</p>
+                        <p class="text-xs text-muted-foreground">Tenant Admin</p>
+                    </div>
+                    <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-80 transition-all duration-300 ease-in-out" id="mainContent">
+        <!-- Header -->
+        <header class="bg-white/70 backdrop-blur-sm border-b border-white/20 sticky top-0 z-40">
+            <div class="px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold gradient-text">Dashboard</h1>
+                        <p class="text-sm text-muted-foreground">Welcome back, Sarah! Here's your company overview.</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 hover:bg-white/50 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM9 7H4l5-5v5zM9 17v5l-5-5h5zM15 7V2l5 5h-5z"></path>
+                            </svg>
+                        </button>
+                        <button class="relative p-2 hover:bg-white/50 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5z"></path>
+                            </svg>
+                        </button>
+                        <button class="relative p-2 hover:bg-white/50 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5z"></path>
+                            </svg>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                                <span class="text-xs text-white font-medium">3</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-8 space-y-8">
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-2xl p-6 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Total Employees</p>
+                            <p class="text-3xl font-bold text-foreground">127</p>
+                            <p class="text-sm text-green-600 font-medium mt-1">+12 this month</p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Feedback Collected</p>
+                            <p class="text-3xl font-bold text-foreground">2,847</p>
+                            <p class="text-sm text-green-600 font-medium mt-1">+324 this week</p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8m10 0H7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Avg Performance</p>
+                            <p class="text-3xl font-bold text-foreground">87%</p>
+                            <p class="text-sm text-blue-600 font-medium mt-1">+5% vs last month</p>
+                        </div>
+                        <div class="w-12 h-12 relative">
+                            <div class="w-12 h-12 performance-ring rounded-full flex items-center justify-center">
+                                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-bold text-primary">87</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Active Reviews</p>
+                            <p class="text-3xl font-bold text-foreground">23</p>
+                            <p class="text-sm text-orange-600 font-medium mt-1">7 due this week</p>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Company Performance Overview -->
+                <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold">Performance Trends</h3>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 text-sm bg-primary text-primary-foreground rounded-lg">7D</button>
+                            <button class="px-3 py-1 text-sm hover:bg-secondary rounded-lg">30D</button>
+                            <button class="px-3 py-1 text-sm hover:bg-secondary rounded-lg">90D</button>
+                        </div>
+                    </div>
+                    <!-- Modern office environment with glass conference room and collaborative workspace -->
+                    <div class="h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl flex items-center justify-center relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400" alt="Modern office workspace" class="w-full h-full object-cover opacity-20" />
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-muted-foreground">Performance Analytics Chart</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold mb-6">Quick Actions</h3>
+                    <div class="space-y-4">
+                        <button class="w-full p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span class="font-medium">Add New Employee</span>
+                        </button>
+
+                        <button class="w-full p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span class="font-medium">Start Review Cycle</span>
+                        </button>
+
+                        <button class="w-full p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8m10 0H7"></path>
+                            </svg>
+                            <span class="font-medium">View Analytics</span>
+                        </button>
+
+                        <button class="w-full p-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-105 flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="font-medium">Manage Settings</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Feedback System -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Recent Activity -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold mb-6">Recent Activity</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors">
+                            <!-- Professional headshot of a smiling female employee in modern office -->
+                            <img src="https://pixabay.com/get/gb736863ec62e67678b032831468d31a39456cf1cce7615870a4b7207909faf68291376e446413a379c5673f8e832e14c18cf060ee7225d155122b8abcd3eb9ba_1280.jpg" alt="Employee" class="w-10 h-10 rounded-full object-cover" />
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">Emily Chen completed her quarterly review</p>
+                                <p class="text-xs text-muted-foreground">2 hours ago</p>
+                            </div>
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors">
+                            <!-- Professional headshot of a male manager in business attire -->
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="Employee" class="w-10 h-10 rounded-full object-cover" />
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">Mike Rodriguez received 5-star feedback from client</p>
+                                <p class="text-xs text-muted-foreground">4 hours ago</p>
+                            </div>
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors">
+                            <!-- Professional headshot of a diverse team member smiling -->
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="Employee" class="w-10 h-10 rounded-full object-cover" />
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">James Wilson started new performance goals</p>
+                                <p class="text-xs text-muted-foreground">6 hours ago</p>
+                            </div>
+                            <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-3 hover:bg-secondary/50 rounded-lg transition-colors">
+                            <!-- Professional headshot of a female executive in modern office setting -->
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="Employee" class="w-10 h-10 rounded-full object-cover" />
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">Lisa Zhang updated her feedback profile</p>
+                                <p class="text-xs text-muted-foreground">1 day ago</p>
+                            </div>
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Collection System -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold mb-6">Universal Feedback System</h3>
+                    <div class="space-y-6">
+                        <!-- Sample Employee Feedback Profile -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <!-- Professional headshot of a confident business professional -->
+                                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="John Doe" class="w-12 h-12 rounded-full object-cover border-2 border-white" />
+                                <div>
+                                    <p class="font-semibold text-blue-900">John Doe</p>
+                                    <p class="text-sm text-blue-700">Product Manager</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-medium text-blue-700 mb-2">Personal Feedback URL</p>
+                                    <div class="flex items-center space-x-2">
+                                        <code class="flex-1 px-3 py-2 bg-white rounded-lg text-xs font-mono">fbk.techcorp.io/john-x7k9</code>
+                                        <button class="p-2 hover:bg-white/50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- QR Code visualization -->
+                                <div class="flex justify-between items-center">
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 bg-white p-2 rounded-lg border-2 border-blue-200 mb-2">
+                                            <div class="w-full h-full bg-gradient-to-br from-blue-600 to-blue-800 rounded pattern-qr"></div>
+                                        </div>
+                                        <p class="text-xs text-blue-700">QR Code</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-2">
+                                            <span class="text-xl font-bold text-green-600">92</span>
+                                        </div>
+                                        <p class="text-xs text-blue-700">Score</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-2">
+                                            <span class="text-xl font-bold text-purple-600">47</span>
+                                        </div>
+                                        <p class="text-xs text-blue-700">Reviews</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Stats -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-4 bg-green-50 rounded-xl border border-green-100">
+                                <p class="text-2xl font-bold text-green-600">847</p>
+                                <p class="text-sm text-green-700">Total Feedback</p>
+                            </div>
+                            <div class="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                                <p class="text-2xl font-bold text-blue-600">4.6</p>
+                                <p class="text-sm text-blue-700">Avg Rating</p>
+                            </div>
+                        </div>
+
+                        <button class="w-full p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 font-medium">
+                            Generate New Feedback Links
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Structure Preview -->
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold">Organization Structure</h3>
+                    <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        View Full Chart
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <!-- CEO Level -->
+                    <div class="flex items-center justify-center">
+                        <div class="text-center">
+                            <!-- Professional CEO headshot in executive office setting -->
+                            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="CEO" class="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-4 border-blue-200" />
+                            <p class="font-semibold text-sm">Robert Chen</p>
+                            <p class="text-xs text-muted-foreground">CEO</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Department Heads -->
+                    <div class="flex justify-center space-x-8">
+                        <div class="text-center">
+                            <!-- Professional CTO headshot in modern tech office -->
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="CTO" class="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-green-200" />
+                            <p class="font-medium text-xs">Tech Team</p>
+                            <p class="text-xs text-muted-foreground">45 members</p>
+                        </div>
+                        <div class="text-center">
+                            <!-- Professional Sales Director headshot in business environment -->
+                            <img src="https://pixabay.com/get/g88d963342ce3eb4d1b5d3e36cd6616d7deb8abbd129f627beae85e49ec9ff2e020dbea6777bde427846a970917235280a0081128e79cd330898b9d4f85e85dcb_1280.jpg" alt="Sales Director" class="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-purple-200" />
+                            <p class="font-medium text-xs">Sales Team</p>
+                            <p class="text-xs text-muted-foreground">32 members</p>
+                        </div>
+                        <div class="text-center">
+                            <!-- Professional Marketing Director headshot in creative workspace -->
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="Marketing Director" class="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-orange-200" />
+                            <p class="font-medium text-xs">Marketing</p>
+                            <p class="text-xs text-muted-foreground">28 members</p>
+                        </div>
+                        <div class="text-center">
+                            <!-- Professional HR Director headshot in modern office setting -->
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" alt="HR Director" class="w-12 h-12 rounded-full object-cover mx-auto mb-2 border-2 border-pink-200" />
+                            <p class="font-medium text-xs">HR Team</p>
+                            <p class="text-xs text-muted-foreground">22 members</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Role Switching Demo Modal (Hidden by default) -->
+    <div id="roleModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-xl font-semibold mb-6 text-center">Switch Role View</h3>
+            <div class="space-y-3">
+                <button class="w-full p-4 text-left rounded-xl border border-border hover:border-primary transition-colors">
+                    <p class="font-medium">Platform Super Admin</p>
+                    <p class="text-sm text-muted-foreground">Manage all customer tenants</p>
+                </button>
+                <button class="w-full p-4 text-left rounded-xl border border-primary bg-primary/5">
+                    <p class="font-medium text-primary">Tenant Admin</p>
+                    <p class="text-sm text-muted-foreground">Current role - Manage TechCorp</p>
+                </button>
+                <button class="w-full p-4 text-left rounded-xl border border-border hover:border-primary transition-colors">
+                    <p class="font-medium">Manager</p>
+                    <p class="text-sm text-muted-foreground">Manage team performance</p>
+                </button>
+                <button class="w-full p-4 text-left rounded-xl border border-border hover:border-primary transition-colors">
+                    <p class="font-medium">Employee</p>
+                    <p class="text-sm text-muted-foreground">Personal performance view</p>
+                </button>
+            </div>
+            <button id="closeModal" class="w-full mt-6 p-3 bg-secondary text-secondary-foreground rounded-xl hover:bg-secondary/80 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.getElementById('mainContent');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-collapsed');
+            if (sidebar.classList.contains('sidebar-collapsed')) {
+                mainContent.style.marginLeft = '64px';
+            } else {
+                mainContent.style.marginLeft = '320px';
+            }
+        });
+
+        // TODO: Implement role switching functionality
+        // TODO: Add real-time notifications
+        // TODO: Connect to feedback collection API
+        // TODO: Implement performance analytics
+        // TODO: Add organization chart interactivity
+
+        // Demo: Add some interactive effects
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add smooth hover effects to cards
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-2px)';
+                    card.style.boxShadow = '0 12px 40px rgba(31, 38, 135, 0.12)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = '0 8px 32px rgba(31, 38, 135, 0.08)';
+                });
+            });
+
+            // Animate performance ring
+            const performanceRing = document.querySelector('.performance-ring');
+            if (performanceRing) {
+                performanceRing.style.background = `conic-gradient(from 0deg, hsl(221, 83%, 53%) 0%, hsl(221, 83%, 53%) 87%, hsl(214, 32%, 91%) 87%, hsl(214, 32%, 91%) 100%)`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1074 @@
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LVL UP Performance - Next-Gen HR Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+       theme: {
+         extend: {
+          borderRadius: {
+          lg: "var(--radius)",
+          md: "calc(var(--radius) - 2px)",
+          sm: "calc(var(--radius) - 4px)",
+          },
+          colors: {
+          background: "var(--background)",
+          foreground: "var(--foreground)",
+          card: {
+             DEFAULT: "var(--card)",
+             foreground: "var(--card-foreground)",
+          },
+          popover: {
+             DEFAULT: "var(--popover)",
+             foreground: "var(--popover-foreground)",
+          },
+          primary: {
+             DEFAULT: "var(--primary)",
+             foreground: "var(--primary-foreground)",
+          },
+          secondary: {
+             DEFAULT: "var(--secondary)",
+             foreground: "var(--secondary-foreground)",
+          },
+          muted: {
+             DEFAULT: "var(--muted)",
+             foreground: "var(--muted-foreground)",
+          },
+          accent: {
+             DEFAULT: "var(--accent)",
+             foreground: "var(--accent-foreground)",
+          },
+          destructive: {
+             DEFAULT: "var(--destructive)",
+             foreground: "var(--destructive-foreground)",
+          },
+          border: "var(--border)",
+          input: "var(--input)",
+          ring: "var(--ring)",
+          chart: {
+             "1": "var(--chart-1)",
+             "2": "var(--chart-2)",
+             "3": "var(--chart-3)",
+             "4": "var(--chart-4)",
+             "5": "var(--chart-5)",
+          }
+          },
+          fontFamily: {
+          sans: ["var(--font-sans)"],
+          serif: ["var(--font-serif)"],
+          mono: ["var(--font-mono)"],
+       }
+  },
+}
+    };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        :root {
+            --card: #101011;
+            --ring: hsl(221.74, 13.14%, 34.31%);
+            --input: #2b2b2b;
+            --muted: #404040;
+            --accent: hsl(0, 0%, 92.16%);
+            --border: #2b2b2b;
+            --radius: 0.4rem;
+            --shadow: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 1px 2px -1px hsl(9, 75%, 61% / 0.00);
+            --chart-1: hsl(203.8863, 88.2845%, 53.1373%);
+            --chart-2: hsl(159.7826, 100%, 36.0784%);
+            --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
+            --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
+            --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
+            --popover: hsl(45, 25%, 97%);
+            --primary: #f5f5f5;
+            --sidebar: hsl(45, 25%, 97%);
+            --spacing: 0.25rem;
+            --font-mono: Menlo, monospace;
+            --font-sans: 'Inter', sans-serif;
+            --secondary: #ebebeb;
+            --shadow-lg: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 4px 6px -1px hsl(9, 75%, 61% / 0.00);
+            --shadow-md: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 2px 4px -1px hsl(9, 75%, 61% / 0.00);
+            --shadow-sm: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 1px 2px -1px hsl(9, 75%, 61% / 0.00);
+            --shadow-xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 8px 10px -1px hsl(9, 75%, 61% / 0.00);
+            --shadow-xs: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
+            --background: #090909;
+            --font-serif: 'Inter', sans-serif;
+            --foreground: #ebebeb;
+            --shadow-2xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
+            --shadow-2xs: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
+            --destructive: hsl(356.3033, 90.5579%, 54.3137%);
+            --sidebar-ring: hsl(9, 75%, 61%);
+            --sidebar-accent: hsl(25, 45%, 80%);
+            --sidebar-border: hsl(45, 15%, 80%);
+            --card-foreground: hsl(0, 0%, 100%);
+            --sidebar-primary: hsl(9, 75%, 61%);
+            --tracking-normal: 0em;
+            --muted-foreground: #ababab;
+            --accent-foreground: hsl(0, 0%, 0%);
+            --popover-foreground: hsl(0, 0%, 100%);
+            --primary-foreground: #0d0d0d;
+            --sidebar-foreground: hsl(20, 14%, 17%);
+            --secondary-foreground: #0d0d0d;
+            --destructive-foreground: #ffffff;
+            --sidebar-accent-foreground: hsl(20, 14%, 17%);
+            --sidebar-primary-foreground: hsl(0, 0%, 100%);
+        }
+        
+        .light {
+            --background: #ffffff;
+            --foreground: #1e293b;
+            --card: #ffffff;
+            --card-foreground: #1e293b;
+            --popover: #ffffff;
+            --popover-foreground: #1e293b;
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --muted: #f8fafc;
+            --muted-foreground: #64748b;
+            --accent: #f1f5f9;
+            --accent-foreground: #0f172a;
+            --destructive: #ef4444;
+            --destructive-foreground: #ffffff;
+            --border: #e2e8f0;
+            --input: #ffffff;
+            --ring: #3b82f6;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .hover-scale {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        .performance-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
+    <!-- Main Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-card border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">LVL UP</span>
+                </div>
+                
+                <!-- Role Switcher -->
+                <div class="flex items-center space-x-4">
+                    <select id="roleSelect" class="glass-card border-0 px-4 py-2 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500">
+                        <option value="platform-admin">Platform Super Admin</option>
+                        <option value="tenant-admin">Tenant Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="employee">Employee</option>
+                        <option value="feedback-page">Public Feedback Page</option>
+                    </select>
+                    
+                    <div class="flex items-center space-x-2">
+                        <!-- A panoramic view of modern bright office space with glass windows and collaborative work areas -->
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32" alt="User avatar" class="w-8 h-8 rounded-full object-cover" />
+                        <span class="text-sm font-medium text-slate-700">John Doe</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Platform Super Admin Dashboard -->
+    <div id="platform-admin-view" class="dashboard-view pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="space-y-8">
+            <!-- Header -->
+            <div class="text-center space-y-4">
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Platform Overview</h1>
+                <p class="text-slate-600 text-lg">Manage all customer tenants and platform operations</p>
+            </div>
+            
+            <!-- Platform Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass-card rounded-xl p-6 hover-scale">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Total Tenants</p>
+                            <p class="text-3xl font-bold text-slate-900">24</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="building-2" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-green-600 font-medium">+12%</span>
+                        <span class="text-slate-600 ml-1">from last month</span>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6 hover-scale">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Active Users</p>
+                            <p class="text-3xl font-bold text-slate-900">1,247</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-green-600 font-medium">+8%</span>
+                        <span class="text-slate-600 ml-1">from last month</span>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6 hover-scale">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Monthly Revenue</p>
+                            <p class="text-3xl font-bold text-slate-900">$18,432</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="dollar-sign" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-green-600 font-medium">+15%</span>
+                        <span class="text-slate-600 ml-1">from last month</span>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6 hover-scale">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Support Tickets</p>
+                            <p class="text-3xl font-bold text-slate-900">7</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="help-circle" class="w-6 h-6 text-orange-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-red-600 font-medium">+2</span>
+                        <span class="text-slate-600 ml-1">from yesterday</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tenant Management -->
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-slate-900">Customer Tenants</h2>
+                    <button class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all">
+                        Add New Tenant
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-slate-200/50">
+                        <div class="flex items-center space-x-4">
+                            <!-- A clean minimalist office workspace with modern furniture and bright lighting -->
+                            <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48" alt="TechCorp logo" class="w-12 h-12 rounded-lg object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">TechCorp Solutions</h3>
+                                <p class="text-sm text-slate-600">127 employees • Performing Tier</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Active</span>
+                            <span class="text-lg font-bold text-slate-900">$2,540/mo</span>
+                            <button class="text-slate-400 hover:text-slate-600">
+                                <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-slate-200/50">
+                        <div class="flex items-center space-x-4">
+                            <!-- A modern bright office space with collaborative work areas and natural lighting -->
+                            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48" alt="InnovateLab logo" class="w-12 h-12 rounded-lg object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">InnovateLab Inc</h3>
+                                <p class="text-sm text-slate-600">89 employees • Norming Tier</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Active</span>
+                            <span class="text-lg font-bold text-slate-900">$1,335/mo</span>
+                            <button class="text-slate-400 hover:text-slate-600">
+                                <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-slate-200/50">
+                        <div class="flex items-center space-x-4">
+                            <!-- A professional bright office space with glass partitions and modern design -->
+                            <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48" alt="StartupHub logo" class="w-12 h-12 rounded-lg object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">StartupHub Ventures</h3>
+                                <p class="text-sm text-slate-600">23 employees • Forming Tier</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Trial</span>
+                            <span class="text-lg font-bold text-slate-900">$115/mo</span>
+                            <button class="text-slate-400 hover:text-slate-600">
+                                <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tenant Admin Dashboard -->
+    <div id="tenant-admin-view" class="dashboard-view hidden pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="space-y-8">
+            <!-- Header -->
+            <div class="text-center space-y-4">
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">TechCorp Dashboard</h1>
+                <p class="text-slate-600 text-lg">Manage your organization and team performance</p>
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium">Performing Tier</span>
+                    <span class="text-slate-600">•</span>
+                    <span class="text-slate-600">127 employees</span>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-xl p-6 hover-scale cursor-pointer">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="user-plus" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900">Add Employee</h3>
+                            <p class="text-sm text-slate-600">Invite new team members</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6 hover-scale cursor-pointer">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="settings" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900">Company Settings</h3>
+                            <p class="text-sm text-slate-600">Configure your workspace</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6 hover-scale cursor-pointer">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="bar-chart-3" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900">Analytics</h3>
+                            <p class="text-sm text-slate-600">View performance insights</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Department Overview -->
+            <div class="glass-card rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-slate-900 mb-6">Department Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-900">Engineering</h3>
+                            <span class="text-2xl font-bold performance-score">92</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2">45 employees</p>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-900">Sales</h3>
+                            <span class="text-2xl font-bold performance-score">87</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2">23 employees</p>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style="width: 87%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold text-slate-900">Marketing</h3>
+                            <span class="text-2xl font-bold performance-score">89</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2">18 employees</p>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full" style="width: 89%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="glass-card rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-slate-900 mb-6">Recent Activity</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4 p-4 bg-white/50 rounded-xl">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="thumbs-up" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-slate-900"><span class="font-medium">Sarah Johnson</span> received excellent feedback from client</p>
+                            <p class="text-xs text-slate-600">2 hours ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 p-4 bg-white/50 rounded-xl">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-slate-900"><span class="font-medium">Mike Chen</span> joined Engineering team</p>
+                            <p class="text-xs text-slate-600">5 hours ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 p-4 bg-white/50 rounded-xl">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="target" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-slate-900">Q4 performance goals updated for <span class="font-medium">Sales Department</span></p>
+                            <p class="text-xs text-slate-600">1 day ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manager Dashboard -->
+    <div id="manager-view" class="dashboard-view hidden pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="space-y-8">
+            <!-- Header -->
+            <div class="text-center space-y-4">
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Team Performance</h1>
+                <p class="text-slate-600 text-lg">Monitor and support your team's growth</p>
+            </div>
+            
+            <!-- Team Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-xl p-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-white">8</span>
+                        </div>
+                        <h3 class="font-semibold text-slate-900">Team Members</h3>
+                        <p class="text-sm text-slate-600">Direct reports</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-white performance-score">91</span>
+                        </div>
+                        <h3 class="font-semibold text-slate-900">Avg Performance</h3>
+                        <p class="text-sm text-slate-600">Team score</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-white">47</span>
+                        </div>
+                        <h3 class="font-semibold text-slate-900">Feedback Items</h3>
+                        <p class="text-sm text-slate-600">This week</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Members -->
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-slate-900">Your Team</h2>
+                    <button class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all">
+                        Request Team Feedback
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50 hover-scale">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <!-- A happy diverse professional employee smiling in a modern office environment -->
+                            <img src="https://pixabay.com/get/g8f21c86ac18f7f9ddd8cea5db0a6f660bdf1cacc1689c6b49160ea99dd02c58dddd47f9031100182cde41f24cb7c90aaead8e40b97e0f7e71646e8367662fb08_1280.jpg" alt="Sarah Johnson" class="w-12 h-12 rounded-full object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Sarah Johnson</h3>
+                                <p class="text-sm text-slate-600">Senior Developer</p>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="text-xl font-bold performance-score">94</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Performance</span>
+                                <span class="text-slate-900 font-medium">Excellent</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: 94%"></div>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2">Latest: "Excellent code quality and mentorship" - Client</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50 hover-scale">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <!-- A professional diverse employee working at a clean modern workspace -->
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48" alt="Mike Chen" class="w-12 h-12 rounded-full object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Mike Chen</h3>
+                                <p class="text-sm text-slate-600">Product Designer</p>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="text-xl font-bold performance-score">88</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Performance</span>
+                                <span class="text-slate-900 font-medium">Strong</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style="width: 88%"></div>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2">Latest: "Creative solutions and great collaboration" - Team Lead</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50 hover-scale">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <!-- A cheerful diverse professional in a bright office setting -->
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48" alt="Emma Davis" class="w-12 h-12 rounded-full object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Emma Davis</h3>
+                                <p class="text-sm text-slate-600">Marketing Specialist</p>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="text-xl font-bold performance-score">92</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Performance</span>
+                                <span class="text-slate-900 font-medium">Excellent</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full" style="width: 92%"></div>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2">Latest: "Outstanding campaign results" - Marketing Director</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50 hover-scale">
+                        <div class="flex items-center space-x-4 mb-4">
+                            <!-- A confident diverse professional employee in a modern office workspace -->
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48" alt="Alex Rodriguez" class="w-12 h-12 rounded-full object-cover" />
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Alex Rodriguez</h3>
+                                <p class="text-sm text-slate-600">Junior Developer</p>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="text-xl font-bold performance-score">85</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Performance</span>
+                                <span class="text-slate-900 font-medium">Good</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2">Latest: "Quick learner, great potential" - Senior Developer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Dashboard -->
+    <div id="employee-view" class="dashboard-view hidden pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="space-y-8">
+            <!-- Header -->
+            <div class="text-center space-y-4">
+                <div class="flex items-center justify-center space-x-4">
+                    <!-- A professional diverse employee in a bright modern office setting -->
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=64&h=64" alt="John Doe" class="w-16 h-16 rounded-full object-cover" />
+                    <div>
+                        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">John Doe</h1>
+                        <p class="text-slate-600 text-lg">Senior Product Manager</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Score -->
+            <div class="glass-card rounded-xl p-8 text-center">
+                <div class="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6">
+                    <span class="text-4xl font-bold text-white">89</span>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-900 mb-2">Performance Score</h2>
+                <p class="text-slate-600 mb-4">You're performing excellently! Keep up the great work.</p>
+                <div class="flex items-center justify-center space-x-4 text-sm">
+                    <span class="text-green-600 font-medium">+5 this week</span>
+                    <span class="text-slate-600">•</span>
+                    <span class="text-slate-600">23 feedback items</span>
+                </div>
+            </div>
+            
+            <!-- Feedback Collection Tools -->
+            <div class="glass-card rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-slate-900 mb-6">Your Feedback Collection Tools</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- QR Code -->
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50">
+                        <div class="text-center">
+                            <div class="w-32 h-32 bg-white rounded-xl border-2 border-slate-200 flex items-center justify-center mx-auto mb-4">
+                                <div class="w-24 h-24 bg-gradient-to-br from-slate-900 to-slate-700 rounded-lg flex items-center justify-center">
+                                    <span class="text-white text-xs font-mono">QR CODE</span>
+                                </div>
+                            </div>
+                            <h3 class="font-semibold text-slate-900 mb-2">Your QR Code</h3>
+                            <p class="text-sm text-slate-600 mb-4">Perfect for business cards and email signatures</p>
+                            <button class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                                Download QR Code
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Feedback Link -->
+                    <div class="bg-white/50 rounded-xl p-6 border border-slate-200/50">
+                        <h3 class="font-semibold text-slate-900 mb-4">Personal Feedback Link</h3>
+                        <div class="bg-slate-100 rounded-lg p-3 mb-4">
+                            <code class="text-sm text-slate-700">feedback.techcorp.com/john-doe-x7k9</code>
+                        </div>
+                        <div class="space-y-3">
+                            <button class="w-full bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all">
+                                Copy Link
+                            </button>
+                            <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                                Share via Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Email Signature -->
+                <div class="mt-6 bg-white/50 rounded-xl p-6 border border-slate-200/50">
+                    <h3 class="font-semibold text-slate-900 mb-4">Email Signature Code</h3>
+                    <div class="bg-slate-100 rounded-lg p-4">
+                        <code class="text-xs text-slate-700 block">
+                            &lt;a href="https://feedback.techcorp.com/john-doe-x7k9" style="color: #3B82F6;"&gt;<br/>
+                            💭 Share feedback about working with me<br/>
+                            &lt;/a&gt;
+                        </code>
+                    </div>
+                    <button class="mt-3 bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all">
+                        Copy HTML Code
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Feedback -->
+            <div class="glass-card rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-slate-900 mb-6">Recent Feedback</h2>
+                <div class="space-y-4">
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="star" class="w-4 h-4 text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-green-900 font-medium mb-1">"Excellent presentation and clear communication!"</p>
+                                <p class="text-xs text-green-700">From Client • 2 hours ago • ⭐⭐⭐⭐⭐</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-blue-900 font-medium mb-1">"Great team player and always helpful"</p>
+                                <p class="text-xs text-blue-700">From Sarah M. (Colleague) • 5 hours ago • ⭐⭐⭐⭐⭐</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="lightbulb" class="w-4 h-4 text-purple-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-purple-900 font-medium mb-1">"Innovative solutions and great leadership"</p>
+                                <p class="text-xs text-purple-700">From Manager • 1 day ago • ⭐⭐⭐⭐⭐</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="mt-6 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-lg font-medium hover:shadow-lg transition-all">
+                    View All Feedback (23 items)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Public Feedback Page -->
+    <div id="feedback-page-view" class="dashboard-view hidden pt-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
+        <div class="space-y-8">
+            <!-- Header -->
+            <div class="glass-card rounded-xl p-8 text-center">
+                <!-- A professional diverse employee smiling confidently in a modern bright office -->
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=128&h=128" alt="John Doe" class="w-32 h-32 rounded-full object-cover mx-auto mb-6 border-4 border-white shadow-lg" />
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">Give Feedback to John Doe</h1>
+                <p class="text-slate-600 text-lg mb-1">Senior Product Manager at TechCorp</p>
+                <div class="flex items-center justify-center space-x-2 text-sm text-slate-500">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>Verified Employee</span>
+                </div>
+            </div>
+            
+            <!-- Feedback Form -->
+            <div class="glass-card rounded-xl p-8">
+                <form class="space-y-6">
+                    <!-- Relationship -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-900 mb-3">How do you know John?</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <label class="flex items-center space-x-2 bg-white/50 border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors">
+                                <input type="radio" name="relationship" value="client" class="text-blue-600">
+                                <span class="text-sm font-medium">Client</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-white/50 border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors">
+                                <input type="radio" name="relationship" value="colleague" class="text-blue-600">
+                                <span class="text-sm font-medium">Colleague</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-white/50 border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors">
+                                <input type="radio" name="relationship" value="manager" class="text-blue-600">
+                                <span class="text-sm font-medium">Manager</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-white/50 border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors">
+                                <input type="radio" name="relationship" value="vendor" class="text-blue-600">
+                                <span class="text-sm font-medium">Vendor</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-white/50 border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors">
+                                <input type="radio" name="relationship" value="team" class="text-blue-600">
+                                <span class="text-sm font-medium">Team Member</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-white/50 border border-slate-200 rounded-lg p-3 cursor-pointer hover:border-blue-300 transition-colors">
+                                <input type="radio" name="relationship" value="other" class="text-blue-600">
+                                <span class="text-sm font-medium">Other</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Overall Rating -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-900 mb-3">Overall Experience</label>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-slate-600">Poor</span>
+                            <div class="flex space-x-1">
+                                <button type="button" class="star-rating w-8 h-8 text-slate-300 hover:text-yellow-400 transition-colors">
+                                    <i data-lucide="star" class="w-6 h-6"></i>
+                                </button>
+                                <button type="button" class="star-rating w-8 h-8 text-slate-300 hover:text-yellow-400 transition-colors">
+                                    <i data-lucide="star" class="w-6 h-6"></i>
+                                </button>
+                                <button type="button" class="star-rating w-8 h-8 text-slate-300 hover:text-yellow-400 transition-colors">
+                                    <i data-lucide="star" class="w-6 h-6"></i>
+                                </button>
+                                <button type="button" class="star-rating w-8 h-8 text-slate-300 hover:text-yellow-400 transition-colors">
+                                    <i data-lucide="star" class="w-6 h-6"></i>
+                                </button>
+                                <button type="button" class="star-rating w-8 h-8 text-slate-300 hover:text-yellow-400 transition-colors">
+                                    <i data-lucide="star" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+                            <span class="text-sm text-slate-600">Excellent</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Specific Skills -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-900 mb-3">Rate Specific Areas</label>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-700">Communication</span>
+                                <div class="flex space-x-1">
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-slate-300">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-700">Problem Solving</span>
+                                <div class="flex space-x-1">
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-700">Teamwork</span>
+                                <div class="flex space-x-1">
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <button type="button" class="w-6 h-6 text-slate-300">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comments -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-900 mb-3">Additional Comments</label>
+                        <textarea 
+                            rows="4" 
+                            class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            placeholder="Share specific examples of John's work or behavior..."
+                        ></textarea>
+                    </div>
+                    
+                    <!-- Contact Info (Optional) -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-900 mb-3">Your Information (Optional)</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input 
+                                type="text" 
+                                placeholder="Your name"
+                                class="px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <input 
+                                type="email" 
+                                placeholder="Your email"
+                                class="px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">This helps John follow up if needed. Your information will remain private.</p>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02]"
+                    >
+                        Submit Feedback
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Trust Indicators -->
+            <div class="glass-card rounded-xl p-6 text-center">
+                <div class="flex items-center justify-center space-x-6 text-sm text-slate-600">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-600"></i>
+                        <span>SSL Secured</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="lock" class="w-4 h-4 text-blue-600"></i>
+                        <span>Privacy Protected</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="building" class="w-4 h-4 text-purple-600"></i>
+                        <span>TechCorp Verified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Role switching functionality
+        const roleSelect = document.getElementById('roleSelect');
+        const dashboardViews = document.querySelectorAll('.dashboard-view');
+
+        roleSelect.addEventListener('change', function() {
+            // Hide all views
+            dashboardViews.forEach(view => {
+                view.classList.add('hidden');
+            });
+
+            // Show selected view
+            const selectedView = document.getElementById(this.value + '-view');
+            if (selectedView) {
+                selectedView.classList.remove('hidden');
+            }
+
+            // Re-initialize icons after view change
+            lucide.createIcons();
+        });
+
+        // Star rating functionality for feedback page
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.star-rating')) {
+                const stars = e.target.closest('.star-rating').parentElement.querySelectorAll('.star-rating');
+                const clickedIndex = Array.from(stars).indexOf(e.target.closest('.star-rating'));
+                
+                stars.forEach((star, index) => {
+                    if (index <= clickedIndex) {
+                        star.classList.remove('text-slate-300');
+                        star.classList.add('text-yellow-400');
+                    } else {
+                        star.classList.remove('text-yellow-400');
+                        star.classList.add('text-slate-300');
+                    }
+                });
+            }
+        });
+
+        // Smooth scroll to top when switching views
+        roleSelect.addEventListener('change', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Form submission handler (demo)
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Create success animation
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            
+            button.textContent = 'Submitting...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.textContent = '✅ Feedback Submitted!';
+                button.classList.add('bg-green-500');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                    button.classList.remove('bg-green-500');
+                    form.reset();
+                }, 2000);
+            }, 1000);
+        });
+
+        // Add smooth hover effects to cards
+        document.querySelectorAll('.hover-scale').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Performance score animation
+        function animatePerformanceScores() {
+            const scores = document.querySelectorAll('.performance-score');
+            scores.forEach(score => {
+                const targetValue = parseInt(score.textContent);
+                let currentValue = 0;
+                const increment = targetValue / 50;
+                
+                const animation = setInterval(() => {
+                    currentValue += increment;
+                    score.textContent = Math.floor(currentValue);
+                    
+                    if (currentValue >= targetValue) {
+                        score.textContent = targetValue;
+                        clearInterval(animation);
+                    }
+                }, 20);
+            });
+        }
+
+        // Initialize animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            // Run performance score animation after a short delay
+            setTimeout(animatePerformanceScores, 500);
+        });
+    </script>
+</body>
+</html>
