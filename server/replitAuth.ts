@@ -5,9 +5,7 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
 // Development authentication - simplified for testing multi-tenant functionality
-// Use dev auth if in development OR if Replit Auth secrets are not configured
-const isDevelopment = process.env.NODE_ENV === "development" || 
-  !process.env.REPL_ID || !process.env.REPLIT_DOMAINS;
+const isDevelopment = process.env.NODE_ENV === "development";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week

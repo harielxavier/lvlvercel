@@ -34,8 +34,7 @@ import {
   DollarSign,
   Tag,
   Gift,
-  Palette,
-  Brain
+  Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -149,12 +148,6 @@ function getMenuItemsForRole(role: string, tier?: string): MenuItem[] {
           icon: Palette,
           label: 'Website Customization',
           href: '/website-customization'
-        },
-        {
-          icon: Brain,
-          label: 'AI Insights',
-          href: '/ai-insights',
-          badge: tier && ['norming', 'performing', 'appsumo'].includes(tier.toLowerCase()) ? 'Premium' : 'Upgrade'
         }
       ];
 

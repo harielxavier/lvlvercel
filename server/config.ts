@@ -34,10 +34,9 @@ function loadConfig() {
     
     // Validate critical configurations
     if (env.NODE_ENV === 'production') {
-      // In production, warn about missing authentication settings but don't fail
-      // The app uses development auth system which doesn't require these specific secrets
+      // In production, require all authentication settings
       if (!env.REPLIT_AUTH_ISSUER || !env.REPLIT_AUTH_CLIENT_ID || !env.REPLIT_AUTH_CALLBACK_URL) {
-        console.warn('[CONFIG] Production Replit Auth not configured - using development authentication system');
+        throw new Error('Authentication configuration is required in production');
       }
       
       // Warn about missing optional services

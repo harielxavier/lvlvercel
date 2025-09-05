@@ -24,8 +24,6 @@ import {
   referrals,
   referralRewards,
   websiteSettings,
-  behavioralAnalysis,
-  risingStarCandidates,
   type User,
   type UpsertUser,
   type Tenant,
@@ -44,10 +42,6 @@ import {
   type NotificationPreferences,
   type InsertNotification,
   type InsertNotificationPreferences,
-  type BehavioralAnalysis,
-  type InsertBehavioralAnalysis,
-  type RisingStarCandidate,
-  type InsertRisingStarCandidate,
   type PricingTier,
   type InsertPricingTier,
   type BillingAuditLog,
@@ -145,15 +139,6 @@ export interface IStorage {
   getPerformanceReviewsByTenant(tenantId: string): Promise<PerformanceReview[]>;
   updatePerformanceReview(id: string, data: Partial<InsertPerformanceReview>): Promise<PerformanceReview>;
   deletePerformanceReview(id: string): Promise<void>;
-
-  // AI Behavioral Intelligence operations
-  createBehavioralAnalysis(analysis: InsertBehavioralAnalysis): Promise<BehavioralAnalysis>;
-  getBehavioralAnalysis(employeeId: string, analysisType?: string): Promise<BehavioralAnalysis[]>;
-  updateBehavioralAnalysis(id: string, data: Partial<InsertBehavioralAnalysis>): Promise<BehavioralAnalysis>;
-  
-  createRisingStarCandidate(candidate: InsertRisingStarCandidate): Promise<RisingStarCandidate>;
-  getRisingStarCandidates(tenantId: string): Promise<RisingStarCandidate[]>;
-  updateRisingStarCandidate(id: string, data: Partial<InsertRisingStarCandidate>): Promise<RisingStarCandidate>;
   
   // Dashboard analytics
   getDashboardMetrics(tenantId: string): Promise<{
@@ -1629,62 +1614,6 @@ export class DatabaseStorage implements IStorage {
     }
     
     return settings;
-  }
-
-  // AI Behavioral Intelligence operations
-  async createBehavioralAnalysis(analysisData: InsertBehavioralAnalysis): Promise<BehavioralAnalysis> {
-    const [analysis] = await db
-      .insert(behavioralAnalysis)
-      .values(analysisData)
-      .returning();
-    return analysis;
-  }
-
-  async getBehavioralAnalysis(employeeId: string, analysisType?: string): Promise<BehavioralAnalysis[]> {
-    const query = db
-      .select()
-      .from(behavioralAnalysis)
-      .where(eq(behavioralAnalysis.employeeId, employeeId));
-    
-    if (analysisType) {
-      return await query.where(eq(behavioralAnalysis.analysisType, analysisType));
-    }
-    
-    return await query.orderBy(desc(behavioralAnalysis.createdAt));
-  }
-
-  async updateBehavioralAnalysis(id: string, data: Partial<InsertBehavioralAnalysis>): Promise<BehavioralAnalysis> {
-    const [analysis] = await db
-      .update(behavioralAnalysis)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(behavioralAnalysis.id, id))
-      .returning();
-    return analysis;
-  }
-
-  async createRisingStarCandidate(candidateData: InsertRisingStarCandidate): Promise<RisingStarCandidate> {
-    const [candidate] = await db
-      .insert(risingStarCandidates)
-      .values(candidateData)
-      .returning();
-    return candidate;
-  }
-
-  async getRisingStarCandidates(tenantId: string): Promise<RisingStarCandidate[]> {
-    return await db
-      .select()
-      .from(risingStarCandidates)
-      .where(eq(risingStarCandidates.tenantId, tenantId))
-      .orderBy(desc(risingStarCandidates.overallScore));
-  }
-
-  async updateRisingStarCandidate(id: string, data: Partial<InsertRisingStarCandidate>): Promise<RisingStarCandidate> {
-    const [candidate] = await db
-      .update(risingStarCandidates)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(risingStarCandidates.id, id))
-      .returning();
-    return candidate;
   }
 }
 

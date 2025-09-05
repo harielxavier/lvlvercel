@@ -152,7 +152,13 @@ export default function Goals() {
   
   const addGoalMutation = useMutation({
     mutationFn: async (goalData: any) => {
-      return await apiRequest('POST', `/api/employee/${user?.employee?.id}/goals`, goalData);
+      const response = await fetch(`/api/employee/${user?.employee?.id}/goals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(goalData)
+      });
+      if (!response.ok) throw new Error('Failed to create goal');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/employee', user?.employee?.id, 'goals'] });
@@ -664,9 +670,7 @@ export default function Goals() {
 
           {/* Goals Grid */}
           <div className="space-y-8">
-            {viewMode === 'calendar' ? (
-              <CalendarView goals={filteredGoals} />
-            ) : filteredGoals.length === 0 ? (
+            {filteredGoals.length === 0 ? (
               <Card className="glass-card border-0">
                 <CardContent className="p-12 text-center">
                   <Target className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
@@ -684,6 +688,8 @@ export default function Goals() {
                   )}
                 </CardContent>
               </Card>
+            ) : viewMode === 'calendar' ? (
+              <CalendarView goals={filteredGoals} />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredGoals.map((goal: any) => (
