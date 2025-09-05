@@ -235,7 +235,7 @@ export default function PricingManagement() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-background">
-        <Sidebar />
+        <Sidebar user={user} />
         <div className="flex-1 lg:ml-80">
           <div className="flex items-center justify-center min-h-screen">
             <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />

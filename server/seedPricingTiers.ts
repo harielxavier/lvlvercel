@@ -125,14 +125,12 @@ const initialPricingTiers = [
 ];
 
 export async function seedPricingTiers() {
-  console.log("🌱 Starting pricing tiers seeding...");
   
   try {
     // Check if pricing tiers already exist
     const existingTiers = await storage.getPricingTiers();
     
     if (existingTiers.length > 0) {
-      console.log(`✅ Pricing tiers already exist (${existingTiers.length} tiers found). Skipping seeding.`);
       return;
     }
 
@@ -140,16 +138,12 @@ export async function seedPricingTiers() {
     for (const tierData of initialPricingTiers) {
       try {
         const createdTier = await storage.createPricingTier(tierData);
-        console.log(`✅ Created pricing tier: ${createdTier.name} (${createdTier.id})`);
       } catch (error) {
-        console.error(`❌ Failed to create pricing tier ${tierData.id}:`, error);
       }
     }
 
-    console.log("🎉 Pricing tiers seeding completed successfully!");
     
   } catch (error) {
-    console.error("❌ Error during pricing tiers seeding:", error);
     throw error;
   }
 }
@@ -159,11 +153,9 @@ const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 if (isMainModule) {
   seedPricingTiers()
     .then(() => {
-      console.log("Seeding complete!");
       process.exit(0);
     })
     .catch((error) => {
-      console.error("Seeding failed:", error);
       process.exit(1);
     });
 }

@@ -21,7 +21,6 @@ export function getSession() {
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
     if (isDevelopment) {
-      console.warn("⚠️  WARNING: SESSION_SECRET not set, using development fallback");
     } else {
       throw new Error("SESSION_SECRET environment variable is required in production");
     }
@@ -132,7 +131,6 @@ export async function setupAuth(app: Express) {
           const userSession = createDevUserSession(user);
           req.logIn(userSession, (err) => {
             if (err) {
-              console.error('Login error:', err);
               return res.status(500).json({ error: "Login failed" });
             }
             res.json({ success: true, user: userSession.claims });
@@ -141,7 +139,6 @@ export async function setupAuth(app: Express) {
           res.status(404).json({ error: "User not found" });
         }
       } catch (error) {
-        console.error('Development login error:', error);
         res.status(500).json({ error: "Internal server error" });
       }
     });

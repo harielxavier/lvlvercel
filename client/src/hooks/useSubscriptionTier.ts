@@ -65,7 +65,7 @@ export function useSubscriptionTier() {
 
   const { data: tierInfo, isLoading, error } = useQuery<TierInfo>({
     queryKey: ['/api/subscription/tier-info'],
-    enabled: !!user?.tenantId,
+    enabled: !!(user as any)?.tenantId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 

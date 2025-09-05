@@ -521,7 +521,6 @@ export async function validateFeatureAccess(
       tier: tenant.subscriptionTier
     };
   } catch (error) {
-    console.error('[FEATURE_ACCESS] Validation failed:', error);
     return { allowed: false, reason: "Feature validation failed" };
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,14 +75,16 @@ export default function WebsiteCustomization() {
   });
 
   const { data: settings, isLoading } = useQuery<WebsiteSettings>({
-    queryKey: [`/api/website-settings/${user?.tenantId}`],
-    enabled: !!user?.tenantId,
-    onSuccess: (data) => {
-      if (data) {
-        form.reset(data);
-      }
-    },
+    queryKey: [`/api/website-settings/${(user as any)?.tenantId}`],
+    enabled: !!(user as any)?.tenantId,
   });
+
+  // Handle form reset when data loads
+  React.useEffect(() => {
+    if (settings) {
+      form.reset(settings);
+    }
+  }, [settings, form]);
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: WebsiteSettingsForm) => {
@@ -93,7 +95,7 @@ export default function WebsiteCustomization() {
         title: "Settings Updated",
         description: "Website customization settings have been saved successfully.",
       });
-      queryClient.invalidateQueries([`/api/website-settings/${user?.tenantId}`]);
+      queryClient.invalidateQueries({ queryKey: [`/api/website-settings/${(user as any)?.tenantId}`] });
     },
     onError: (error: any) => {
       toast({
@@ -112,7 +114,7 @@ export default function WebsiteCustomization() {
     return null;
   }
 
-  if (user.role !== 'tenant_admin' && user.role !== 'platform_admin') {
+  if ((user as any).role !== 'tenant_admin' && (user as any).role !== 'platform_admin') {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar user={user} />

@@ -93,7 +93,6 @@ export default function CustomerTenants() {
       toast({ title: "User created successfully!" });
     },
     onError: (error) => {
-      console.error('Error creating user:', error);
       toast({ 
         title: "Error creating user", 
         description: error.message, 
@@ -112,7 +111,6 @@ export default function CustomerTenants() {
       toast({ title: "User updated successfully!" });
     },
     onError: (error) => {
-      console.error('Error updating user:', error);
       toast({ 
         title: "Error updating user", 
         description: error.message, 
@@ -130,7 +128,6 @@ export default function CustomerTenants() {
       toast({ title: "User deleted successfully!" });
     },
     onError: (error) => {
-      console.error('Error deleting user:', error);
       toast({ 
         title: "Error deleting user", 
         description: error.message, 
@@ -149,7 +146,6 @@ export default function CustomerTenants() {
       toast({ title: "Tenant created successfully!" });
     },
     onError: (error) => {
-      console.error('Error creating tenant:', error);
       toast({ 
         title: "Error creating tenant", 
         description: error.message, 
@@ -168,7 +164,6 @@ export default function CustomerTenants() {
       toast({ title: "Company updated successfully!" });
     },
     onError: (error) => {
-      console.error('Error updating tenant:', error);
       toast({ 
         title: "Error updating company", 
         description: error.message, 
@@ -187,7 +182,6 @@ export default function CustomerTenants() {
       toast({ title: "Company deleted successfully!" });
     },
     onError: (error) => {
-      console.error('Error deleting tenant:', error);
       toast({ 
         title: "Error deleting company", 
         description: error.message, 
@@ -207,7 +201,6 @@ export default function CustomerTenants() {
       }, 1000);
     },
     onError: (error) => {
-      console.error('Error logging in as user:', error);
       toast({ 
         title: "Error logging in as user", 
         description: error.message, 

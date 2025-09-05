@@ -39,7 +39,6 @@ export function validateBody(schema: z.ZodSchema) {
       req.body = result.data;
       next();
     } catch (error) {
-      console.error('[VALIDATION] Body validation error:', error);
       return res.status(500).json({
         error: 'VALIDATION_ERROR',
         message: 'Internal validation error'
@@ -68,7 +67,6 @@ export function validateQuery(schema: z.ZodSchema) {
       req.query = result.data;
       next();
     } catch (error) {
-      console.error('[VALIDATION] Query validation error:', error);
       return res.status(500).json({
         error: 'VALIDATION_ERROR',
         message: 'Internal validation error'
@@ -154,7 +152,6 @@ export async function validateTenantAccess(
     
     return { valid: true, user };
   } catch (error) {
-    console.error('[VALIDATION] Tenant access validation failed:', error);
     return { 
       valid: false, 
       error: "Failed to validate tenant access", 

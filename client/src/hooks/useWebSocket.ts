@@ -36,12 +36,10 @@ export function useWebSocket() {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${protocol}//${window.location.host}/ws`;
       
-      console.log('🔌 Connecting to WebSocket:', wsUrl);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('✅ WebSocket connected');
         setIsConnected(true);
         reconnectAttempts.current = 0;
         
@@ -55,11 +53,9 @@ export function useWebSocket() {
       ws.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
-          console.log('📨 WebSocket message received:', message);
 
           switch (message.type) {
             case 'auth_success':
-              console.log('🔐 WebSocket authenticated successfully');
               break;
               
             case 'notification':
@@ -79,7 +75,6 @@ export function useWebSocket() {
               break;
               
             case 'error':
-              console.error('❌ WebSocket error:', message.message);
               toast({
                 title: 'Connection Error',
                 description: message.message || 'WebSocket connection error',
@@ -88,28 +83,23 @@ export function useWebSocket() {
               break;
               
             default:
-              console.log('Unknown WebSocket message type:', message.type);
           }
         } catch (error) {
-          console.error('❌ Failed to parse WebSocket message:', error);
         }
       };
 
       ws.onclose = (event) => {
-        console.log('🔌 WebSocket disconnected:', event.code, event.reason);
         setIsConnected(false);
         
         // Auto-reconnect with exponential backoff
         if (reconnectAttempts.current < maxReconnectAttempts) {
           const delay = Math.pow(2, reconnectAttempts.current) * 1000; // 1s, 2s, 4s, 8s, 16s
-          console.log(`🔄 Reconnecting in ${delay}ms... (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
           
           setTimeout(() => {
             reconnectAttempts.current++;
             connect();
           }, delay);
         } else {
-          console.error('❌ Max reconnection attempts reached');
           toast({
             title: 'Connection Lost',
             description: 'Unable to maintain real-time connection. Please refresh the page.',
@@ -119,11 +109,9 @@ export function useWebSocket() {
       };
 
       ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
       };
 
     } catch (error) {
-      console.error('❌ Failed to create WebSocket connection:', error);
     }
   }, [isAuthenticated, user, toast]);
 

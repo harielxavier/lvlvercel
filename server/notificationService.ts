@@ -19,8 +19,6 @@ export class NotificationService {
   
   constructor() {
     // Initialize email service (simulated for demo)
-    console.log('📧 Email notification service initialized');
-    console.log('📱 SMS service ready for configuration');
   }
 
   /**
@@ -37,7 +35,6 @@ export class NotificationService {
       // Get user and their notification preferences
       const user = await storage.getUser(userId);
       if (!user) {
-        console.error(`User ${userId} not found for notification`);
         return;
       }
 
@@ -84,9 +81,7 @@ export class NotificationService {
       if (this.shouldSendEmail(type, preferences)) deliveryMethods.push('email');
       if (this.shouldSendSMS(type, preferences)) deliveryMethods.push('sms');
 
-      console.log(`✅ Notification sent to ${user.email} via [${deliveryMethods.join(', ')}]: ${title}`);
     } catch (error) {
-      console.error('❌ Failed to send notification:', error);
     }
   }
 
@@ -196,7 +191,6 @@ export class NotificationService {
     try {
       // Check if Mailgun is configured
       if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN) {
-        console.log(`📧 Email simulated (Mailgun not configured) to ${emailConfig.to}: ${emailConfig.subject}`);
         return;
       }
 
@@ -218,17 +212,13 @@ export class NotificationService {
       };
 
       await mg.messages.create(process.env.MAILGUN_DOMAIN, emailData);
-      console.log(`📧 Email sent via Mailgun to ${emailConfig.to}: ${emailConfig.subject}`);
     } catch (error) {
-      console.error('❌ Failed to send email via Mailgun:', error);
       // Fallback to console logging
-      console.log(`📧 Email fallback (simulated) to ${emailConfig.to}: ${emailConfig.subject}`);
     }
   }
 
   private async sendSMS(user: User, message: string): Promise<void> {
     // SMS implementation would require phone number in user profile
-    console.log(`📱 SMS would be sent to user ${user.id}: ${message}`);
     
     // TODO: Integrate with SMS service like Twilio
     // await twilioClient.messages.create({

@@ -39,7 +39,6 @@ export function requireFeature(feature: keyof TierFeatures) {
       // Feature is allowed, continue to the route handler
       next();
     } catch (error) {
-      console.error('[FEATURE_GUARD] Error validating feature access:', error);
       return res.status(500).json({
         message: "Failed to validate feature access",
         errorCode: "FEATURE_VALIDATION_ERROR"
@@ -72,7 +71,6 @@ export async function addTierInfo(req: Request, res: Response, next: NextFunctio
     
     next();
   } catch (error) {
-    console.error('[TIER_INFO] Error adding tier information:', error);
     // Don't fail the request, just continue without tier info
     next();
   }

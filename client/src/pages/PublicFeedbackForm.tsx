@@ -107,7 +107,6 @@ export default function PublicFeedbackForm() {
         description: "Failed to submit feedback. Please try again.",
         variant: "destructive",
       });
-      console.error('Error submitting feedback:', error);
     }
   });
 

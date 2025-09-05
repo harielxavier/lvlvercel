@@ -247,7 +247,7 @@ export default function AdvancedEmployeeManagement({ user }: AdvancedEmployeeMan
               </DialogHeader>
               <CreateDepartmentForm 
                 departments={departments}
-                onSubmit={(data) => createDepartmentMutation.mutate(data)}
+                onSubmit={(data: any) => createDepartmentMutation.mutate(data)}
                 isLoading={createDepartmentMutation.isPending}
               />
             </DialogContent>
@@ -265,7 +265,7 @@ export default function AdvancedEmployeeManagement({ user }: AdvancedEmployeeMan
                 <DialogTitle>Create Job Position</DialogTitle>
               </DialogHeader>
               <CreateJobPositionForm 
-                onSubmit={(data) => createJobPositionMutation.mutate(data)}
+                onSubmit={(data: any) => createJobPositionMutation.mutate(data)}
                 isLoading={createJobPositionMutation.isPending}
               />
             </DialogContent>
@@ -286,7 +286,7 @@ export default function AdvancedEmployeeManagement({ user }: AdvancedEmployeeMan
                 departments={departments}
                 jobPositions={jobPositions}
                 employees={employees}
-                onSubmit={(data) => createEmployeeMutation.mutate({ ...data, tenantId: user.tenantId })}
+                onSubmit={(data: any) => createEmployeeMutation.mutate({ ...data, tenantId: user.tenantId })}
                 isLoading={createEmployeeMutation.isPending}
               />
             </DialogContent>
@@ -351,7 +351,7 @@ export default function AdvancedEmployeeManagement({ user }: AdvancedEmployeeMan
                     departments={departments}
                     employees={employees}
                     selectedCount={selectedEmployees.length}
-                    onSubmit={(data) => bulkAssignMutation.mutate(data)}
+                    onSubmit={(data: any) => bulkAssignMutation.mutate(data)}
                     isLoading={bulkAssignMutation.isPending}
                   />
                 </DialogContent>

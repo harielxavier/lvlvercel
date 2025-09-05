@@ -47,25 +47,20 @@ function loadConfig() {
       
       // Warn about missing optional services
       if (!env.MAILGUN_API_KEY || !env.MAILGUN_DOMAIN) {
-        console.warn('[CONFIG] Mailgun not configured - email notifications will be simulated');
       }
       
       if (!env.TWILIO_ACCOUNT_SID) {
-        console.warn('[CONFIG] Twilio not configured - SMS notifications disabled');
       }
     }
     
     return env;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('[CONFIG] Environment validation failed:');
       error.errors.forEach(err => {
-        console.error(`  - ${err.path.join('.')}: ${err.message}`);
       });
       process.exit(1);
     }
     
-    console.error('[CONFIG] Configuration error:', error);
     process.exit(1);
   }
 }

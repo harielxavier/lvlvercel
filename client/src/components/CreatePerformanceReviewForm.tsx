@@ -133,7 +133,6 @@ export default function CreatePerformanceReviewForm({
       setGoals([{ title: '', description: '', targetDate: '', progress: 0 }]);
     },
     onError: (error) => {
-      console.error('Error with performance review:', error);
       toast({
         title: "Error",
         description: editReview 

@@ -31,7 +31,6 @@ export function getSession() {
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
     if (isDevelopment) {
-      console.warn("⚠️  WARNING: SESSION_SECRET not set, using development fallback");
     } else {
       throw new Error("SESSION_SECRET environment variable is required in production");
     }
@@ -112,7 +111,6 @@ function createVercelStrategy() {
         
         return done(null, userSession);
       } catch (error) {
-        console.error('Vercel OAuth error:', error);
         return done(error);
       }
     }
@@ -163,7 +161,6 @@ export async function setupAuth(app: Express) {
       }
     );
   } else {
-    console.warn("⚠️  Vercel OAuth credentials not configured, falling back to development mode");
   }
 
   // Development authentication routes (fallback when Vercel OAuth is not configured)
@@ -305,7 +302,6 @@ export async function setupAuth(app: Express) {
                     alert('Login failed. Please try again.');
                   }
                 }).catch(error => {
-                  console.error('Login error:', error);
                   alert('Login failed. Please try again.');
                 });
               }
@@ -331,7 +327,6 @@ export async function setupAuth(app: Express) {
           const userSession = createDevUserSession(user);
           req.logIn(userSession, (err) => {
             if (err) {
-              console.error('Login error:', err);
               return res.status(500).json({ error: "Login failed" });
             }
             res.json({ success: true, user: userSession.claims });
@@ -340,7 +335,6 @@ export async function setupAuth(app: Express) {
           res.status(404).json({ error: "User not found" });
         }
       } catch (error) {
-        console.error('Development login error:', error);
         res.status(500).json({ error: "Internal server error" });
       }
     });
@@ -350,7 +344,6 @@ export async function setupAuth(app: Express) {
   app.get("/api/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
-        console.error('Logout error:', err);
       }
       res.redirect("/api/login");
     });
@@ -391,7 +384,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         return next();
       }
     } catch (error) {
-      console.error('Token refresh error:', error);
     }
   }
 

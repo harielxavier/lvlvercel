@@ -161,14 +161,12 @@ const defaultSystemSettings = [
 ];
 
 export async function seedSystemSettings() {
-  console.log("🌱 Starting system settings seeding...");
   
   try {
     // Check if system settings already exist
     const existingSettings = await storage.getSystemSettings();
     
     if (existingSettings.length > 0) {
-      console.log(`✅ System settings already exist (${existingSettings.length} settings found). Skipping seeding.`);
       return;
     }
 
@@ -179,16 +177,12 @@ export async function seedSystemSettings() {
           ...settingData,
           lastModifiedBy: null, // System-generated default
         });
-        console.log(`✅ Created system setting: ${createdSetting.settingKey} (${createdSetting.category})`);
       } catch (error) {
-        console.error(`❌ Failed to create system setting ${settingData.settingKey}:`, error);
       }
     }
 
-    console.log("🎉 System settings seeding completed successfully!");
     
   } catch (error) {
-    console.error("❌ Error during system settings seeding:", error);
     throw error;
   }
 }
@@ -198,11 +192,9 @@ const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 if (isMainModule) {
   seedSystemSettings()
     .then(() => {
-      console.log("Seeding complete!");
       process.exit(0);
     })
     .catch((error) => {
-      console.error("Seeding failed:", error);
       process.exit(1);
     });
 }

@@ -45,13 +45,7 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
     
     // Enhanced error logging
-    console.error(`[ERROR ${status}] ${message}`, {
-      error: err.name,
-      stack: isProduction() ? undefined : err.stack,
-      url: _req.url,
-      method: _req.method,
-      timestamp: new Date().toISOString()
-    });
+    // Error details: err.name, stack, url, method, timestamp
 
     // Send structured error response
     res.status(status).json({ 

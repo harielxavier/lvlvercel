@@ -84,7 +84,6 @@ class ErrorBoundary extends React.Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
     
     // In production, this would be sent to an error reporting service
@@ -98,12 +97,11 @@ class ErrorBoundary extends React.Component<Props, State> {
 
   logErrorToService = (error: Error, errorInfo: React.ErrorInfo) => {
     // This would typically send to an error monitoring service like Sentry
-    console.error('Error logged:', {
-      message: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      timestamp: new Date().toISOString(),
-    });
+    // Error details:
+    // - message: error.message
+    // - stack: error.stack
+    // - componentStack: errorInfo.componentStack
+    // - timestamp: new Date().toISOString()
   };
 
   resetError = () => {
