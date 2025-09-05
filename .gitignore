@@ -80,3 +80,4 @@ vite.config.ts.*
 # Cache directories
 .cache/
 .upm/
+.vercel
