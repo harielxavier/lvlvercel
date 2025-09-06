@@ -31,6 +31,7 @@ export function getSession() {
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
     if (isDevelopment) {
+      console.warn("⚠️  WARNING: SESSION_SECRET not set, using development fallback");
     } else {
       throw new Error("SESSION_SECRET environment variable is required in production");
     }
@@ -137,7 +138,22 @@ function createDevUserSession(userData: any) {
 
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
-  app.use(getSession());
+  
+  // Use in-memory session store for serverless (not recommended for production)
+  const sessionConfig = {
+    secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      sameSite: 'strict' as const,
+    },
+  };
+
+  // Use MemoryStore for serverless (sessions won't persist across invocations)
+  app.use(session(sessionConfig));
   app.use(passport.initialize());
   app.use(passport.session());
 
