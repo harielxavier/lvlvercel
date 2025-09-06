@@ -1,48 +1,51 @@
-// Minimal serverless function with basic health check
-export default async function handler(req, res) {
-  // Enable CORS
+// Serverless function that integrates with Express server
+import express from 'express';
+import { registerRoutes } from '../server/routes.js';
+import { setupAuth } from '../server/auth.js';
+import { db } from '../server/db.js';
+
+// Create Express app instance
+const app = express();
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Enable CORS
+app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
-  // Handle OPTIONS for CORS
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
-  const path = req.url.split('?')[0];
-  
-  try {
-    // Basic routing
-    if (path === '/api/health' || path === '/api/test') {
-      return res.status(200).json({
-        status: 'ok',
-        message: 'API is working',
-        path: req.url,
-        method: req.method,
-        timestamp: new Date().toISOString(),
-        environment: {
-          hasDatabase: !!process.env.DATABASE_URL,
-          hasSession: !!process.env.SESSION_SECRET
-        }
-      });
+  next();
+});
+
+// Initialize auth and routes
+let initialized = false;
+async function initialize() {
+  if (!initialized) {
+    try {
+      // Setup authentication
+      setupAuth(app);
+      
+      // Register all routes
+      registerRoutes(app);
+      
+      initialized = true;
+    } catch (error) {
+      console.error('Initialization error:', error);
     }
-    
-    // TODO: Add more routes progressively
-    
-    // Default 404
-    res.status(404).json({
-      error: 'NOT_FOUND',
-      message: `Route ${path} not found`,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error("Handler error:", error);
-    res.status(500).json({
-      error: 'INTERNAL_ERROR',
-      message: error.message || 'An error occurred',
-      timestamp: new Date().toISOString()
-    });
   }
+}
+
+// Serverless handler
+export default async function handler(req, res) {
+  // Initialize on first request
+  await initialize();
+  
+  // Let Express handle the request
+  app(req, res);
 }
