@@ -1,5 +1,5 @@
 // Ultra-simple serverless function for debugging
-module.exports = (req, res) => {
+export default function handler(req, res) {
   // Basic response - no dependencies, no environment checks
   res.status(200).json({
     message: "API is working",
@@ -7,4 +7,4 @@ module.exports = (req, res) => {
     method: req.method,
     timestamp: new Date().toISOString()
   });
-};
+}
