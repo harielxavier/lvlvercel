@@ -1,16 +1,38 @@
-import { Pool } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { users, tenants, employees, departments } from '../shared/schema';
-import { eq, desc } from 'drizzle-orm';
+// Database imports - only import if needed to avoid serverless function bloat
+let Pool: any, drizzle: any, users: any, tenants: any, employees: any, departments: any, eq: any, desc: any;
+
+// Lazy load database dependencies
+async function loadDatabaseDependencies() {
+  if (!Pool) {
+    const neonModule = await import('@neondatabase/serverless');
+    const drizzleModule = await import('drizzle-orm/neon-serverless');
+    const schemaModule = await import('../shared/schema');
+    const drizzleOrmModule = await import('drizzle-orm');
+
+    Pool = neonModule.Pool;
+    drizzle = drizzleModule.drizzle;
+    users = schemaModule.users;
+    tenants = schemaModule.tenants;
+    employees = schemaModule.employees;
+    departments = schemaModule.departments;
+    eq = drizzleOrmModule.eq;
+    desc = drizzleOrmModule.desc;
+  }
+}
 
 // Feature flag for bypassing authentication during testing
 const BYPASS_AUTH = process.env.BYPASS_AUTH === 'true' || process.env.NODE_ENV === 'development';
 
 // Database connection for fetching real data
 let db: any = null;
-if (process.env.DATABASE_URL) {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  db = drizzle({ client: pool, schema: { users, tenants, employees, departments } });
+
+async function initializeDatabase() {
+  if (!db && process.env.DATABASE_URL) {
+    await loadDatabaseDependencies();
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    db = drizzle({ client: pool, schema: { users, tenants, employees, departments } });
+  }
+  return db;
 }
 
 // Fallback mock user data for testing (used when database is unavailable)
@@ -46,22 +68,24 @@ const MOCK_USERS = [
 
 // Function to fetch organizational hierarchy from database
 async function getOrganizationalHierarchy() {
-  if (!db) {
-    console.log('Database not available, using mock data');
-    return {
-      tenants: [{ id: '1', name: 'Mock Company', subscriptionTier: 'forming', isActive: true }],
-      users: MOCK_USERS,
-      employees: [],
-      departments: []
-    };
-  }
-
   try {
+    const database = await initializeDatabase();
+
+    if (!database) {
+      console.log('Database not available, using mock data');
+      return {
+        tenants: [{ id: '1', name: 'Mock Company', subscriptionTier: 'forming', isActive: true }],
+        users: MOCK_USERS,
+        employees: [],
+        departments: []
+      };
+    }
+
     // Fetch all tenants
-    const allTenants = await db.select().from(tenants).orderBy(desc(tenants.createdAt));
+    const allTenants = await database.select().from(tenants).orderBy(desc(tenants.createdAt));
 
     // Fetch all users with their tenant information
-    const allUsers = await db
+    const allUsers = await database
       .select({
         id: users.id,
         email: users.email,
@@ -80,7 +104,7 @@ async function getOrganizationalHierarchy() {
       .orderBy(desc(users.createdAt));
 
     // Fetch all employees with additional info
-    const allEmployees = await db
+    const allEmployees = await database
       .select({
         id: employees.id,
         userId: employees.userId,
@@ -94,7 +118,7 @@ async function getOrganizationalHierarchy() {
       .from(employees);
 
     // Fetch all departments
-    const allDepartments = await db
+    const allDepartments = await database
       .select()
       .from(departments)
       .orderBy(departments.name);
