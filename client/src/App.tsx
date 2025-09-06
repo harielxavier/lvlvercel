@@ -37,7 +37,7 @@ import PricingManagement from "@/pages/PricingManagement";
 import { useLocation } from "wouter";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, bypassAuth } = useAuth();
   const [location] = useLocation();
 
   // Check if this is a public route (feedback form)
@@ -74,8 +74,8 @@ function Router() {
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  // Redirect to login if not authenticated (unless bypassing auth)
+  if (!isAuthenticated && !bypassAuth) {
     window.location.href = '/api/login';
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -91,8 +91,37 @@ function Router() {
     );
   }
 
+  // Show testing mode banner when bypassing auth
+  const TestingBanner = () => {
+    if (!bypassAuth) return null;
+
+    return (
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <span className="text-yellow-500">⚠️</span>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-yellow-700">
+              <strong>Testing Mode:</strong> Authentication is bypassed.
+              <button
+                type="button"
+                onClick={() => window.location.href = '/api/login'}
+                className="ml-2 underline hover:no-underline"
+              >
+                Switch User
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Switch>
+    <div>
+      <TestingBanner />
+      <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Home} />
       
@@ -129,7 +158,8 @@ function Router() {
       <Route path="/referrals" component={ReferralDashboard} />
       
       <Route component={NotFound} />
-    </Switch>
+      </Switch>
+    </div>
   );
 }
 

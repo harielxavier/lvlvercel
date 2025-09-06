@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useUserContext } from '@/context/UserContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import Sidebar from '@/components/Sidebar';
@@ -9,9 +10,12 @@ export default function Home() {
   const { user, isLoading, isAuthenticated } = useUserContext();
   const { toast } = useToast();
 
-  // Redirect to home if not authenticated
+  // Get auth status to check if we're bypassing auth
+  const { bypassAuth } = useAuth();
+
+  // Redirect to home if not authenticated (unless bypassing auth)
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !bypassAuth) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
@@ -22,7 +26,7 @@ export default function Home() {
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading, bypassAuth, toast]);
 
   if (isLoading || !isAuthenticated || !user) {
     return (
