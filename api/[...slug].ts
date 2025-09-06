@@ -41,6 +41,31 @@ export default function handler(req: any, res: any) {
     return res.status(200).json([]);
   }
 
+  // Logout endpoint
+  if (path.includes('/api/logout')) {
+    // Clear any auth cookies (even though we're not using them in this simplified version)
+    res.setHeader('Set-Cookie', 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly');
+    
+    // For GET requests (from window.location.href), redirect to login
+    if (req.method === 'GET') {
+      res.writeHead(302, { Location: '/api/login' });
+      return res.end();
+    }
+    
+    // For other requests, return JSON success
+    return res.status(200).json({ 
+      success: true,
+      message: 'Logged out successfully'
+    });
+  }
+
+  // Login page endpoint (simple redirect to home for now)
+  if (path.includes('/api/login')) {
+    // For now, just redirect to home page since we don't have auth
+    res.writeHead(302, { Location: '/' });
+    return res.end();
+  }
+
   // Default response
   return res.status(200).json({ 
     message: 'API endpoint',
