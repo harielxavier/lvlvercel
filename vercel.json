@@ -9,14 +9,6 @@
       }
     }
   ],
-  "functions": {
-    "api/[...slug].js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/test.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "routes": [
     {
       "src": "/api/(.*)",
