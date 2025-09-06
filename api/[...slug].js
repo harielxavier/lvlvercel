@@ -1,72 +1,47 @@
-import express from "express";
-import { registerRoutes } from "../server/routes.js";
-
-// Create Express app
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// Simple logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    console.log(`${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
-  });
-  next();
-});
-
-// Initialize routes once
-let routesInitialized = false;
-let initPromise = null;
-
-async function initializeApp() {
-  if (!routesInitialized && !initPromise) {
-    initPromise = registerRoutes(app).then(() => {
-      routesInitialized = true;
-      return true;
-    }).catch(err => {
-      console.error("Failed to initialize routes:", err);
-      initPromise = null;
-      throw err;
-    });
-  }
-  return initPromise;
-}
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-  
-  console.error("Error:", {
-    message,
-    status,
-    path: req.path,
-    method: req.method,
-    stack: err.stack
-  });
-
-  res.status(status).json({ 
-    error: err.code || 'INTERNAL_ERROR',
-    message,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Vercel serverless handler
+// Minimal serverless function with basic health check
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle OPTIONS for CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  const path = req.url.split('?')[0];
+  
   try {
-    // Initialize routes if needed
-    await initializeApp();
+    // Basic routing
+    if (path === '/api/health' || path === '/api/test') {
+      return res.status(200).json({
+        status: 'ok',
+        message: 'API is working',
+        path: req.url,
+        method: req.method,
+        timestamp: new Date().toISOString(),
+        environment: {
+          hasDatabase: !!process.env.DATABASE_URL,
+          hasSession: !!process.env.SESSION_SECRET
+        }
+      });
+    }
     
-    // Let Express handle the request
-    app(req, res);
+    // TODO: Add more routes progressively
+    
+    // Default 404
+    res.status(404).json({
+      error: 'NOT_FOUND',
+      message: `Route ${path} not found`,
+      timestamp: new Date().toISOString()
+    });
+    
   } catch (error) {
     console.error("Handler error:", error);
     res.status(500).json({
-      error: "INITIALIZATION_ERROR",
-      message: "Failed to initialize application",
+      error: 'INTERNAL_ERROR',
+      message: error.message || 'An error occurred',
       timestamp: new Date().toISOString()
     });
   }
